@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
+run_container() {
+    local network="$1"
+    shift
+    local image container result
+    image="$(docker build --quiet --file "$ROOT_DIR/docker/runner.Dockerfile" "$ROOT_DIR")"
+    container="erbas-contract-${BASHPID}-${RANDOM}"
+
+    cleanup() {
+        local code=$?
+        trap - EXIT INT TERM
+        local remaining
+        if ! remaining="$(docker container ls --all --quiet --filter "name=^${container}$")"; then
+            echo 'ERROR: unable to verify runner container cleanup.' >&2
+            code=1
+        elif [[ -n "$remaining" ]]; then
+            if [[ "$(docker inspect --format '{{ index .Config.Labels "org.erbas.contract.run" }}' "$container")" != "$container" ]]; then
+                echo 'ERROR: refusing to remove a container not owned by this run.' >&2
+                code=1
+            elif ! docker rm --force "$container" >/dev/null; then
+                echo 'ERROR: runner container cleanup failed.' >&2
+                code=1
+            fi
+        fi
+        exit "$code"
+    }
+    trap cleanup EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' TERM
+
+    local -a transport=(--network "$network")
+    if [[ "$network" == bridge ]]; then
+        transport+=(--add-host host.docker.internal:host-gateway)
+    fi
+    result=0
+    docker run --rm --init --name "$container" \
+        --label "org.erbas.contract.run=$container" \
+        --read-only --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+        --cap-drop ALL --security-opt no-new-privileges \
+        "${transport[@]}" "$image" "$@" || result=$?
+    exit "$result"
+}

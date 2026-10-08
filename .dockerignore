@@ -1,0 +1,15 @@
+**
+!docker/
+!docker/runner.Dockerfile
+!docker/package.json
+!docker/package-lock.json
+!docker/entrypoint.mjs
+!openapi/
+!openapi/**
+!bruno/
+!bruno/**
+!scripts/
+!scripts/**
+!tests/
+!tests/**
+!redocly.yaml

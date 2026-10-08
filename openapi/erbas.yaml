@@ -1,0 +1,38 @@
+openapi: 3.1.0
+info:
+  title: ERBAS shared HTTP contract
+  version: 0.1.0
+  description: >-
+    Unreleased first contract draft. This liveness probe only establishes that
+    the HTTP process responds after startup, not database or dependency health.
+security: []
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Check HTTP process liveness
+      description: >-
+        Public liveness probe. Clients send Accept application/json. The response
+        has exactly one property. JSON whitespace and property order have no
+        contractual significance. Valid media type parameters are accepted.
+        A redirect is not a conforming response.
+      responses:
+        '200':
+          description: The HTTP process is alive.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: ok
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          const: ok

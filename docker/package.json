@@ -1,0 +1,9 @@
+{
+  "name": "erbas-contract-runner",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@redocly/cli": "2.5.1",
+    "@usebruno/cli": "4.2.0"
+  }
+}
