@@ -54,3 +54,17 @@ change cannot be isolated safely. Write versioned documentation in English.
 Do not commit, push, tag, publish, or deploy without express authorization.
 Do not claim backend conformance from `bin/check`: only `bin/test URL` verifies
 the specified live service. Report actual commands, results, and limitations.
+
+## Public documentation
+
+The root README is a public landing page and must remain brief and scannable.
+Keep extensive technical and operational documentation in `docs/`, with
+`docs/README.md` as its index. Link to detailed documents instead of duplicating
+their content in the root README or across documentation pages.
+
+The README must link the other ERBAS ecosystem repositories. Badges may only
+represent real, verifiable states. General CI success, contractual conformance,
+and the implemented contract version are distinct facts and must not be
+presented as interchangeable. Keep links, compatibility states, and badges
+updated as the ecosystem evolves; do not advertise workflows or releases that
+do not exist.
