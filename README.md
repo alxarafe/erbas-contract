@@ -43,6 +43,10 @@ owns the shared contract. The client is intended to work against either backend.
 
 Both run through Docker; see [usage and networking](docs/usage.md).
 
+Development APIs use loopback host ports 48080 (Java) and 48081 (.NET).
+Port 48082 is reserved for the future client. These are local infrastructure
+conventions; see [development ports](docs/development-ports.md).
+
 ## Current contractual coverage
 
 ```text

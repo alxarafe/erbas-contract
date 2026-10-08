@@ -14,6 +14,11 @@ Backend repositories own their test infrastructure, migrations, native tests,
 bounded readiness waits, and cleanup. Never mount or access the Docker socket
 from the runner. Synthetic HTTP fixtures exist only to test the runner.
 
+Development ports are local infrastructure conventions, documented in
+`docs/development-ports.md`, never HTTP contract requirements. Keep OpenAPI and
+Bruno independent of fixed ports and accept a supplied base URL. The runner must
+not publish a stable port. Prefer Docker network access for validation.
+
 ## Execution and dependencies
 
 Docker is mandatory. The host must not require Node.js, Bruno, Redocly, Java,
