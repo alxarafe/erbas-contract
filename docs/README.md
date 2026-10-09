@@ -9,14 +9,20 @@
 | [CONTRACT-001A verification](verification/contract-001a.md) | Synthetic test cases, measured results, tool identity, and coverage limits. |
 | [Working agreement](../AGENTS.md) | Scope, preservation, validation, and authorization rules. |
 
-## Future status reporting
+## Verification badges
 
-Workflows will run in the repository responsible for each check. Their badges
-may be displayed in other READMEs without duplicating tests or workflows.
-General CI success does not establish contractual conformance: the implemented
-contract version and the result of checking that version are separate facts.
+Workflow badges can appear in any ecosystem README, always linking to the
+repository that runs the check. A technology or license badge describes a fact;
+it is not a test result.
 
-ERBAS Contract will progressively publish the ecosystem compatibility matrix
-with explicit versions and conformance evidence. The current [status table](../README.md#erbas-ecosystem)
-records the foundation and pending integrations; no CI workflows or releases
-are available yet in this repository.
+| Badge source | What the workflow checks |
+| --- | --- |
+| [Java CI](https://github.com/alxarafe/erbas/actions/workflows/ci.yml) | Docker build, native tests, application health and Flyway. Shared Bruno is not part of this workflow yet; local conformance evidence lives in the Java repository. |
+| [.NET CI / shared Bruno](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml) | The backend's `bin/check`, including native/module tests and the shared contract's `bin/test` against the pinned draft checkout. This is a combined workflow result, not a separate Bruno-only result. |
+
+There is no contract-repository CI workflow or client build workflow yet. Backend
+badges displayed here or in the client report backend checks, not checks of the
+hosting repository. Workflow results, declared contract revisions and published
+contract versions are separate facts. Neither backend consumes a published
+contract release yet. Shared conformance currently covers only `GET /health`;
+it does not establish interchangeability of other backend endpoints.

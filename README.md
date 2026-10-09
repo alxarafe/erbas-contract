@@ -2,6 +2,10 @@
 
 > One executable contract. Multiple interchangeable implementations.
 
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+[![Java CI](https://github.com/alxarafe/erbas/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alxarafe/erbas/actions/workflows/ci.yml)
+[![.NET CI / shared Bruno](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml)
+
 [![Pre-release](https://img.shields.io/badge/status-pre--release-blue)](docs/versioning.md)
 [![OpenAPI 3.1](https://img.shields.io/badge/OpenAPI-3.1-6BA539)](openapi/erbas.yaml)
 [![Bruno CLI 4.2.0](https://img.shields.io/badge/Bruno_CLI-4.2.0-F4AA41)](bruno/)
@@ -24,8 +28,8 @@ flowchart LR
 | Repository | Responsibility | Current status |
 | --- | --- | --- |
 | [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared specification and conformance suite | Foundation verified, unreleased |
-| [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot implementation | Conformance not verified yet |
-| [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | C#/ASP.NET Core implementation | Conformance not verified yet |
+| [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot implementation | Local conformance recorded; CI does not run shared Bruno |
+| [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | C#/ASP.NET Core implementation | CI includes shared Bruno against a pinned draft |
 | [erbas-client](https://github.com/alxarafe/erbas-client) | Shared Angular client | Not implemented yet |
 
 Backends own their builds and isolated test infrastructure; this repository
@@ -43,9 +47,7 @@ owns the shared contract. The client is intended to work against either backend.
 
 Both run through Docker; see [usage and networking](docs/usage.md).
 
-Development APIs use loopback host ports 48080 (Java) and 48081 (.NET).
-Port 48082 is reserved for the future client. These are local infrastructure
-conventions; see [development ports](docs/development-ports.md).
+See [development ports](docs/development-ports.md) for local infrastructure conventions.
 
 ## Current contractual coverage
 
@@ -63,7 +65,10 @@ dependency health; exact response rules are in [OpenAPI](openapi/erbas.yaml).
 Start with the [documentation index](docs/README.md) for usage, decisions,
 verification evidence, versioning, and working rules.
 
-No release is published; `v0.1.0` is planned. Next: Java conformance
-(`CONTRACT-001B`), .NET conformance (`001C`), and joint verification (`001D`).
-Mandatory CI and fixed published-version consumption belong to `CONTRACT-002`;
-see the [versioning policy](docs/versioning.md).
+No contract release is published; `v0.1.0` is planned. Backend workflows and
+their shared-contract coverage are described in the [documentation index](docs/README.md#verification-badges).
+Published-version consumption remains planned; see the [versioning policy](docs/versioning.md).
+
+## License
+
+Copyright (c) 2026 Alxarafe. Licensed under [Apache-2.0](LICENSE).
