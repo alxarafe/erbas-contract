@@ -39,6 +39,7 @@ owns the shared contract. The client is intended to work against either backend.
 
 ```bash
 ./bin/check
+# Export disposable ERBAS_TEST_EMAIL and ERBAS_TEST_PASSWORD first:
 ./bin/test URL
 ```
 
@@ -60,12 +61,17 @@ GET /health
 This public probe only establishes HTTP process liveness, not PostgreSQL or
 dependency health; exact response rules are in [OpenAPI](openapi/erbas.yaml).
 
+AUTH-001 adds `POST /api/auth/login`: email/password JSON, a minimal access-token
+response, and distinct 400/401 errors. See [AUTH-001](docs/auth-001.md) for the
+contract, test credentials and required backend adaptations. The new draft
+does not establish current backend login conformance.
+
 ## Documentation and next steps
 
 Start with the [documentation index](docs/README.md) for usage, decisions,
 verification evidence, versioning, and working rules.
 
-No contract release is published; `v0.1.0` is planned. Backend workflows and
+No contract release is published; `0.2.0` is the AUTH-001 draft. Backend workflows and
 their shared-contract coverage are described in the [documentation index](docs/README.md#verification-badges).
 Published-version consumption remains planned; see the [versioning policy](docs/versioning.md).
 

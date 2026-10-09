@@ -14,4 +14,8 @@ if [[ $# -ne 1 || ! "$1" =~ ^https?:// ]]; then
     exit 2
 fi
 source "$(dirname "${BASH_SOURCE[0]}")/lib/runner"
+if [[ -z "${ERBAS_TEST_EMAIL:-}" || -z "${ERBAS_TEST_PASSWORD:-}" ]]; then
+    echo 'ERBAS_TEST_EMAIL and ERBAS_TEST_PASSWORD are required for full conformance.' >&2
+    exit 2
+fi
 run_container "$network" test "$1"

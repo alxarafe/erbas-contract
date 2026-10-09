@@ -33,6 +33,11 @@ Replace the example with the target's base URL. The command validates the same
 OpenAPI and executes the sole Bruno collection against that URL. The backend
 must already be ready: this command does not build, start, or wait for it.
 
+Export nonempty `ERBAS_TEST_EMAIL` and `ERBAS_TEST_PASSWORD` for a disposable
+backend test account before invoking `bin/test`. Missing credentials are a
+usage error, never a skipped login check. See [AUTH-001](auth-001.md) for
+negative fixture prerequisites, safe injection, scenarios and logging rules.
+
 | URL rule | Behavior |
 | --- | --- |
 | Scheme | HTTP or HTTPS required. |
@@ -89,9 +94,9 @@ for platform support and limitations.
 | Operation | Limit |
 | --- | --- |
 | HTTP request | 2 seconds |
-| Bruno process watchdog | 10 seconds |
+| Bruno process watchdog | 30 seconds |
 | OpenAPI lint | 30 seconds |
-| Synthetic test suite | 90 seconds |
+| Synthetic test suite | 180 seconds |
 
 These limits bound tool execution, not image downloads or Docker builds.
 The runner does not retry failed HTTP responses.

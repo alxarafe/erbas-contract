@@ -1,0 +1,52 @@
+meta {
+  name: Successful login
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  req.setBody({ email: bru.getProcessEnv("ERBAS_TEST_EMAIL"), password: bru.getProcessEnv("ERBAS_TEST_PASSWORD") });
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+tests {
+  test("HTTP status is 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Content-Type is JSON with syntactically valid optional parameters", function () {
+    const token = "[!#$%&'*+.^_`|~0-9A-Za-z-]+";
+    const quoted = '"(?:[\\t\\x20\\x21\\x23-\\x5b\\x5d-\\x7e\\x80-\\xff]|\\\\[\\t\\x20-\\x7e\\x80-\\xff])*"';
+    const mediaType = new RegExp("^application/json(?:[ \\t]*;[ \\t]*" + token + "=(?:" + token + "|" + quoted + "))*[ \\t]*$", "i");
+    expect(res.getHeader("content-type")).to.be.a("string").and.match(mediaType);
+  });
+
+  test("Closed LoginResponse and bearer-compatible token", function () {
+    const body = res.getBody();
+    expect(body).to.be.an("object");
+    expect(Object.keys(body)).to.deep.equal(["accessToken"]);
+    expect(typeof body.accessToken).to.equal("string");
+    expect(/^[A-Za-z0-9._~+\/-]+=*(?![\s\S])/.test(body.accessToken)).to.equal(true);
+    expect(res.getHeader("cache-control")).to.equal("no-store");
+  });
+}
+

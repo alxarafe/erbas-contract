@@ -1,5 +1,5 @@
 import { validateOpenApi } from './scripts/validate.mjs';
-import { normalizeBaseUrl, runBruno } from './scripts/conformance.mjs';
+import { normalizeBaseUrl, runBruno, requireCredentials } from './scripts/conformance.mjs';
 import { runProcess } from './scripts/process.mjs';
 
 async function main() {
@@ -8,15 +8,16 @@ async function main() {
     console.error('Usage: check | test BASE_URL');
     return 2;
   }
-  if (mode === 'test') normalizeBaseUrl(args[0]);
+  if (mode === 'test') { normalizeBaseUrl(args[0]); requireCredentials(); }
   const validation = await validateOpenApi();
   if (validation.code !== 0) return validation.code;
   if (mode === 'test') {
     const result = await runBruno(args[0]);
-    if (result.code === 124) console.error('Conformance runner exceeded its 10-second deadline.');
+    console.log(result.output);
+    if (result.code === 124) console.error('Conformance runner exceeded its 30-second deadline.');
     return result.code;
   }
-  const result = await runProcess(process.execPath, ['--test', '/runner/tests/runner.test.mjs'], { timeoutMs: 90000 });
+  const result = await runProcess(process.execPath, ['--test', '/runner/tests/runner.test.mjs'], { timeoutMs: 180000 });
   if (result.code === 0) console.log('Repository verification passed; no external backend was examined.');
   return result.code;
 }

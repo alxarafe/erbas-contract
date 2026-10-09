@@ -32,6 +32,10 @@ run_container() {
     trap 'exit 143' TERM
 
     local -a transport=(--network "$network")
+    if [[ "$1" == test ]]; then
+        export ERBAS_TEST_EMAIL ERBAS_TEST_PASSWORD
+        transport+=(--env ERBAS_TEST_EMAIL --env ERBAS_TEST_PASSWORD)
+    fi
     if [[ "$network" == bridge ]]; then
         transport+=(--add-host host.docker.internal:host-gateway)
     fi
