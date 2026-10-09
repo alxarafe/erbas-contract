@@ -47,16 +47,30 @@ nonbehavioral corrections use patch increments. Document changes deliberately.
 ## Task lifecycle and preservation
 
 Work in small, complete, independently verifiable tasks: analysis, explicit
-scope, acceptance criteria, implementation, tests, final verification, and
-documentation. Publication or deployment is a separate authorized step when
-applicable. Do not expand an approved task into the next task.
+scope, acceptance criteria, explicit approval, implementation, tests, final
+verification, documentation, scope review, and a final local atomic commit.
+Request and obtain approval before starting the next task; do not expand an
+approved task into it.
+
+Task approval also authorizes staging and the final local commit once the task
+is implemented, applicable validations pass and the diff contains only that
+task's changes. No second authorization is required solely for that commit.
+Use one atomic commit, or the minimum number its structure requires, with clear
+messages consistent with repository conventions. Preserve all other
+repository-specific rules.
+
+Do not commit incomplete tasks or tasks with failed validations. Correct and
+revalidate defects found before closing a task. Do not start the next task with
+uncommitted changes from the previous one. If a task exceptionally starts with
+another task's pending changes, separate their commits correctly before continuing.
 
 Inspect and preserve staged, unstaged, and untracked changes belonging to others.
 Use focused patches; do not reformat unrelated code, reset, stash, overwrite,
 or remove unrelated resources. Stop and explain a conflict if the approved
 change cannot be isolated safely. Write versioned documentation in English.
 
-Do not commit, push, tag, publish, or deploy without express authorization.
+Task approval does not authorize push, PR creation, merge, tag, release,
+publication or deployment; each requires separate express authorization.
 Do not claim backend conformance from `bin/check`: only `bin/test URL` verifies
 the specified live service. Report actual commands, results, and limitations.
 
