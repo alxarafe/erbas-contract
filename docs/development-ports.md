@@ -8,7 +8,7 @@ remain neutral; callers supply the target base URL.
 | --- | --- | --- | --- |
 | Java API | 48080 | 8080 | `ERBAS_JAVA_PORT` |
 | .NET API | 48081 | 8080 | `ERBAS_DOTNET_PORT` |
-| Future Angular client | 48082, reserved only | 80, planned | `ERBAS_CLIENT_PORT`, reserved only |
+| Angular client | 48082 | 80 | `ERBAS_CLIENT_PORT` |
 | PostgreSQL | Not published | 5432 | None |
 
 Development API publications bind exclusively to `127.0.0.1` by default:
@@ -47,15 +47,15 @@ an available override. Remove only resources owned by that validation run.
 and tests an explicitly supplied URL. Prefer its existing `--network NETWORK`
 interface for containerized backends; see [networking](usage.md#choose-docker-networking).
 
-Java already implements shared health conformance. .NET currently retains the
-ASP.NET Core health-check representation; CONTRACT-001C must adapt it to the
-shared JSON response `{"status":"ok"}`. PLATFORM-001 preserves that behavior
-and verifies .NET's existing tests and HTTP 200, without claiming shared conformance.
+Java and .NET implement shared Health (`{"status":"ok"}`) and AUTH-001 login.
+Java records local conformance; .NET includes shared Bruno in validation and CI.
 
-`erbas-client` currently contains no Angular application or Docker runtime.
-WEB-001 will implement its Docker configuration and `ERBAS_CLIENT_PORT` mapping;
-48082 and container port 80 are reservations, not running functionality.
+`erbas-client` implements the Angular application and Docker/Nginx runtime.
+WEB-001 and WEB-002 are completed. Its publication binds
+`127.0.0.1:${ERBAS_CLIENT_PORT:-48082}` to container port 80. Browser Health and
+login requests use exact same-origin proxy paths to either backend; host ports
+remain infrastructure settings, not HTTP contract requirements.
 
 Implementation-specific instructions belong to [Java development](https://github.com/alxarafe/erbas/blob/main/docs/usage.md#development),
-[.NET development](https://github.com/alxarafe/alxarafe-dotnet#linux-development-with-docker-only),
-and the [planned client](https://github.com/alxarafe/erbas-client).
+[.NET development](https://github.com/alxarafe/alxarafe-dotnet/blob/main/docs/usage.md),
+and [client development](https://github.com/alxarafe/erbas-client/blob/main/docs/full-stack-development.md).
