@@ -3,6 +3,7 @@
 | Document | What to find |
 | --- | --- |
 | [Usage](usage.md) | Local commands, Docker networking, limits, cleanup, and pinned tooling. |
+| [AUTH-001](auth-001.md) | Login behavior, credentials, scope and backend adaptation requirements. |
 | [Development ports](development-ports.md) | Shared host-port conventions, overrides, internal networking, and the client reservation. |
 | [Versioning](versioning.md) | Planned releases, compatibility policy, and future consumption rules. |
 | [Architecture decision](decisions/0001-contract-foundation.md) | Why `/health` was chosen and where contract and backend responsibilities belong. |
@@ -24,5 +25,6 @@ There is no contract-repository CI workflow or client build workflow yet. Backen
 badges displayed here or in the client report backend checks, not checks of the
 hosting repository. Workflow results, declared contract revisions and published
 contract versions are separate facts. Neither backend consumes a published
-contract release yet. Shared conformance currently covers only `GET /health`;
-it does not establish interchangeability of other backend endpoints.
+contract release yet. Their pinned revisions cover only `GET /health`.
+AUTH-001 adds login to the new draft;
+neither backend is claimed conformant to that draft yet.

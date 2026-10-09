@@ -1,10 +1,9 @@
 openapi: 3.1.0
 info:
   title: ERBAS shared HTTP contract
-  version: 0.1.0
+  version: 0.2.0
   description: >-
-    Unreleased first contract draft. This liveness probe only establishes that
-    the HTTP process responds after startup, not database or dependency health.
+    Unreleased AUTH-001 draft: public HTTP liveness and minimal bearer login.
 security: []
 paths:
   /health:
@@ -25,8 +24,102 @@ paths:
                 $ref: '#/components/schemas/HealthResponse'
               example:
                 status: ok
+  /api/auth/login:
+    post:
+      operationId: login
+      summary: Authenticate with email and password
+      description: >-
+        Public endpoint. Send Content-Type and Accept application/json.
+        Field names are case-sensitive. No trimming or transformation of the
+        password is permitted. Additional fields are rejected. Nonempty strings
+        are structurally valid; email syntax and password strength policies are
+        not login validation rules. All unsuccessful credential checks return
+        the same 401 representation, including nonexistent accounts.
+        Tokens are opaque to clients and used as Authorization: Bearer TOKEN
+        against the issuing backend. Cross-backend token acceptance is not required.
+        No redirects. JSON whitespace and property order are insignificant;
+        syntactically valid media type parameters are accepted.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authentication succeeded. Token lifetime is backend-owned.
+          headers:
+            Cache-Control:
+              required: true
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Malformed JSON or body not matching LoginRequest.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidLoginRequest'
+        '401':
+          description: Authentication failed, without revealing account existence.
+          headers:
+            WWW-Authenticate:
+              required: true
+              schema:
+                type: string
+                const: Bearer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidCredentials'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Opaque client token; no required token encoding or signing format.
   schemas:
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+    LoginResponse:
+      type: object
+      additionalProperties: false
+      required: [accessToken]
+      properties:
+        accessToken:
+          type: string
+          minLength: 1
+          pattern: '^[A-Za-z0-9._~+/-]+=*(?![\s\S])'
+          description: Bearer header-compatible opaque token (RFC 6750 section 2.1).
+    InvalidLoginRequest:
+      type: object
+      additionalProperties: false
+      required: [code]
+      properties:
+        code:
+          type: string
+          const: invalid_request
+    InvalidCredentials:
+      type: object
+      additionalProperties: false
+      required: [code]
+      properties:
+        code:
+          type: string
+          const: invalid_credentials
     HealthResponse:
       type: object
       additionalProperties: false

@@ -1,11 +1,19 @@
 # Contract versioning
 
-No version has been published. `v0.1.0` is the first planned release; OpenAPI's
-`info.version: 0.1.0` identifies the intended draft, not an existing release tag.
+No version has been published. AUTH-001 advances OpenAPI's intended draft to
+`0.2.0`; this is not an existing release tag.
 Do not create backend version declarations or claim consumption of a published
 release during CONTRACT-001A.
 
 ## Future release policy
+
+AUTH-001 adds a login endpoint without changing Health's HTTP behavior, a
+compatible API addition. Full conformance now requires login and explicitly
+supplied test credentials, so Health-only consumers and runner invocations
+must be adapted before opting into the new revision. Both additive API scope
+and the incompatible runner requirement warrant a minor increment under the
+0.x policy. No consumer revision, tag or release is changed by this task.
+See [AUTH-001](auth-001.md) for .NET adaptations and Java feasibility.
 
 Use semantic versions with immutable `vMAJOR.MINOR.PATCH` tags. Each backend
 must explicitly declare the contract release it implements and test that same

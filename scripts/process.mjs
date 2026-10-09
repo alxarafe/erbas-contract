@@ -1,10 +1,10 @@
 import { spawn } from 'node:child_process';
 
 // Every subprocess is bounded. Its process group is terminated on cancellation.
-export function runProcess(command, args, { cwd = '/runner', timeoutMs = 30000, capture = false } = {}) {
+export function runProcess(command, args, { cwd = '/runner', timeoutMs = 30000, capture = false, env = process.env } = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
-      cwd, detached: true, stdio: capture ? ['ignore', 'pipe', 'pipe'] : ['ignore', 'inherit', 'inherit']
+      cwd, env, detached: true, stdio: capture ? ['ignore', 'pipe', 'pipe'] : ['ignore', 'inherit', 'inherit']
     });
     let output = '';
     let forcedCode;
