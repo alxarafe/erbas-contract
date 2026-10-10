@@ -91,7 +91,8 @@ backend conformance.
 ## Documentation and next steps
 
 The [shared demo defaults](demo/README.md) define public initial development/demo
-credentials; backend/client adoption remains separate work.
+credentials now consumed by Java, .NET and the Angular client's full-stack demo
+orchestration.
 
 Start with the [documentation index](docs/README.md) for usage, decisions,
 verification evidence, versioning, and working rules.

@@ -22,7 +22,7 @@ it is not a test result.
 
 | Badge source | What the workflow checks |
 | --- | --- |
-| [Java backend CI](https://github.com/alxarafe/erbas/actions/workflows/ci.yml) | Docker build, native tests, application health and Flyway. Shared Bruno is not part of this workflow yet; local Health/AUTH-001/USERS-001/COLLECTIONS-001 conformance evidence lives in the Java repository. Its workflow display name remains `CI`. |
+| [Java backend CI](https://github.com/alxarafe/erbas/actions/workflows/ci.yml) | Docker build, native tests, application health and Flyway. Shared Bruno is not part of this workflow yet; local Health/AUTH-001/USERS-001/COLLECTIONS-001 conformance evidence lives in the Java repository. Its workflow display name is `Java CI`. |
 | [.NET backend CI / shared conformance](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml) | The backend's `bin/check`, including native/module tests and the shared contract's `bin/test` against the pinned draft checkout. Its display name is `.NET CI / shared conformance`. This is a combined workflow result, not a separate Bruno-only result. |
 | [Angular client CI](https://github.com/alxarafe/erbas-client/actions/workflows/ci.yml) | Client `bin/check`: Angular tests, production build, Docker runtime and isolated Health/login proxies. Real dual-backend demo verification is separate. |
 
@@ -44,5 +44,6 @@ published. Angular consumes Health and AUTH-001 from either backend; no
 USERS/COLLECTIONS client functionality is claimed. WEB-002's real dual-backend
 demo exists and has
 [separate verification evidence](https://github.com/alxarafe/erbas-client/blob/main/docs/full-stack-development.md#web-002-integration-verification-2026-10-09).
-Shared demo defaults are a development convention, with consumer adoption to
-follow in separate tasks; they do not change this HTTP draft or conformance.
+Shared demo defaults are a development convention consumed by Java, .NET and
+the client's full-stack demo orchestration; they do not change this HTTP draft
+or conformance.
