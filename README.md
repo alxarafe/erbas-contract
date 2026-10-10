@@ -8,7 +8,7 @@
 [![.NET backend CI / shared conformance](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml)
 [![Angular client CI](https://github.com/alxarafe/erbas-client/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alxarafe/erbas-client/actions/workflows/ci.yml)
 
-[![Pre-release](https://img.shields.io/badge/status-pre--release-blue)](docs/versioning.md)
+[![Release preparation](https://img.shields.io/badge/status-release--preparation-blue)](docs/versioning.md)
 [![OpenAPI 3.1](https://img.shields.io/badge/OpenAPI-3.1-6BA539)](openapi/erbas.yaml)
 [![Bruno CLI 4.2.0](https://img.shields.io/badge/Bruno_CLI-4.2.0-F4AA41)](bruno/)
 [![Docker-based validation](https://img.shields.io/badge/validation-Docker--based-2496ED)](docs/usage.md)
@@ -29,9 +29,9 @@ flowchart LR
 
 | Repository | Responsibility | Current status |
 | --- | --- | --- |
-| [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Health, AUTH-001, USERS-001 and COLLECTIONS-001 specified; no published release |
-| [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 | Local shared conformance recorded against draft 0.4.0; Java CI does not run shared Bruno |
-| [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 plus platform modules | Authoritative check/CI includes shared Bruno against the pinned draft 0.4.0 |
+| [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Health, AUTH-001, USERS-001 and COLLECTIONS-001; first release v0.4.0 prepared for publication |
+| [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 | Local shared conformance recorded against a pinned 0.4.0 revision; Java CI does not run shared Bruno |
+| [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 plus platform modules | Authoritative check/CI includes shared Bruno against the pinned 0.4.0 revision |
 | [erbas-client](https://github.com/alxarafe/erbas-client) | Angular 22 client consuming Health and AUTH-001 from either backend | WEB-001 and WEB-002 completed and merged; real dual-backend demo verified |
 
 Backends own their builds and isolated test infrastructure; this repository
@@ -48,6 +48,8 @@ same-origin Nginx proxy, keeping each opaque token only in memory.
 
 `./bin/check` validates OpenAPI and verifies the runner using synthetic servers.
 `./bin/test URL` validates OpenAPI and checks the already running service at URL.
+The added `Contract CI` workflow invokes `./bin/check` on pull requests and
+pushes to `main`, without publishing anything.
 
 USERS-001 conformance mutates users and requires an isolated disposable environment.
 Both run through Docker; see [usage and networking](docs/usage.md).
@@ -79,7 +81,7 @@ implement these capabilities; Angular currently consumes only Health and AUTH-00
 with no USERS/COLLECTIONS client functionality claimed.
 
 Java has [local shared-conformance evidence](https://github.com/alxarafe/erbas/blob/main/docs/verification/collections-001.md)
-against its pinned draft 0.4.0 revision. Its CI remains general Java CI and does
+against its pinned 0.4.0 revision. Its CI remains general Java CI and does
 not run shared Bruno. .NET's authoritative check/CI runs the pinned shared suite;
 its `POST /api/auth/register` remains an
 [implementation-specific extension](docs/implementation-extensions.md).
@@ -97,9 +99,12 @@ orchestration.
 Start with the [documentation index](docs/README.md) for usage, decisions,
 verification evidence, versioning, and working rules.
 
-No contract release is published; `0.4.0` is the COLLECTIONS-001 draft. Backend workflows and
-their shared-contract coverage are described in the [documentation index](docs/README.md#verification-badges).
-Published-version consumption remains planned; see the [versioning policy](docs/versioning.md).
+`v0.4.0` is prepared as the first formal release; this change does not create
+its tag or publish it. See the [release notes](docs/releases/v0.4.0.md) and
+[versioning/publication procedure](docs/versioning.md). Consumers must pin the
+published version and verify conformance; backend pin updates remain separate.
+Backend workflows and their coverage are described in the
+[documentation index](docs/README.md#verification-badges).
 
 ## License
 

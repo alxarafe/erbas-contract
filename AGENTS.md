@@ -55,8 +55,9 @@ authorized, and pin the Docker base image by version and digest. Install with
 ## Versioning and compatibility
 
 Use semantic versioning and immutable release tags. See `docs/versioning.md`.
-There is currently no published contract version. Consumers must eventually pin
-an explicit release; do not silently consume `main`.
+The first release identity is `v0.4.0`; release preparation does not create its
+tag or publish it. Consumers must pin an explicit published release; do not
+silently consume `main`.
 
 Review compatibility against existing consumers and assertions. Changing routes,
 required fields, status codes, permission requirements, or accepted inputs can

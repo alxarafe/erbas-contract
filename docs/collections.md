@@ -1,9 +1,9 @@
 # COLLECTIONS-001: standard paged collections
 
-Draft `0.4.0` establishes ERBAS's base convention for future paged collections.
+Version `0.4.0` establishes ERBAS's base convention for future paged collections.
 USERS-001's `GET /api/users` is its first application. OpenAPI is authoritative;
 the sole Bruno collection verifies this behavior independently of backend stack.
-This contract-only task does not update backend/client revisions or implementations.
+See [versioning](versioning.md) for first-release preparation and publication.
 
 ## Representation and semantics
 
@@ -115,6 +115,11 @@ excessive limit, extra envelope fields and extra order fields. The existing
 bare-array fault remains rejected. Two additional tests prove empty metadata
 and sorting before slicing: fixture insertion order and email order deliberately
 oppose its own ID comparison. Other endpoints' fixtures/assertions are preserved.
+
+### Original draft compatibility assessment
+
+The following assessment records the original COLLECTIONS-001 task before
+backend adaptation; it is not current publication or consumer status.
 
 The wire-shape replacement is incompatible. Under the documented pre-1.0 policy
 it requires a minor increment from `0.3.0` to **`0.4.0`**, not a patch. No release

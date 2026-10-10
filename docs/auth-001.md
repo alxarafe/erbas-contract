@@ -1,8 +1,9 @@
 # AUTH-001: minimal login
 
-This unreleased contract adds only `POST /api/auth/login`. OpenAPI 3.1 is the
+AUTH-001 defines `POST /api/auth/login` within ERBAS Contract 0.4.0. OpenAPI 3.1 is the
 formal authority; the sole Bruno collection supplies shared conformance checks.
 Health remains public and unchanged. There is no backend-specific branch.
+See [versioning](versioning.md) for first-release preparation and publication.
 
 ## HTTP behavior
 

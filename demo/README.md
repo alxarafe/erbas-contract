@@ -5,7 +5,7 @@ credentials of the ERBAS full-stack development/demo environment. These values
 are deliberately public, are not secrets and must never be used in production.
 They are an ecosystem development/demo convention hosted by the neutral shared
 repository, not production configuration, OpenAPI or Bruno conformance artifacts.
-They do not change the HTTP contract or its draft version.
+They do not change the HTTP contract or its version.
 
 Consumers use this precedence for each value:
 

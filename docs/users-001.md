@@ -1,12 +1,12 @@
 # USERS-001: basic CORE user administration
 
 USERS-001 introduced user administration and a protected current-user endpoint
-in draft `0.3.0`. Current draft `0.4.0` applies the
+in draft `0.3.0`. Version `0.4.0` applies the
 [COLLECTIONS-001 pagination convention](collections.md) to its list operation.
-OpenAPI is authoritative; the single Bruno
-collection is shared by all implementations. This task changes only the
-contract repository. Java, .NET and Angular implementation and revision updates
-remain separate tasks. No release or backend conformance is claimed.
+OpenAPI is authoritative; the single Bruno collection is shared by all
+implementations. See [versioning](versioning.md) for first-release preparation
+and published-version consumption. The dated verification below records the
+original task, not publication or current backend conformance.
 
 ## Public model and authentication
 
