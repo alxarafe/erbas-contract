@@ -1,7 +1,9 @@
 # USERS-001: basic CORE user administration
 
-Draft `0.3.0` adds user administration and a usable protected current-user
-endpoint to Health and AUTH-001. OpenAPI is authoritative; the single Bruno
+USERS-001 introduced user administration and a protected current-user endpoint
+in draft `0.3.0`. Current draft `0.4.0` applies the
+[COLLECTIONS-001 pagination convention](collections.md) to its list operation.
+OpenAPI is authoritative; the single Bruno
 collection is shared by all implementations. This task changes only the
 contract repository. Java, .NET and Angular implementation and revision updates
 remain separate tasks. No release or backend conformance is claimed.
@@ -45,7 +47,7 @@ contractual errors, carries `Cache-Control: no-store`. Redirects do not conform.
 
 | Operation | Request | Success |
 | --- | --- | --- |
-| `GET /api/users` | No body | 200, array of `User`; no pagination, search, filters or ordering guarantee. |
+| `GET /api/users` | Optional `offset` and `limit` | 200, closed `UserCollection`, fixed stable id ASC order. |
 | `GET /api/users/{id}` | Opaque string path ID | 200, `User`. |
 | `POST /api/users` | Exactly required `email`, `password`, `admin` | 201, created `User` with `enabled=true`. |
 | `PATCH /api/users/{id}` | One or both Boolean fields `enabled`, `admin` | 200, updated `User`. |
@@ -57,7 +59,7 @@ lengths produce the generic structural error. No validation internals are expose
 
 | Status | Exact JSON body | Additional behavior |
 | --- | --- | --- |
-| 400 | `{"code":"invalid_request"}` | Structurally invalid create/update request. |
+| 400 | `{"code":"invalid_request"}` | Structurally invalid create/update request or invalid list pagination. |
 | 401 | `{"code":"unauthorized"}` | Missing, invalid, expired or disabled bearer; `WWW-Authenticate: Bearer`. |
 | 403 | `{"code":"forbidden"}` | Authenticated non-admin; no `WWW-Authenticate`. |
 | 404 | `{"code":"user_not_found"}` | Unknown ID, only after administrator authorization. |
@@ -102,10 +104,11 @@ emails, consumes opaque returned IDs and retains passwords/tokens only in the
 process. Created accounts remain until the backend removes its disposable
 environment; the contract runner neither provisions nor cleans backend data.
 
-The collection has **67 requests and 253 named checks**: the original 15
-Health/AUTH-001 requests and 45 checks, plus 52 USERS-001 requests and 208 checks.
+The collection has **82 requests and 313 named checks**: the original 15
+Health/AUTH-001 requests and 45 checks, 52 USERS-001 requests and 208 checks,
+and 15 COLLECTIONS-001 requests and 60 checks.
 The added flow verifies admin login/current user, missing/invalid bearer,
-creation, unordered listing, get, normal login/current user, all four operations'
+creation, paged listing, get, normal login/current user, all four operations'
 401/403 behavior, disabled-token rejection, disabled login, re-enable,
 promotion/demotion, combined PATCH, duplicate email, unknown users, invalid
 create/update bodies and Unicode password boundaries. Creation and subsequent
@@ -119,13 +122,18 @@ administrator exclusion and allowed self-disable/self-demotion with another
 enabled admin.
 Native Java/.NET tests remain mandatory; the fixture is only a runner test.
 
-The repository check runs **58 automated synthetic/unit checks**, retaining all
+The repository check runs **69 automated synthetic/unit checks**, retaining all
 Health/AUTH-001 cases and adding 16 deliberate USERS-001 nonconformances,
 a disabled-token fault, the deterministic last-admin test and exact
 collection-counter verification. Negative cases
 cover closed responses, state, media type, headers, errors, redirects and
 HTTP timeouts. They execute the same sole collection. Output remains withheld
 to avoid logging credentials, tokens or Authorization headers.
+
+COLLECTIONS-001 adds nine pagination/envelope faults plus empty-collection and
+sorting-before-window tests. Its shared requests prove defaults, custom windows,
+stable metadata, correct totals through mutations and invalid query rejection.
+See [collections](collections.md) for semantics and exact coverage.
 
 A passing `./bin/check` validates the specification and runner, not either
 backend. See [usage](usage.md) for Docker isolation, deadlines and cleanup.

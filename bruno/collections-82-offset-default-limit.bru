@@ -1,11 +1,11 @@
 meta {
-  name: List users
+  name: Collections offset-default-limit
   type: http
-  seq: 20
+  seq: 82
 }
 
 get {
-  url: {{baseUrl}}/api/users
+  url: {{baseUrl}}/api/users?offset=1
   body: none
   auth: none
 }
@@ -40,12 +40,13 @@ tests {
     const collection = res.getBody();
     expect(collection).to.be.an("object");
     expect(Object.keys(collection).sort()).to.deep.equal(["items", "limit", "offset", "order", "total"]);
-    expect(collection.offset).to.equal(0);
+    expect(collection.offset).to.equal(1);
     expect(collection.limit).to.equal(50);
+    expect(collection.total).to.equal(bru.getVar("usersTotalAfterFirstCreation") + 2);
     expect(Number.isInteger(collection.total)).to.equal(true);
-    expect(collection.total).to.be.at.least(2);
     expect(collection.order).to.deep.equal([{field: "id", direction: "asc"}]);
-    expect(collection.items).to.be.an("array").with.lengthOf(Math.min(50, collection.total));
+    expect(collection.items).to.be.an("array").with.lengthOf(
+      Math.min(collection.limit, Math.max(0, collection.total - collection.offset)));
     expect(new Set(collection.items.map(user => user.id)).size).to.equal(collection.items.length);
     for (const user of collection.items) {
       expect(Object.keys(user).sort()).to.deep.equal(["admin", "email", "enabled", "id"]);
@@ -54,9 +55,6 @@ tests {
       expect(user.enabled).to.be.a("boolean");
       expect(user.admin).to.be.a("boolean");
     }
-    if (collection.total <= 50) {
-      expect(collection.items.filter(user => user.id === bru.getVar("userId"))).to.deep.equal([bru.getVar("expectedUser")]);
-    }
-    bru.setVar("usersTotalAfterFirstCreation", collection.total);
+    expect(collection.items.slice(0, 49)).to.deep.equal(bru.getVar("collectionReference").items.slice(1, 50));
   });
 }

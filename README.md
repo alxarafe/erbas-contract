@@ -28,7 +28,7 @@ flowchart LR
 
 | Repository | Responsibility | Current status |
 | --- | --- | --- |
-| [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Health, AUTH-001 and USERS-001 specified; no published release |
+| [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Health, AUTH-001, USERS-001 and COLLECTIONS-001 specified; no published release |
 | [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot backend implementing Health and AUTH-001 | AUTH-003 completed; local conformance recorded; Java CI does not run shared Bruno |
 | [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health and AUTH-001 plus platform modules | AUTH-002 completed; CI includes shared Bruno against the pinned draft |
 | [erbas-client](https://github.com/alxarafe/erbas-client) | Angular 22 client consuming Health and AUTH-001 from either backend | WEB-001 and WEB-002 completed and merged; real dual-backend demo verified |
@@ -79,15 +79,17 @@ provides separate integration evidence.
 
 USERS-001 adds `/api/auth/me` and administrator-only user list, get, create and
 update operations. Disabled users cannot authenticate or retain access. See
-[USERS-001](docs/users-001.md) for the minimal model and rules. Backend and client
-implementation of this new draft remains pending.
+[USERS-001](docs/users-001.md) for the minimal model and rules.
+[COLLECTIONS-001](docs/collections.md) standardizes paged collections and applies
+`items`, `offset`, `limit`, `total`, `order` to user listing. Backend/client
+adaptation to this paginated draft remains separate work.
 
 ## Documentation and next steps
 
 Start with the [documentation index](docs/README.md) for usage, decisions,
 verification evidence, versioning, and working rules.
 
-No contract release is published; `0.3.0` is the USERS-001 draft. Backend workflows and
+No contract release is published; `0.4.0` is the COLLECTIONS-001 draft. Backend workflows and
 their shared-contract coverage are described in the [documentation index](docs/README.md#verification-badges).
 Published-version consumption remains planned; see the [versioning policy](docs/versioning.md).
 

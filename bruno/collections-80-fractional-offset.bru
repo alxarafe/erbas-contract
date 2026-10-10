@@ -1,0 +1,42 @@
+meta {
+  name: Collections fractional-offset
+  type: http
+  seq: 80
+}
+
+get {
+  url: {{baseUrl}}/api/users?offset=1.5
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+tests {
+  test("HTTP status is 400", function () {
+    expect(res.getStatus()).to.equal(400);
+  });
+
+  test("Content-Type is JSON with syntactically valid optional parameters", function () {
+    const token = "[!#$%&'*+.^_`|~0-9A-Za-z-]+";
+    const quoted = '"(?:[\\t\\x20\\x21\\x23-\\x5b\\x5d-\\x7e\\x80-\\xff]|\\\\[\\t\\x20-\\x7e\\x80-\\xff])*"';
+    const mediaType = new RegExp("^application/json(?:[ \\t]*;[ \\t]*" + token + "=(?:" + token + "|" + quoted + "))*[ \\t]*$", "i");
+    expect(res.getHeader("content-type")).to.be.a("string").and.match(mediaType);
+  });
+
+  test("Contractual response headers", function () {
+    expect(res.getHeader("cache-control")).to.equal("no-store");
+  });
+
+  test("Closed response and expected state", function () {
+    expect(res.getBody()).to.deep.equal({code: "invalid_request"});
+  });
+}
