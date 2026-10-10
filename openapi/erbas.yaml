@@ -3,7 +3,7 @@ info:
   title: ERBAS shared HTTP contract
   version: 0.4.0
   description: >-
-    Unreleased COLLECTIONS-001 draft: liveness, bearer login and CORE user administration with paged collections.
+    ERBAS Contract 0.4.0: liveness, bearer login and CORE user administration with paged collections.
 security: []
 paths:
   /health:
