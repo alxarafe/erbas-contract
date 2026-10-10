@@ -3,6 +3,8 @@
 | Document | What to find |
 | --- | --- |
 | [Usage](usage.md) | Local commands, Docker networking, limits, cleanup, and pinned tooling. |
+| [COLLECTIONS-001](collections.md) | Standard paged envelope, users pagination, order, totals and compatibility. |
+| [USERS-001](users-001.md) | CORE user model, current user, administration, security invariants and conformance coverage. |
 | [AUTH-001](auth-001.md) | Login behavior, credentials, scope and backend adaptation requirements. |
 | [Development ports](development-ports.md) | Shared host-port conventions, overrides and internal networking for both backends and the client. |
 | [Versioning](versioning.md) | Planned releases, compatibility policy, and future consumption rules. |
@@ -29,3 +31,8 @@ and published contract versions are separate facts. Neither backend consumes a
 published contract release yet. Both implement Health and AUTH-001 against
 pinned unreleased revisions; Java records local conformance and .NET executes
 shared conformance in CI. WEB-002 is completed and merged in the Angular client.
+
+Current draft `0.4.0` applies COLLECTIONS-001 to USERS-001's list response.
+Backend/client adaptation to this paginated revision is pending. Java's local
+USERS-001 draft `0.3.0` evidence belongs to its earlier pin; existing badges and
+historical results do not establish conformance against the new revision.

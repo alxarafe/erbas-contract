@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
   title: ERBAS shared HTTP contract
-  version: 0.2.0
+  version: 0.4.0
   description: >-
-    Unreleased AUTH-001 draft: public HTTP liveness and minimal bearer login.
+    Unreleased COLLECTIONS-001 draft: liveness, bearer login and CORE user administration with paged collections.
 security: []
 paths:
   /health:
@@ -34,7 +34,8 @@ paths:
         password is permitted. Additional fields are rejected. Nonempty strings
         are structurally valid; email syntax and password strength policies are
         not login validation rules. All unsuccessful credential checks return
-        the same 401 representation, including nonexistent accounts.
+        the same 401 representation, including nonexistent and disabled accounts. Disabled users cannot authenticate;
+        previously issued tokens become invalid on protected endpoints.
         Tokens are opaque to clients and used as Authorization: Bearer TOKEN
         against the issuing backend. Cross-backend token acceptance is not required.
         No redirects. JSON whitespace and property order are insignificant;
@@ -76,12 +77,250 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InvalidCredentials'
+  /api/auth/me:
+    get:
+      operationId: getCurrentUser
+      summary: Get the authenticated user
+      description: Any authenticated enabled user. The admin flag informs UI only. All responses use Cache-Control no-store. No redirects.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/CurrentUser'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/users:
+    get:
+      operationId: listUsers
+      summary: List a user window
+      description: Administrator only. Offset/limit pagination after stable server-side id ASC ordering. IDs remain opaque; clients need not reproduce the comparison. No custom ordering, filters or search. All responses use Cache-Control no-store. No redirects.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: offset
+          in: query
+          description: Nonnegative integer displacement before taking items. Beyond total returns an empty page, not an error.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: limit
+          in: query
+          description: Effective maximum number of items, not the returned item count. Invalid values are rejected without clamping.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          $ref: '#/components/responses/UserList'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      operationId: createUser
+      summary: Create an enabled user
+      description: Administrator only. Exact duplicate email conflicts. Password is never returned. All responses use Cache-Control no-store. No redirects.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/CreatedUser'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/EmailConflict'
+  /api/users/{id}:
+    get:
+      operationId: getUser
+      summary: Get a user
+      description: Administrator only. Authenticate and authorize before lookup. All responses use Cache-Control no-store. No redirects.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Opaque user identifier; consumers must not interpret its format.
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          $ref: '#/components/responses/CurrentUser'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+    patch:
+      operationId: updateUser
+      summary: Update enabled or admin
+      description: Administrator only. Authenticate and authorize before lookup. Atomically reject updates leaving no enabled administrator, including self-disable or self-demotion. Email and password cannot be edited. All responses use Cache-Control no-store. No redirects.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Opaque user identifier; consumers must not interpret its format.
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/CurrentUser'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+        '409':
+          $ref: '#/components/responses/LastAdmin'
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       description: Opaque client token; no required token encoding or signing format.
+  responses:
+    CurrentUser:
+      description: Public user.
+      headers:
+        Cache-Control:
+          required: true
+          schema:
+            type: string
+            const: no-store
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+    CreatedUser:
+      description: Created with enabled true.
+      headers:
+        Cache-Control:
+          required: true
+          schema:
+            type: string
+            const: no-store
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+    UserList:
+      description: User window after stable id ASC ordering. Empty collections and offsets at or beyond total return 200 with empty items.
+      headers:
+        Cache-Control:
+          required: true
+          schema:
+            type: string
+            const: no-store
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserCollection'
+    InvalidRequest:
+      description: Malformed JSON, structurally invalid body or invalid list pagination.
+      headers:
+        Cache-Control:
+          required: true
+          schema:
+            type: string
+            const: no-store
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InvalidLoginRequest'
+    Unauthorized:
+      description: Missing, invalid, expired or disabled bearer; no external distinction.
+      headers:
+        Cache-Control:
+          required: true
+          schema:
+            type: string
+            const: no-store
+        WWW-Authenticate:
+          required: true
+          schema:
+            type: string
+            const: Bearer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Unauthorized'
+    Forbidden:
+      description: Authenticated user is not an administrator. WWW-Authenticate must be absent.
+      headers:
+        Cache-Control:
+          required: true
+          schema:
+            type: string
+            const: no-store
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Forbidden'
+    UserNotFound:
+      description: User does not exist; only after administrator authorization.
+      headers:
+        Cache-Control:
+          required: true
+          schema:
+            type: string
+            const: no-store
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserNotFound'
+    EmailConflict:
+      description: Exactly the same email already exists.
+      headers:
+        Cache-Control:
+          required: true
+          schema:
+            type: string
+            const: no-store
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EmailConflict'
+    LastAdmin:
+      description: Update would leave zero enabled administrators.
+      headers:
+        Cache-Control:
+          required: true
+          schema:
+            type: string
+            const: no-store
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LastAdmin'
   schemas:
     LoginRequest:
       type: object
@@ -129,3 +368,133 @@ components:
         status:
           type: string
           const: ok
+    User:
+      type: object
+      additionalProperties: false
+      required: [id, email, enabled, admin]
+      properties:
+        id:
+          type: string
+          minLength: 1
+          description: Opaque identifier, without a required internal representation.
+        email:
+          type: string
+          minLength: 1
+        enabled:
+          type: boolean
+        admin:
+          type: boolean
+          description: Temporary administrator flag, not RBAC.
+    Order:
+      type: object
+      additionalProperties: false
+      required: [field, direction]
+      properties:
+        field:
+          type: string
+          minLength: 1
+        direction:
+          type: string
+          enum: [asc, desc]
+    UserCollection:
+      type: object
+      additionalProperties: false
+      required: [items, offset, limit, total, order]
+      properties:
+        items:
+          type: array
+          description: Exactly the requested window; never null. Empty windows use an empty array.
+          items:
+            $ref: '#/components/schemas/User'
+        offset:
+          type: integer
+          minimum: 0
+          description: Applied displacement, including when greater than total.
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: Effective requested limit; never replaced by items length.
+        total:
+          type: integer
+          minimum: 0
+          description: Total matching resources before offset and limit; future filters must affect this total.
+        order:
+          type: array
+          minItems: 1
+          maxItems: 1
+          description: Fixed effective id ASC criterion. The ID comparison belongs to the server; IDs remain opaque.
+          items:
+            $ref: '#/components/schemas/Order'
+          const: [{field: id, direction: asc}]
+      example:
+        items: []
+        offset: 0
+        limit: 50
+        total: 0
+        order: [{field: id, direction: asc}]
+    CreateUserRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password, admin]
+      properties:
+        email:
+          type: string
+          minLength: 1
+          description: No new trimming, normalization, case folding or syntax policy.
+        password:
+          type: string
+          minLength: 12
+          maxLength: 256
+          description: Unicode allowed; length in Unicode code points. No trimming or composition rules. Credentials are never part of User.
+        admin:
+          type: boolean
+    UpdateUserRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        enabled:
+          type: boolean
+        admin:
+          type: boolean
+    Unauthorized:
+      type: object
+      additionalProperties: false
+      required: [code]
+      properties:
+        code:
+          type: string
+          const: unauthorized
+    Forbidden:
+      type: object
+      additionalProperties: false
+      required: [code]
+      properties:
+        code:
+          type: string
+          const: forbidden
+    UserNotFound:
+      type: object
+      additionalProperties: false
+      required: [code]
+      properties:
+        code:
+          type: string
+          const: user_not_found
+    EmailConflict:
+      type: object
+      additionalProperties: false
+      required: [code]
+      properties:
+        code:
+          type: string
+          const: email_conflict
+    LastAdmin:
+      type: object
+      additionalProperties: false
+      required: [code]
+      properties:
+        code:
+          type: string
+          const: last_admin

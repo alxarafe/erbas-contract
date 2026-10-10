@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, writeFile, rm, readdir, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { startFixture, fixtureEnv } from './fixtures/http-server.mjs';
+import { startFixture, fixtureEnv, userCollection } from './fixtures/http-server.mjs';
 import { runBruno, normalizeBaseUrl, requireCredentials } from '../scripts/conformance.mjs';
 import { validateOpenApi } from '../scripts/validate.mjs';
 import { runProcess } from '../scripts/process.mjs';
@@ -16,19 +16,31 @@ test('credentials are mandatory and never included in validation errors', () => 
   requireCredentials(fixtureEnv);
 });
 
-test('full suite exercises Health and all AUTH-001 scenarios', { timeout: 15000 }, async () => {
+test('full suite exercises Health, AUTH-001 and USERS-001 scenarios', { timeout: 15000 }, async () => {
   const fixture = await startFixture();
   try {
     const result = await runBruno(fixture.baseUrl, { env: fixtureEnv });
     assert.equal(result.code, 0, result.output);
-    assert.equal(fixture.requests.length, 15);
-    const login = fixture.requests.slice(1);
+    assert.equal(fixture.requests.length, 82);
+    const login = fixture.requests.slice(1, 15);
     assert.ok(login.every(r => r.method === 'POST' && r.path === '/api/auth/login'
       && r.accept === 'application/json' && r.contentType.toLowerCase() === 'application/json'));
     assert.equal(login.filter(r => r.expected === 200).length, 1);
     assert.equal(login.filter(r => r.expected === 401).length, 3);
     assert.equal(login.filter(r => r.expected === 400).length, 10);
     assert.equal(login.filter(r => r.malformed).length, 1);
+    const users = fixture.requests.slice(15, 67);
+    assert.equal(users.length, 52);
+    assert.equal(users.filter(r => r.expected === 201).length, 3);
+    assert.equal(users.filter(r => r.expected === 403).length, 4);
+    assert.equal(users.filter(r => r.expected === 400).length, 20);
+    assert.equal(users.filter(r => r.expected === 404).length, 2);
+    assert.equal(users.filter(r => r.expected === 409).length, 1);
+    const collections = fixture.requests.slice(67);
+    assert.equal(collections.length, 15);
+    assert.ok(collections.every(r => r.method === 'GET' && r.path.startsWith('/api/users')));
+    assert.equal(collections.filter(r => r.expected === 200).length, 8);
+    assert.equal(collections.filter(r => r.expected === 400).length, 7);
   } finally { await fixture.close(); }
 });
 
@@ -234,7 +246,7 @@ for (const [name, fixtureOptions, success] of scenarios) {
       if (success) assert.equal(result.code, 0, result.output);
       else assert.notEqual(result.code, 0, result.output);
       assert.notEqual(result.code, 124, 'CLI watchdog hid the expected HTTP test result');
-      assert.equal(fixture.requests.filter(r => r.path !== '/api/auth/login').length, 1, 'Health must not be retried or redirected');
+      assert.equal(fixture.requests.filter(r => r.path === '/health' || r.path === '/target').length, 1, 'Health must not be retried or redirected');
       assert.deepEqual(fixture.requests[0], { method: 'GET', path: '/health', accept: 'application/json' });
       if (fixtureOptions.hang) {
         assert.match(result.output, /timeout|timed out/i);
@@ -266,4 +278,135 @@ test('invalid base URLs are rejected', () => {
     assert.throws(() => normalizeBaseUrl(value));
   }
   assert.equal(normalizeBaseUrl('http://example.test/'), 'http://example.test');
+});
+
+const userFailures = [
+  ['current user exposes password', { 'me:200': { body: '{"id":"x","email":"fixture@example.test","enabled":true,"admin":true,"password":"synthetic"}' } }],
+  ['administrator identity is not admin', { 'me:200': { body: '{"id":"x","email":"fixture@example.test","enabled":true,"admin":false}' } }],
+  ['unauthorized challenge missing', { 'me:401': { headers: { 'WWW-Authenticate': 'Basic' } } }],
+  ['protected error cacheable', { 'me:401': { headers: { 'Cache-Control': 'public' } } }],
+  ['forbidden includes challenge', { 'list:403': { headers: { 'WWW-Authenticate': 'Bearer' } } }],
+  ['created user disabled', { 'create:201': { body: '{"id":"x","email":"wrong@example.test","enabled":false,"admin":false}' } }],
+  ['list returns a bare array', { 'list:200': { body: '[]' } }],
+  ['get returns different user', { 'get:200': { body: '{}' } }],
+  ['patch returns stale state', { 'patch:200': { body: '{}' } }],
+  ['duplicate email accepted', { 'create:409': { status: 201 } }],
+  ['missing user exposes detail', { 'get:404': { body: '{"code":"user_not_found","detail":"internal"}' } }],
+  ['invalid creation accepted', { 'create:400': { status: 201 } }],
+  ['invalid patch accepted', { 'patch:400': { status: 200 } }],
+  ['protected response has wrong media type', { 'me:200': { contentType: 'text/plain' } }],
+  ['protected redirect', { 'me:200': { status: 302, headers: { Location: '/health' } } }],
+  ['protected HTTP timeout', { 'me:200': { hang: true } }]
+];
+for (const [name, users] of userFailures) {
+  test(name, { timeout: 15000 }, async () => {
+    const fixture = await startFixture({ users });
+    try {
+      const result = await runBruno(fixture.baseUrl, { env: fixtureEnv });
+      assert.notEqual(result.code, 0, result.output);
+      assert.notEqual(result.code, 124);
+      assert.ok(!result.output.includes(fixtureEnv.ERBAS_TEST_PASSWORD));
+      assert.ok(!result.output.includes('synthetic.token_123'));
+    } finally { await fixture.close(); }
+  });
+}
+
+test('runner rejects tokens belonging to disabled users', { timeout: 15000 }, async () => {
+  const fixture = await startFixture({ acceptDisabledTokens: true });
+  try {
+    const result = await runBruno(fixture.baseUrl, { env: fixtureEnv });
+    assert.notEqual(result.code, 0, result.output);
+  } finally { await fixture.close(); }
+});
+
+test('last enabled administrator invariant and self updates in synthetic fixture', async () => {
+  const fixture = await startFixture();
+  const headers = { 'Content-Type': 'application/json', Authorization: 'Bearer synthetic.token_123' };
+  const patch = async (id, body, status, expected) => {
+    const response = await fetch(`${fixture.baseUrl}/api/users/${id}`, { method: 'PATCH', headers, body: JSON.stringify(body) });
+    assert.equal(response.status, status);
+    assert.equal(response.headers.get('cache-control'), 'no-store');
+    assert.deepEqual(await response.json(), expected);
+  };
+  try {
+    for (const body of [{ enabled: false }, { admin: false }, { enabled: false, admin: false }]) {
+      await patch('synthetic-admin', body, 409, { code: 'last_admin' });
+    }
+    const response = await fetch(`${fixture.baseUrl}/api/users`, { method: 'POST', headers,
+      body: JSON.stringify({ email: 'second-admin@example.test', password: 'synthetic-password', admin: true }) });
+    assert.equal(response.status, 201);
+    const second = await response.json();
+    await patch(second.id, { enabled: false }, 200, { ...second, enabled: false });
+    await patch('synthetic-admin', { admin: false }, 409, { code: 'last_admin' });
+    await patch(second.id, { enabled: true }, 200, second);
+    await patch('synthetic-admin', { enabled: false }, 200,
+      { id: 'synthetic-admin', email: fixtureEnv.ERBAS_TEST_EMAIL, enabled: false, admin: true });
+    const disabled = await fetch(`${fixture.baseUrl}/api/auth/me`, { headers });
+    assert.equal(disabled.status, 401);
+    assert.deepEqual(await disabled.json(), { code: 'unauthorized' });
+    const login = await fetch(`${fixture.baseUrl}/api/auth/login`, { method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: second.email, password: 'synthetic-password' }) });
+    assert.equal(login.status, 200);
+    const { accessToken } = await login.json();
+    const restored = await fetch(`${fixture.baseUrl}/api/users/synthetic-admin`, { method: 'PATCH',
+      headers: { ...headers, Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ enabled: true }) });
+    assert.equal(restored.status, 200);
+    await patch('synthetic-admin', { admin: false }, 200,
+      { id: 'synthetic-admin', email: fixtureEnv.ERBAS_TEST_EMAIL, enabled: true, admin: false });
+  } finally { await fixture.close(); }
+});
+
+test('documented Bruno request and named-check counts match the sole collection', async () => {
+  const files = (await readdir('/runner/bruno')).filter(file => file.endsWith('.bru'));
+  assert.equal(files.length, 82);
+  let checks = 0;
+  for (const file of files) checks += ((await readFile(join('/runner/bruno', file), 'utf8')).match(/\btest\("/g) ?? []).length;
+  assert.equal(checks, 313);
+});
+
+for (const collectionFault of ['total', 'limit', 'offset', 'order', 'window', 'negative-offset',
+  'excessive-limit', 'extra', 'order-extra']) {
+  test(`runner rejects collection fault: ${collectionFault}`, { timeout: 15000 }, async () => {
+    const fixture = await startFixture({ collectionFault });
+    try {
+      const result = await runBruno(fixture.baseUrl, { env: fixtureEnv });
+      assert.notEqual(result.code, 0, result.output);
+      assert.notEqual(result.code, 124);
+      assert.ok(!result.output.includes(fixtureEnv.ERBAS_TEST_PASSWORD));
+      assert.ok(!result.output.includes('synthetic.token_123'));
+      const expectedPath = ['offset', 'window'].includes(collectionFault) ? '/api/users?offset=1&limit=1'
+        : collectionFault === 'negative-offset' ? '/api/users?offset=-1'
+        : collectionFault === 'excessive-limit' ? '/api/users?limit=101' : '/api/users';
+      assert.equal(fixture.requests.at(-1).path, expectedPath, 'failure must reach the targeted pagination fault');
+    } finally { await fixture.close(); }
+  });
+}
+
+test('empty collection has complete metadata and fixed order', () => {
+  assert.deepEqual(userCollection([]), { items: [], offset: 0, limit: 50, total: 0,
+    order: [{ field: 'id', direction: 'asc' }] });
+});
+
+test('fixture orders before slicing rather than relying on insertion order', async () => {
+  const fixture = await startFixture();
+  const headers = { 'Content-Type': 'application/json', Authorization: 'Bearer synthetic.token_123' };
+  try {
+    const created = [];
+    for (const email of ['z@example.test', 'a@example.test']) {
+      const response = await fetch(`${fixture.baseUrl}/api/users`, { method: 'POST', headers,
+        body: JSON.stringify({ email, password: 'synthetic-password', admin: false }) });
+      assert.equal(response.status, 201);
+      created.push(await response.json());
+    }
+    // Admin was inserted first, and emails oppose ID order. Only ID sorting yields this window.
+    const response = await fetch(`${fixture.baseUrl}/api/users?offset=1&limit=1`, { headers });
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { items: [created[1]], offset: 1, limit: 1, total: 3,
+      order: [{ field: 'id', direction: 'asc' }] });
+    const beyond = await fetch(`${fixture.baseUrl}/api/users?offset=100`, { headers });
+    assert.equal(beyond.status, 200);
+    assert.deepEqual(await beyond.json(), { items: [], offset: 100, limit: 50, total: 3,
+      order: [{ field: 'id', direction: 'asc' }] });
+  } finally { await fixture.close(); }
 });

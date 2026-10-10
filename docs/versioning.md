@@ -1,9 +1,29 @@
 # Contract versioning
 
-No version has been published. AUTH-001 advances OpenAPI's intended draft to
-`0.2.0`; this is not an existing release tag.
+No version has been published. COLLECTIONS-001 advances OpenAPI's intended draft
+from `0.3.0` to `0.4.0`; this is not an existing release tag.
 Do not create backend version declarations or claim consumption of a published
-release during CONTRACT-001A.
+release during contract-only work.
+
+COLLECTIONS-001 replaces `GET /api/users`' bare array with the required closed
+`items`, `offset`, `limit`, `total`, `order` envelope, adds optional pagination
+inputs and requires stable id ASC order. This changes an existing wire shape
+and is incompatible with array-consuming backends, clients and assertions.
+The pre-1.0 policy therefore requires a minor increment, not `0.3.1`.
+Other endpoint behavior remains unchanged. Consumer pin updates, adaptation,
+release tags and publication remain separate work. See [collections](collections.md).
+
+## Earlier draft changes
+
+USERS-001 advanced draft `0.2.0` to `0.3.0` without publishing a release.
+
+USERS-001 adds five operations and the closed public User model. Health and
+AUTH-001 login request/response shapes remain unchanged. Disabled accounts must
+lose access, and full conformance now requires a provisioned enabled admin and
+a disposable environment because tests mutate users. This additive API scope
+and changed runner prerequisite require a minor increment under the 0.x policy.
+Consumer revision updates, implementation, release tags and publication remain
+separate authorized work. See [USERS-001](users-001.md).
 
 ## Future release policy
 
@@ -44,5 +64,7 @@ mandatory GitHub Actions integration. Local and workflow validation must invoke
 the same versioned commands. Publishing or deploying a backend must depend on
 successful shared-contract conformance against its clean ephemeral environment.
 
-Tags, commits, pushes, releases, publication, and deployment require express
-authorization. A passing local check does not authorize any of these actions.
+Task approval authorizes the final local atomic commit after passing validation,
+as defined in [the working agreement](../AGENTS.md). Pushes, tags, releases,
+publication and deployment require separate express authorization; passing
+checks alone do not authorize them.

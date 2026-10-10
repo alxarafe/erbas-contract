@@ -1,0 +1,60 @@
+meta {
+  name: Collections offset-one
+  type: http
+  seq: 70
+}
+
+get {
+  url: {{baseUrl}}/api/users?offset=1&limit=1
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+tests {
+  test("HTTP status is 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Content-Type is JSON with syntactically valid optional parameters", function () {
+    const token = "[!#$%&'*+.^_`|~0-9A-Za-z-]+";
+    const quoted = '"(?:[\\t\\x20\\x21\\x23-\\x5b\\x5d-\\x7e\\x80-\\xff]|\\\\[\\t\\x20-\\x7e\\x80-\\xff])*"';
+    const mediaType = new RegExp("^application/json(?:[ \\t]*;[ \\t]*" + token + "=(?:" + token + "|" + quoted + "))*[ \\t]*$", "i");
+    expect(res.getHeader("content-type")).to.be.a("string").and.match(mediaType);
+  });
+
+  test("Contractual response headers", function () {
+    expect(res.getHeader("cache-control")).to.equal("no-store");
+  });
+
+  test("Closed response and expected state", function () {
+    const collection = res.getBody();
+    expect(collection).to.be.an("object");
+    expect(Object.keys(collection).sort()).to.deep.equal(["items", "limit", "offset", "order", "total"]);
+    expect(collection.offset).to.equal(1);
+    expect(collection.limit).to.equal(1);
+    expect(collection.total).to.equal(bru.getVar("usersTotalAfterFirstCreation") + 2);
+    expect(Number.isInteger(collection.total)).to.equal(true);
+    expect(collection.order).to.deep.equal([{field: "id", direction: "asc"}]);
+    expect(collection.items).to.be.an("array").with.lengthOf(
+      Math.min(collection.limit, Math.max(0, collection.total - collection.offset)));
+    expect(new Set(collection.items.map(user => user.id)).size).to.equal(collection.items.length);
+    for (const user of collection.items) {
+      expect(Object.keys(user).sort()).to.deep.equal(["admin", "email", "enabled", "id"]);
+      expect(user.id).to.be.a("string").and.not.equal("");
+      expect(user.email).to.be.a("string").and.not.equal("");
+      expect(user.enabled).to.be.a("boolean");
+      expect(user.admin).to.be.a("boolean");
+    }
+    expect(collection.items).to.deep.equal(bru.getVar("collectionReference").items.slice(1, 2));
+  });
+}
