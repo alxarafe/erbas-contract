@@ -19,6 +19,27 @@ Development ports are local infrastructure conventions, documented in
 Bruno independent of fixed ports and accept a supplied base URL. The runner must
 not publish a stable port. Prefer Docker network access for validation.
 
+## Cross-stack contract design
+
+Before adding a shared contractual capability, review how each supported stack
+currently provides or could provide the requested observable behavior.
+If one stack already provides it, evaluate whether the other stack can reproduce
+equivalent observable behavior reasonably and idiomatically.
+
+If multiple stacks provide it, compare their observable semantics, security
+characteristics, complexity, maintainability and testability. Choose the most
+appropriate common behavior, or an appropriate intermediate/common behavior.
+A framework feature does not automatically belong in the ERBAS contract.
+Keep behavior implementation-specific when it is not useful or reasonably
+portable as a shared capability.
+
+After the shared behavior is chosen, each backend remains free to implement it
+differently and idiomatically internally. Java need not copy .NET internals,
+and .NET need not copy Spring internals. The contract standardizes observable
+behavior only. Promotion of an implementation-specific capability requires
+this explicit review and an approved contract change; see
+`docs/implementation-extensions.md`.
+
 ## Execution and dependencies
 
 Docker is mandatory. The host must not require Node.js, Bruno, Redocly, Java,

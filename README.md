@@ -30,8 +30,8 @@ flowchart LR
 | Repository | Responsibility | Current status |
 | --- | --- | --- |
 | [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Health, AUTH-001, USERS-001 and COLLECTIONS-001 specified; no published release |
-| [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot backend implementing Health and AUTH-001 | AUTH-003 completed; local conformance recorded; Java CI does not run shared Bruno |
-| [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health and AUTH-001 plus platform modules | AUTH-002 completed; CI includes shared Bruno against the pinned draft |
+| [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 | Local shared conformance recorded against draft 0.4.0; Java CI does not run shared Bruno |
+| [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 plus platform modules | Authoritative check/CI includes shared Bruno against the pinned draft 0.4.0 |
 | [erbas-client](https://github.com/alxarafe/erbas-client) | Angular 22 client consuming Health and AUTH-001 from either backend | WEB-001 and WEB-002 completed and merged; real dual-backend demo verified |
 
 Backends own their builds and isolated test infrastructure; this repository
@@ -68,24 +68,30 @@ dependency health; exact response rules are in [OpenAPI](openapi/erbas.yaml).
 AUTH-001 adds `POST /api/auth/login`: email/password JSON, a minimal access-token
 response, and distinct 400/401 errors. See [AUTH-001](docs/auth-001.md) for the
 contract and test credentials; its dated compatibility review records historical
-adaptation requirements. Both backends now implement AUTH-001. Java demonstrated
-conformance against its pinned revision in
-[AUTH-003 local verification](https://github.com/alxarafe/erbas/blob/main/docs/verification/auth-003.md);
-.NET runs shared Bruno in its validation/CI workflow. The contract alone cannot
-guarantee a backend's future conformance: consult each workflow badge and its
-linked evidence. Java CI is general backend CI, not shared-contract conformance;
-Angular client CI checks the client and isolated runtime proxies, while the
-[real dual-backend demo](https://github.com/alxarafe/erbas-client/blob/main/docs/full-stack-development.md#web-002-integration-verification-2026-10-09)
-provides separate integration evidence.
+adaptation requirements.
 
 USERS-001 adds `/api/auth/me` and administrator-only user list, get, create and
 update operations. Disabled users cannot authenticate or retain access. See
 [USERS-001](docs/users-001.md) for the minimal model and rules.
 [COLLECTIONS-001](docs/collections.md) standardizes paged collections and applies
-`items`, `offset`, `limit`, `total`, `order` to user listing. Backend/client
-adaptation to this paginated draft remains separate work.
+`items`, `offset`, `limit`, `total`, `order` to user listing. Both backends
+implement these capabilities; Angular currently consumes only Health and AUTH-001,
+with no USERS/COLLECTIONS client functionality claimed.
+
+Java has [local shared-conformance evidence](https://github.com/alxarafe/erbas/blob/main/docs/verification/collections-001.md)
+against its pinned draft 0.4.0 revision. Its CI remains general Java CI and does
+not run shared Bruno. .NET's authoritative check/CI runs the pinned shared suite;
+its `POST /api/auth/register` remains an
+[implementation-specific extension](docs/implementation-extensions.md).
+Angular CI checks the client and isolated runtime proxies; the
+[real dual-backend demo](https://github.com/alxarafe/erbas-client/blob/main/docs/full-stack-development.md#web-002-integration-verification-2026-10-09)
+provides separate integration evidence. Workflow results do not guarantee future
+backend conformance.
 
 ## Documentation and next steps
+
+The [shared demo defaults](demo/README.md) define public initial development/demo
+credentials; backend/client adoption remains separate work.
 
 Start with the [documentation index](docs/README.md) for usage, decisions,
 verification evidence, versioning, and working rules.
