@@ -34,8 +34,13 @@ OpenAPI and executes the sole Bruno collection against that URL. The backend
 must already be ready: this command does not build, start, or wait for it.
 
 Export nonempty `ERBAS_TEST_EMAIL` and `ERBAS_TEST_PASSWORD` for a disposable
-backend test account before invoking `bin/test`. Missing credentials are a
-usage error, never a skipped login check. See [AUTH-001](auth-001.md) for
+enabled administrator in an isolated validation environment before invoking
+`bin/test`. Missing credentials are a
+usage error, never a skipped login check. USERS-001 creates and modifies users;
+never run the suite against production. Unique test users remain until the
+backend disposes of its environment. See [USERS-001](users-001.md) for required
+account state, mutations, coverage and current exact counters. See
+[AUTH-001](auth-001.md) for
 negative fixture prerequisites, safe injection, scenarios and logging rules.
 
 | URL rule | Behavior |
@@ -96,7 +101,7 @@ for platform support and limitations.
 | HTTP request | 2 seconds |
 | Bruno process watchdog | 30 seconds |
 | OpenAPI lint | 30 seconds |
-| Synthetic test suite | 180 seconds |
+| Synthetic test suite | 300 seconds |
 
 These limits bound tool execution, not image downloads or Docker builds.
 The runner does not retry failed HTTP responses.

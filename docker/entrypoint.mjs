@@ -17,7 +17,7 @@ async function main() {
     if (result.code === 124) console.error('Conformance runner exceeded its 30-second deadline.');
     return result.code;
   }
-  const result = await runProcess(process.execPath, ['--test', '/runner/tests/runner.test.mjs'], { timeoutMs: 180000 });
+  const result = await runProcess(process.execPath, ['--test', '/runner/tests/runner.test.mjs'], { timeoutMs: 300000 });
   if (result.code === 0) console.log('Repository verification passed; no external backend was examined.');
   return result.code;
 }

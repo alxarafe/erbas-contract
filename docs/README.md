@@ -3,6 +3,7 @@
 | Document | What to find |
 | --- | --- |
 | [Usage](usage.md) | Local commands, Docker networking, limits, cleanup, and pinned tooling. |
+| [USERS-001](users-001.md) | CORE user model, current user, administration, security invariants and conformance coverage. |
 | [AUTH-001](auth-001.md) | Login behavior, credentials, scope and backend adaptation requirements. |
 | [Development ports](development-ports.md) | Shared host-port conventions, overrides and internal networking for both backends and the client. |
 | [Versioning](versioning.md) | Planned releases, compatibility policy, and future consumption rules. |
@@ -29,3 +30,7 @@ and published contract versions are separate facts. Neither backend consumes a
 published contract release yet. Both implement Health and AUTH-001 against
 pinned unreleased revisions; Java records local conformance and .NET executes
 shared conformance in CI. WEB-002 is completed and merged in the Angular client.
+
+USERS-001 draft `0.3.0` adds user administration; implementation and conformance
+against that draft are pending in both backends and the Angular client. Existing
+badges and historical evidence do not establish USERS-001 conformance.

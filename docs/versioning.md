@@ -1,9 +1,17 @@
 # Contract versioning
 
-No version has been published. AUTH-001 advances OpenAPI's intended draft to
-`0.2.0`; this is not an existing release tag.
+No version has been published. USERS-001 advances OpenAPI's intended draft from
+`0.2.0` to `0.3.0`; this is not an existing release tag.
 Do not create backend version declarations or claim consumption of a published
 release during CONTRACT-001A.
+
+USERS-001 adds five operations and the closed public User model. Health and
+AUTH-001 login request/response shapes remain unchanged. Disabled accounts must
+lose access, and full conformance now requires a provisioned enabled admin and
+a disposable environment because tests mutate users. This additive API scope
+and changed runner prerequisite require a minor increment under the 0.x policy.
+Consumer revision updates, implementation, release tags and publication remain
+separate authorized work. See [USERS-001](users-001.md).
 
 ## Future release policy
 
@@ -44,5 +52,7 @@ mandatory GitHub Actions integration. Local and workflow validation must invoke
 the same versioned commands. Publishing or deploying a backend must depend on
 successful shared-contract conformance against its clean ephemeral environment.
 
-Tags, commits, pushes, releases, publication, and deployment require express
-authorization. A passing local check does not authorize any of these actions.
+Task approval authorizes the final local atomic commit after passing validation,
+as defined in [the working agreement](../AGENTS.md). Pushes, tags, releases,
+publication and deployment require separate express authorization; passing
+checks alone do not authorize them.

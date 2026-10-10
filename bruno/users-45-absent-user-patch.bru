@@ -1,17 +1,18 @@
 meta {
-  name: Successful login
+  name: Absent user PATCH
   type: http
-  seq: 2
+  seq: 45
 }
 
-post {
-  url: {{baseUrl}}/api/auth/login
+patch {
+  url: {{baseUrl}}/api/users/{{absentId}}
   body: json
   auth: none
 }
 
 headers {
   Accept: application/json
+  Authorization: Bearer {{adminToken}}
   Content-Type: application/json
 }
 
@@ -20,7 +21,7 @@ body:json {
 }
 
 script:pre-request {
-  req.setBody({ email: bru.getProcessEnv("ERBAS_TEST_EMAIL"), password: bru.getProcessEnv("ERBAS_TEST_PASSWORD") });
+  req.setBody({enabled:false});
 }
 
 settings {
@@ -29,8 +30,8 @@ settings {
 }
 
 tests {
-  test("HTTP status is 200", function () {
-    expect(res.getStatus()).to.equal(200);
+  test("HTTP status is 404", function () {
+    expect(res.getStatus()).to.equal(404);
   });
 
   test("Content-Type is JSON with syntactically valid optional parameters", function () {
@@ -40,14 +41,11 @@ tests {
     expect(res.getHeader("content-type")).to.be.a("string").and.match(mediaType);
   });
 
-  test("Closed LoginResponse and bearer-compatible token", function () {
-    const body = res.getBody();
-    expect(body).to.be.an("object");
-    expect(Object.keys(body)).to.deep.equal(["accessToken"]);
-    expect(typeof body.accessToken).to.equal("string");
-    expect(/^[A-Za-z0-9._~+\/-]+=*(?![\s\S])/.test(body.accessToken)).to.equal(true);
+  test("Contractual response headers", function () {
     expect(res.getHeader("cache-control")).to.equal("no-store");
-    bru.setVar("adminToken", body.accessToken);
+  });
+
+  test("Closed response and expected state", function () {
+    expect(res.getBody()).to.deep.equal({ code: "user_not_found" });
   });
 }
-

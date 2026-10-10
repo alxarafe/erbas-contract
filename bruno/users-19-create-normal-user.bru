@@ -1,0 +1,66 @@
+meta {
+  name: Create normal user
+  type: http
+  seq: 19
+}
+
+post {
+  url: {{baseUrl}}/api/users
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  bru.setVar("userEmail", "users-001-" + Date.now() + "-" + Math.random().toString(36).slice(2) + "@example.test");
+  bru.setVar("userPassword", "  密碼😀-users-001  ");
+  bru.setVar("absentId", "users-001-absent-" + Date.now() + "-" + Math.random().toString(36).slice(2));
+  req.setBody({email: bru.getVar("userEmail"), password: bru.getVar("userPassword"), admin: false});
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+tests {
+  test("HTTP status is 201", function () {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("Content-Type is JSON with syntactically valid optional parameters", function () {
+    const token = "[!#$%&'*+.^_`|~0-9A-Za-z-]+";
+    const quoted = '"(?:[\\t\\x20\\x21\\x23-\\x5b\\x5d-\\x7e\\x80-\\xff]|\\\\[\\t\\x20-\\x7e\\x80-\\xff])*"';
+    const mediaType = new RegExp("^application/json(?:[ \\t]*;[ \\t]*" + token + "=(?:" + token + "|" + quoted + "))*[ \\t]*$", "i");
+    expect(res.getHeader("content-type")).to.be.a("string").and.match(mediaType);
+  });
+
+  test("Contractual response headers", function () {
+    expect(res.getHeader("cache-control")).to.equal("no-store");
+  });
+
+  test("Closed response and expected state", function () {
+    const user = res.getBody();
+    expect(user).to.be.an("object");
+    expect(Object.keys(user).sort()).to.deep.equal(["admin", "email", "enabled", "id"]);
+    expect(user.id).to.be.a("string").and.not.equal("");
+    expect(user.email).to.be.a("string").and.not.equal("");
+    expect(user.enabled).to.be.a("boolean");
+    expect(user.admin).to.be.a("boolean");
+    expect(user.email).to.equal(bru.getVar("userEmail"));
+    expect(user.enabled).to.equal(true);
+    expect(user.admin).to.equal(false);
+    bru.setVar("userId", user.id);
+    bru.setVar("userPathId", encodeURIComponent(user.id));
+    bru.setVar("expectedUser", user);
+  });
+}

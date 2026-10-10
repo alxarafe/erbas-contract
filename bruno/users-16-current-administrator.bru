@@ -1,26 +1,18 @@
 meta {
-  name: Successful login
+  name: Current administrator
   type: http
-  seq: 2
+  seq: 16
 }
 
-post {
-  url: {{baseUrl}}/api/auth/login
-  body: json
+get {
+  url: {{baseUrl}}/api/auth/me
+  body: none
   auth: none
 }
 
 headers {
   Accept: application/json
-  Content-Type: application/json
-}
-
-body:json {
-  {}
-}
-
-script:pre-request {
-  req.setBody({ email: bru.getProcessEnv("ERBAS_TEST_EMAIL"), password: bru.getProcessEnv("ERBAS_TEST_PASSWORD") });
+  Authorization: Bearer {{adminToken}}
 }
 
 settings {
@@ -40,14 +32,20 @@ tests {
     expect(res.getHeader("content-type")).to.be.a("string").and.match(mediaType);
   });
 
-  test("Closed LoginResponse and bearer-compatible token", function () {
-    const body = res.getBody();
-    expect(body).to.be.an("object");
-    expect(Object.keys(body)).to.deep.equal(["accessToken"]);
-    expect(typeof body.accessToken).to.equal("string");
-    expect(/^[A-Za-z0-9._~+\/-]+=*(?![\s\S])/.test(body.accessToken)).to.equal(true);
+  test("Contractual response headers", function () {
     expect(res.getHeader("cache-control")).to.equal("no-store");
-    bru.setVar("adminToken", body.accessToken);
+  });
+
+  test("Closed response and expected state", function () {
+    const user = res.getBody();
+    expect(user).to.be.an("object");
+    expect(Object.keys(user).sort()).to.deep.equal(["admin", "email", "enabled", "id"]);
+    expect(user.id).to.be.a("string").and.not.equal("");
+    expect(user.email).to.be.a("string").and.not.equal("");
+    expect(user.enabled).to.be.a("boolean");
+    expect(user.admin).to.be.a("boolean");
+    expect(user.email).to.equal(bru.getProcessEnv("ERBAS_TEST_EMAIL"));
+    expect(user.enabled).to.equal(true);
+    expect(user.admin).to.equal(true);
   });
 }
-
