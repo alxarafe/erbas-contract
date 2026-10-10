@@ -12,8 +12,10 @@ compatible API addition. Full conformance now requires login and explicitly
 supplied test credentials, so Health-only consumers and runner invocations
 must be adapted before opting into the new revision. Both additive API scope
 and the incompatible runner requirement warrant a minor increment under the
-0.x policy. No consumer revision, tag or release is changed by this task.
-See [AUTH-001](auth-001.md) for .NET adaptations and Java feasibility.
+0.x policy. The AUTH-001 contract task did not change consumer revisions, tags
+or releases. Both backends now pin an unreleased AUTH-001 revision; consumption
+of a published release remains future scope. See [AUTH-001](auth-001.md) for the
+contract and its historical backend compatibility review.
 
 Use semantic versions with immutable `vMAJOR.MINOR.PATCH` tags. Each backend
 must explicitly declare the contract release it implements and test that same

@@ -3,8 +3,9 @@
 > One executable contract. Multiple interchangeable implementations.
 
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
-[![Java CI](https://github.com/alxarafe/erbas/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alxarafe/erbas/actions/workflows/ci.yml)
-[![.NET CI / shared Bruno](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml)
+Java backend CI: [![Java backend CI](https://github.com/alxarafe/erbas/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alxarafe/erbas/actions/workflows/ci.yml)
+.NET backend CI / shared conformance: [![.NET backend CI / shared conformance](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml)
+Angular client CI: [![Angular client CI](https://github.com/alxarafe/erbas-client/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alxarafe/erbas-client/actions/workflows/ci.yml)
 
 [![Pre-release](https://img.shields.io/badge/status-pre--release-blue)](docs/versioning.md)
 [![OpenAPI 3.1](https://img.shields.io/badge/OpenAPI-3.1-6BA539)](openapi/erbas.yaml)
@@ -27,13 +28,14 @@ flowchart LR
 
 | Repository | Responsibility | Current status |
 | --- | --- | --- |
-| [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared specification and conformance suite | Foundation verified, unreleased |
-| [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot implementation | Local conformance recorded; CI does not run shared Bruno |
-| [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | C#/ASP.NET Core implementation | CI includes shared Bruno against a pinned draft |
-| [erbas-client](https://github.com/alxarafe/erbas-client) | Shared Angular client | Not implemented yet |
+| [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Health and AUTH-001 specified; no published release |
+| [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot backend implementing Health and AUTH-001 | AUTH-003 completed; local conformance recorded; Java CI does not run shared Bruno |
+| [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health and AUTH-001 plus platform modules | AUTH-002 completed; CI includes shared Bruno against the pinned draft |
+| [erbas-client](https://github.com/alxarafe/erbas-client) | Angular 22 client consuming Health and AUTH-001 from either backend | WEB-001 and WEB-002 completed and merged; real dual-backend demo verified |
 
 Backends own their builds and isolated test infrastructure; this repository
-owns the shared contract. The client is intended to work against either backend.
+owns the shared contract. The client works against either backend through its
+same-origin Nginx proxy, keeping each opaque token only in memory.
 
 ## Quick start
 
@@ -63,8 +65,16 @@ dependency health; exact response rules are in [OpenAPI](openapi/erbas.yaml).
 
 AUTH-001 adds `POST /api/auth/login`: email/password JSON, a minimal access-token
 response, and distinct 400/401 errors. See [AUTH-001](docs/auth-001.md) for the
-contract, test credentials and required backend adaptations. The new draft
-does not establish current backend login conformance.
+contract and test credentials; its dated compatibility review records historical
+adaptation requirements. Both backends now implement AUTH-001. Java demonstrated
+conformance against its pinned revision in
+[AUTH-003 local verification](https://github.com/alxarafe/erbas/blob/main/docs/verification/auth-003.md);
+.NET runs shared Bruno in its validation/CI workflow. The contract alone cannot
+guarantee a backend's future conformance: consult each workflow badge and its
+linked evidence. Java CI is general backend CI, not shared-contract conformance;
+Angular client CI checks the client and isolated runtime proxies, while the
+[real dual-backend demo](https://github.com/alxarafe/erbas-client/blob/main/docs/full-stack-development.md#web-002-integration-verification-2026-10-09)
+provides separate integration evidence.
 
 ## Documentation and next steps
 
