@@ -26,7 +26,7 @@ it is not a test result.
 | [Contract CI](../.github/workflows/ci.yml) | The authoritative Docker-based `./bin/check`: OpenAPI validation and synthetic/unit runner tests. No live backend conformance or publication. |
 | [Java backend CI](https://github.com/alxarafe/erbas/actions/workflows/ci.yml) | Authoritative `./bin/check`: Docker build, native/integration tests, clean PostgreSQL, application readiness, Flyway, mandatory shared Bruno against published `v0.4.0`, and cleanup. Its workflow display name is `Java CI`. |
 | [.NET backend CI / shared conformance](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml) | Authoritative `./bin/check`: native/module tests, validation Host, mandatory shared Bruno against published `v0.4.0`, persistence and cleanup. Its display name is `.NET CI / shared conformance`. This is a combined workflow result, not a separate Bruno-only result. |
-| [Angular client CI](https://github.com/alxarafe/erbas-client/actions/workflows/ci.yml) | Client `bin/check`: Angular tests, production build, Docker runtime and isolated Health/login/profile/list/detail proxies. No backend shared-conformance claim. Real dual-backend demo verification is separate. |
+| [Angular client CI](https://github.com/alxarafe/erbas-client/actions/workflows/ci.yml) | Client `bin/check`: Angular tests, production build, Docker runtime and isolated Health/login/profile/list/detail/create proxies. No backend shared-conformance claim. Real dual-backend demo verification is separate. |
 
 External badges report the checks of their named repositories, not tests of this
 hosting repository. Workflow results, historical local conformance evidence,
@@ -42,18 +42,33 @@ shared contract.
 Published `v0.4.0` specifies Health, AUTH-001, USERS-001 and COLLECTIONS-001;
 the latter applies pagination to USERS-001's list response.
 See [release identity and policy](versioning.md).
-WEB-003B completes Angular's read-only USERS-001 slice against either backend:
-Health, AUTH-001 login, automatic `GET /api/auth/me` profile loading, paged
-administrator `GET /api/users` and `GET /api/users/{id}` detail. `User.admin`
-controls administrator UI visibility; backend authorization remains authoritative.
-Its opaque bearer session remains backend-bound and memory-only. COLLECTIONS-001
-pagination uses a fixed page size of 50 with Previous/Next/Reload. A 401 invalidates
-the session; 403 preserves authentication and denies administrator access; detail
-404 reports user not found. Create/update operations (`POST /api/users`,
-`PATCH /api/users/{id}`) and their UI remain pending. See the
-[client guide](https://github.com/alxarafe/erbas-client/blob/main/docs/full-stack-development.md#current-profile-and-user-detail-web-003b)
-for behavior and verification scope. Client checks do not validate backend
-shared conformance. The historical WEB-002 real dual-backend demo has
+WEB-003C is complete and merged: Angular consumes Health, AUTH-001 login,
+automatic `GET /api/auth/me` profile loading, paged administrator `GET /api/users`,
+`GET /api/users/{id}` detail and administrator `POST /api/users` creation against
+either backend. A loaded `admin=true` profile offers administrator controls;
+backend authorization remains authoritative. The opaque bearer stays backend-bound
+and memory-only. COLLECTIONS-001 pagination uses a fixed page size of 50 with
+Previous/Next/Reload. A 401 invalidates the session; 403 preserves authentication;
+detail 404 reports user not found.
+
+Creation preserves email/password without trimming or normalization, requires
+12–256 Unicode code points for passwords and never persists them. It validates
+201 and contractual 400/401/403/409 responses. No optimistic insertion is used:
+a valid 201 reloads an already loaded collection from the server at the same
+offset. Client cancellation does not imply server rollback. Protected proxies
+allow POST only on the collection; profile/detail remain GET-only.
+`PATCH /api/users/{id}` and update UI (enabled/admin changes and last-admin
+handling) remain pending, as do email/password changes, DELETE and RBAC.
+This is not full USERS-001 frontend support. See the
+[WEB-003C client guide](https://github.com/alxarafe/erbas-client/blob/main/docs/full-stack-development.md#administrator-user-creation-web-003c)
+for detailed behavior and verification scope.
+
+The persistent real dual-backend demo checks POST forwarding non-destructively:
+409 with an existing email and 403 with a regular user. It does not create an
+account to test 201; client tests/mock runtime cover 201 separately from real
+contractual creation in the backends' shared conformance. Client CI checks its
+own tests/build/runtime/isolated proxies, not backend shared conformance.
+The historical WEB-002 real dual-backend demo has
 [separate verification evidence](https://github.com/alxarafe/erbas-client/blob/main/docs/full-stack-development.md#web-002-integration-verification-2026-10-09).
 Shared demo defaults are a development convention consumed by Java, .NET and
 the client's full-stack demo orchestration; they do not change this HTTP version
