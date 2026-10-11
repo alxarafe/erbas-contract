@@ -4,7 +4,7 @@ USERS-001 introduced user administration and a protected current-user endpoint
 in draft `0.3.0`. Version `0.4.0` applies the
 [COLLECTIONS-001 pagination convention](collections.md) to its list operation.
 OpenAPI is authoritative; the single Bruno collection is shared by all
-implementations. See [versioning](versioning.md) for first-release preparation
+implementations. See [versioning](versioning.md) for the published release
 and published-version consumption. The dated verification below records the
 original task, not publication or current backend conformance.
 

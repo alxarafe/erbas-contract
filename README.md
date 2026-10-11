@@ -8,7 +8,7 @@
 [![.NET backend CI / shared conformance](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml)
 [![Angular client CI](https://github.com/alxarafe/erbas-client/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alxarafe/erbas-client/actions/workflows/ci.yml)
 
-[![Release preparation](https://img.shields.io/badge/status-release--preparation-blue)](docs/versioning.md)
+[![Published v0.4.0](https://img.shields.io/badge/contract-v0.4.0-blue)](https://github.com/alxarafe/erbas-contract/tree/v0.4.0)
 [![OpenAPI 3.1](https://img.shields.io/badge/OpenAPI-3.1-6BA539)](openapi/erbas.yaml)
 [![Bruno CLI 4.2.0](https://img.shields.io/badge/Bruno_CLI-4.2.0-F4AA41)](bruno/)
 [![Docker-based validation](https://img.shields.io/badge/validation-Docker--based-2496ED)](docs/usage.md)
@@ -29,9 +29,9 @@ flowchart LR
 
 | Repository | Responsibility | Current status |
 | --- | --- | --- |
-| [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Health, AUTH-001, USERS-001 and COLLECTIONS-001; first release v0.4.0 prepared for publication |
-| [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 | Local shared conformance recorded against a pinned 0.4.0 revision; Java CI does not run shared Bruno |
-| [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 plus platform modules | Authoritative check/CI includes shared Bruno against the pinned 0.4.0 revision |
+| [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Published immutable v0.4.0: Health, AUTH-001, USERS-001 and COLLECTIONS-001 |
+| [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 | Adopted v0.4.0; authoritative `./bin/check` requires shared conformance locally and in CI |
+| [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 plus platform modules | Adopted v0.4.0; authoritative `./bin/check` requires shared conformance locally and in CI |
 | [erbas-client](https://github.com/alxarafe/erbas-client) | Angular 22 client consuming Health and AUTH-001 from either backend | WEB-001 and WEB-002 completed and merged; real dual-backend demo verified |
 
 Backends own their builds and isolated test infrastructure; this repository
@@ -80,10 +80,9 @@ update operations. Disabled users cannot authenticate or retain access. See
 implement these capabilities; Angular currently consumes only Health and AUTH-001,
 with no USERS/COLLECTIONS client functionality claimed.
 
-Java has [local shared-conformance evidence](https://github.com/alxarafe/erbas/blob/main/docs/verification/collections-001.md)
-against its pinned 0.4.0 revision. Its CI remains general Java CI and does
-not run shared Bruno. .NET's authoritative check/CI runs the pinned shared suite;
-its `POST /api/auth/register` remains an
+Java and .NET both pin published `v0.4.0` and require the shared suite through
+their authoritative `./bin/check`, locally and in GitHub Actions.
+.NET's `POST /api/auth/register` remains an
 [implementation-specific extension](docs/implementation-extensions.md).
 Angular CI checks the client and isolated runtime proxies; the
 [real dual-backend demo](https://github.com/alxarafe/erbas-client/blob/main/docs/full-stack-development.md#web-002-integration-verification-2026-10-09)
@@ -99,10 +98,10 @@ orchestration.
 Start with the [documentation index](docs/README.md) for usage, decisions,
 verification evidence, versioning, and working rules.
 
-`v0.4.0` is prepared as the first formal release; this change does not create
-its tag or publish it. See the [release notes](docs/releases/v0.4.0.md) and
-[versioning/publication procedure](docs/versioning.md). Consumers must pin the
-published version and verify conformance; backend pin updates remain separate.
+`v0.4.0` is the first published immutable release, adopted by both backends.
+CONTRACT-002 is complete. See the [release notes](docs/releases/v0.4.0.md) and
+[versioning/publication procedure](docs/versioning.md) for its exact commit and
+consumption policy. Consumers must pin the published version and verify conformance.
 Backend workflows and their coverage are described in the
 [documentation index](docs/README.md#verification-badges).
 

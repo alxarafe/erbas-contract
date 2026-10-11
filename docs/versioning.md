@@ -2,18 +2,19 @@
 
 ## First formal release: v0.4.0
 
-`v0.4.0` is designated as the first published ERBAS Contract version. This
-preparation makes the existing validated 0.4.0 behavior release-ready; it does
-not create the tag or publish a GitHub Release. Publication requires the
-release-preparation change to be merged on `main` and separate authorization.
+`v0.4.0` is the first published immutable ERBAS Contract version. Its annotated
+tag resolves to `839255ea54610ccf711b29bd096ea294a1ebc3fc`.
+The release identity is the published Git tag. GitHub Release and package
+publication require separate authorization.
 The release contains Health, AUTH-001, USERS-001 and COLLECTIONS-001, unchanged
 from the validated behavior. See [release notes](releases/v0.4.0.md).
 
-Consumers must pin a published version rather than follow `main`. Backend
-revision pins are unchanged by this preparation. Moving them to `v0.4.0` requires
-separately approved consumer updates and shared conformance against that exact
+Consumers must pin a published version rather than follow `main`. Updating a
+consumer requires separate approval and shared conformance against that exact
 version; existing evidence against an earlier commit is not evidence of using
-the published tag. Demo defaults remain outside the HTTP contract.
+the published tag. Current backend adoption is documented in the
+[documentation index](README.md#verification-badges).
+Demo defaults remain outside the HTTP contract.
 
 ## Compatibility and consumption policy
 
@@ -57,9 +58,11 @@ Backend publication/deployment must depend on shared conformance against its
 own clean ephemeral environment. Backend CI/pin adoption is separate consumer
 work, not implemented by this repository's workflow.
 
-The intended publication sequence below is documentation only. Do not execute
-it without separate authorization for tagging/pushing and, if desired, GitHub
-Release publication.
+The publication sequence below is documentation only. It records the first-tag
+procedure and serves as a checklist for future releases with their own version
+and reviewed commit. `v0.4.0` already exists; do not repeat its creation or move it.
+Do not execute publication without separate authorization for tagging/pushing
+and, if desired, GitHub Release publication.
 
 1. Merge the approved release-preparation PR and require Contract CI to pass on
    its exact resulting commit on `main`. Record that full merge/squash commit SHA.

@@ -47,8 +47,9 @@ an available override. Remove only resources owned by that validation run.
 and tests an explicitly supplied URL. Prefer its existing `--network NETWORK`
 interface for containerized backends; see [networking](usage.md#choose-docker-networking).
 
-Java and .NET implement shared Health (`{"status":"ok"}`) and AUTH-001 login.
-Java records local conformance; .NET includes shared Bruno in validation and CI.
+Java and .NET implement published `v0.4.0`: Health (`{"status":"ok"}`), AUTH-001,
+USERS-001 and COLLECTIONS-001. Both require shared Bruno conformance through
+their own authoritative `./bin/check`, locally and in CI.
 
 `erbas-client` implements the Angular application and Docker/Nginx runtime.
 WEB-001 and WEB-002 are completed. Its publication binds
