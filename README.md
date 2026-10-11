@@ -32,7 +32,7 @@ flowchart LR
 | [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Published immutable v0.4.0: Health, AUTH-001, USERS-001 and COLLECTIONS-001 |
 | [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 | Adopted v0.4.0; authoritative `./bin/check` requires shared conformance locally and in CI |
 | [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 plus platform modules | Adopted v0.4.0; authoritative `./bin/check` requires shared conformance locally and in CI |
-| [erbas-client](https://github.com/alxarafe/erbas-client) | Angular 22 client consuming Health, AUTH-001 and the USERS-001 collection with COLLECTIONS-001 pagination from either backend | WEB-003A completed and merged; real Java/.NET interoperability verified |
+| [erbas-client](https://github.com/alxarafe/erbas-client) | Angular 22 client consuming Health, AUTH-001 and the read-only USERS-001 profile/list/detail slice with COLLECTIONS-001 pagination from either backend | WEB-003B completed and merged; real Java/.NET interoperability verified |
 
 Backends own their builds and isolated test infrastructure; this repository
 owns the shared contract. The client works against either backend through its
@@ -77,10 +77,10 @@ update operations. Disabled users cannot authenticate or retain access. See
 [USERS-001](docs/users-001.md) for the minimal model and rules.
 [COLLECTIONS-001](docs/collections.md) standardizes paged collections and applies
 `items`, `offset`, `limit`, `total`, `order` to user listing. Both backends
-implement these capabilities; Angular also consumes the administrator-only
-`GET /api/users` collection with pagination. Client creation, editing and detail
-views remain unimplemented; see the
-[WEB-003A client guide](https://github.com/alxarafe/erbas-client/blob/main/docs/full-stack-development.md#authenticated-user-list-web-003a).
+implement these capabilities; Angular consumes the read-only slice: current-user
+profile (`GET /api/auth/me`), paged administrator listing (`GET /api/users`) and
+user detail (`GET /api/users/{id}`). Client creation/update UI remains pending;
+see the [WEB-003B client guide](https://github.com/alxarafe/erbas-client/blob/main/docs/full-stack-development.md#current-profile-and-user-detail-web-003b).
 
 Java and .NET both pin published `v0.4.0` and require the shared suite through
 their authoritative `./bin/check`, locally and in GitHub Actions.
