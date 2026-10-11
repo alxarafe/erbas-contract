@@ -52,11 +52,12 @@ USERS-001 and COLLECTIONS-001. Both require shared Bruno conformance through
 their own authoritative `./bin/check`, locally and in CI.
 
 `erbas-client` implements the Angular application and Docker/Nginx runtime.
-WEB-003A is completed, including the shared paginated user collection. Its
-publication binds `127.0.0.1:${ERBAS_CLIENT_PORT:-48082}` to container port 80.
-Browser Health, login and read-only users collection requests use exact
-same-origin proxy paths to either backend; host ports remain infrastructure
-settings, not HTTP contract requirements.
+WEB-003B is complete, including the current-user profile, paginated administrator
+user collection and read-only user detail. Its publication binds
+`127.0.0.1:${ERBAS_CLIENT_PORT:-48082}` to container port 80. Browser Health, login,
+profile, collection and detail requests use exact same-origin proxy paths to
+either backend; host ports remain infrastructure settings, not HTTP contract
+requirements.
 
 Implementation-specific instructions belong to [Java development](https://github.com/alxarafe/erbas/blob/main/docs/usage.md#development),
 [.NET development](https://github.com/alxarafe/alxarafe-dotnet/blob/main/docs/usage.md),
