@@ -106,6 +106,12 @@ for platform support and limitations.
 | OpenAPI lint | 30 seconds |
 | Synthetic test suite | 450 seconds |
 
+Within the synthetic suite, full Bruno runs and late pagination-fault tests have
+a 35-second outer test budget so the 30-second process watchdog and fixture
+cleanup can finish on slower hosted runners. Shorter Bruno tests retain their
+15-second budgets; HTTP timeout and stuck-subprocess assertions remain bounded
+independently.
+
 These limits bound tool execution, not image downloads or Docker builds.
 The runner does not retry failed HTTP responses.
 

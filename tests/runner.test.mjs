@@ -8,6 +8,9 @@ import { runBruno, normalizeBaseUrl, requireCredentials } from '../scripts/confo
 import { validateOpenApi } from '../scripts/validate.mjs';
 import { runProcess } from '../scripts/process.mjs';
 
+// Full-suite and late-failure runs need the 30-second Bruno watchdog plus cleanup
+// time on slower hosted runners. Short runs keep their existing test budgets.
+const fullSuiteTestTimeoutMs = 35000;
 
 test('credentials are mandatory and never included in validation errors', () => {
   for (const env of [{}, { ERBAS_TEST_EMAIL: 'synthetic' }, { ERBAS_TEST_PASSWORD: 'synthetic' }]) {
@@ -16,7 +19,7 @@ test('credentials are mandatory and never included in validation errors', () => 
   requireCredentials(fixtureEnv);
 });
 
-test('full suite exercises Health, AUTH-001 and USERS-001 scenarios', { timeout: 15000 }, async () => {
+test('full suite exercises Health, AUTH-001 and USERS-001 scenarios', { timeout: fullSuiteTestTimeoutMs }, async () => {
   const fixture = await startFixture();
   try {
     const result = await runBruno(fixture.baseUrl, { env: fixtureEnv });
@@ -238,7 +241,7 @@ const scenarios = [
 ];
 
 for (const [name, fixtureOptions, success] of scenarios) {
-  test(name, { timeout: 15000 }, async () => {
+  test(name, { timeout: success ? fullSuiteTestTimeoutMs : 15000 }, async () => {
     const fixture = await startFixture(fixtureOptions);
     try {
       const started = Date.now();
@@ -367,7 +370,9 @@ test('documented Bruno request and named-check counts match the sole collection'
 
 for (const collectionFault of ['total', 'limit', 'offset', 'order', 'window', 'negative-offset',
   'excessive-limit', 'extra', 'order-extra']) {
-  test(`runner rejects collection fault: ${collectionFault}`, { timeout: 15000 }, async () => {
+  const timeout = ['offset', 'window', 'negative-offset', 'excessive-limit'].includes(collectionFault)
+    ? fullSuiteTestTimeoutMs : 15000;
+  test(`runner rejects collection fault: ${collectionFault}`, { timeout }, async () => {
     const fixture = await startFixture({ collectionFault });
     try {
       const result = await runBruno(fixture.baseUrl, { env: fixtureEnv });
