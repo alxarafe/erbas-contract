@@ -4,7 +4,7 @@
 | --- | --- |
 | [Usage](usage.md) | Local commands, Docker networking, limits, cleanup, and pinned tooling. |
 | [COLLECTIONS-001](collections.md) | Standard paged envelope, user and module pagination, order, totals and compatibility. |
-| [Module administration](modules.md) | Draft 0.5.0 CORE administration, availability, dependency invariants and canonical development/conformance modules. |
+| [Module administration](modules.md) | Published v0.5.0 CORE administration, availability, dependency invariants and canonical development/conformance modules. |
 | [USERS-001](users-001.md) | CORE user model, current user, administration, security invariants and conformance coverage. |
 | [AUTH-001](auth-001.md) | Login behavior, credentials, scope and backend adaptation requirements. |
 | [Shared demo defaults](../demo/README.md) | Canonical public initial demo values, override precedence and adoption boundaries. |
@@ -12,7 +12,7 @@
 | [Development ports](development-ports.md) | Shared host-port conventions, overrides and internal networking for both backends and the client. |
 | [Versioning](versioning.md) | Published release identity, immutable tags, compatibility, consumption and exact publication procedure. |
 | [v0.4.0 release notes](releases/v0.4.0.md) | First executable release scope and exclusions. |
-| [v0.5.0 release notes](releases/v0.5.0.md) | Prepared for publication: compatible module administration and canonical development/conformance fixtures. Not yet published. |
+| [v0.5.0 release notes](releases/v0.5.0.md) | Current published immutable release: compatible module administration, canonical conformance fixtures and exact release identity. |
 | [Architecture decision](decisions/0001-contract-foundation.md) | Why `/health` was chosen and where contract and backend responsibilities belong. |
 | [CONTRACT-001A verification](verification/contract-001a.md) | Synthetic test cases, measured results, tool identity, and coverage limits. |
 | [Working agreement](../AGENTS.md) | Scope, preservation, validation, and authorization rules. |
@@ -41,7 +41,7 @@ verification reports retain evidence against earlier draft revisions.
 .NET's `POST /api/auth/register` remains implementation-specific, outside the
 shared contract.
 
-Published `v0.4.0` specifies Health, AUTH-001, USERS-001 and COLLECTIONS-001;
+Previous published release `v0.4.0` specifies Health, AUTH-001, USERS-001 and COLLECTIONS-001;
 the latter applies pagination to USERS-001's list response.
 See [release identity and policy](versioning.md).
 The same client provides authenticated profiles and basic administrator user
@@ -61,15 +61,16 @@ Shared demo defaults are a development convention consumed by Java, .NET and
 the client's full-stack demo orchestration; they do not change this HTTP version
 or conformance. Demo defaults are outside the HTTP release scope.
 
-## Development contract
+## Published contract and consumer adoption
 
-**0.5.0 is prepared for publication**, incorporating CONTRACT-003 module
-administration and CONTRACT-003A canonical development/conformance modules.
-See [release notes](releases/v0.5.0.md).
-**v0.4.0 remains the latest published immutable release**; v0.5.0 has no tag yet.
+**v0.5.0 is the current published immutable release**, incorporating CONTRACT-003
+module administration and CONTRACT-003A canonical development/conformance modules.
+See [release notes](releases/v0.5.0.md) and [exact tag identity](versioning.md).
+**v0.4.0 is the previous release and the first formal published release**.
 Java and .NET still consume v0.4.0; no v0.5.0 backend conformance or Angular
-adoption is claimed. Consumer adaptation and publication require separately
-approved tasks, independent of repository verification below.
+module-administration adoption is claimed. Adoption requires separately approved
+consumer tasks. Publication, backend adoption, client consumption and repository
+verification below are distinct facts.
 The current sole Bruno collection has 130 request definitions and 506 named
 checks for the two-module synthetic fixture; see
 [module conformance](modules.md#conformance-fixture-and-mutations). Historical

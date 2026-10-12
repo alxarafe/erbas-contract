@@ -1,10 +1,10 @@
 # Module administration (CONTRACT-003)
 
-Draft HTTP contract **0.5.0** adds minimal CORE/platform administration of modules.
-OpenAPI is authoritative; the sole shared Bruno collection is backend-neutral.
-The latest published release remains **v0.4.0**. Consumer adaptation is separate.
-CONTRACT-003A refines conformance infrastructure within this unpublished draft;
-it changes neither the HTTP API nor development version 0.5.0.
+Published HTTP contract **v0.5.0** includes minimal CORE/platform administration
+of modules through CONTRACT-003 and canonical development/conformance modules
+through CONTRACT-003A. OpenAPI is authoritative; the sole shared Bruno collection
+is backend-neutral. See [release identity](versioning.md). Java and .NET remain
+on v0.4.0 and require separately approved adoption and conformance tasks.
 
 The cross-stack design uses concepts both Java and .NET can expose: registry
 availability, a public descriptor, persistent enabled state and dependency-safe
@@ -14,7 +14,7 @@ conformance therefore uses canonical development modules shared by both stacks.
 This specifies observable HTTP behavior without requiring shared discovery or
 persistence internals.
 The existing published operations remain unchanged, making this a compatible
-minor addition. Neither backend is claimed conformant to the new draft yet.
+minor addition. Neither backend is claimed conformant to v0.5.0 yet.
 
 ## Public representation
 
