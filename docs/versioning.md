@@ -16,27 +16,33 @@ the published tag. Current backend adoption is documented in the
 [documentation index](README.md#verification-badges).
 Demo defaults remain outside the HTTP contract.
 
-## Release prepared for publication: v0.5.0
+## Current published immutable release: v0.5.0
 
-The target release is **v0.5.0**, a compatible additive MINOR release incorporating
-CONTRACT-003 (CORE module administration) and CONTRACT-003A (canonical development
-conformance modules). OpenAPI remains **0.5.0**. Existing Health, AUTH-001,
-USERS-001 and COLLECTIONS-001 operations, closed User/UserCollection schemas,
-status codes, headers and security remain unchanged. See
-[prepared release notes](releases/v0.5.0.md) for scope and exclusions.
+**v0.5.0 is the current published immutable ERBAS Contract release.** Its
+annotated tag records the following verified identity:
 
-**v0.5.0 is not published until its immutable tag exists. v0.4.0 remains the
-current published release**, with its original tag/SHA and historical evidence.
-Consumers must continue pinning v0.4.0 until v0.5.0 is published and adoption is
-separately approved. Java and .NET cannot yet be considered conformant to v0.5.0;
-no Angular consumption of that version is claimed.
+- Tag: `v0.5.0`.
+- Annotated tag object: `408f44d56f4ba0554d0bc08de23d397269dae9af`.
+- Target commit: `35be07fe002c364f758ae50419d0ecb86d1f0c43`.
 
-The future annotated v0.5.0 tag must point to the exact validated `main` commit
-resulting from merging CONTRACT-004, not its feature-branch commit or the earlier
-CONTRACT-003A merge. The definitive full SHA will be recorded after that merge;
-this preparation does not select or invent it. Tagging/pushing and any GitHub
-Release or package publication require separate express authorization. The
-procedure below is documentation only and is not executed by CONTRACT-004.
+It was published after validating that exact `main` commit resulting from the
+CONTRACT-004 release-preparation merge. Publication occurred separately from
+CONTRACT-005, which only records it; the tag must never be moved or recreated.
+
+This is a compatible additive MINOR release incorporating CONTRACT-003 (CORE
+module administration) and CONTRACT-003A (canonical development/conformance
+modules). OpenAPI remains **0.5.0**. Existing Health, AUTH-001, USERS-001 and
+COLLECTIONS-001 operations, closed User/UserCollection schemas, status codes,
+headers and security remain unchanged. See [release notes](releases/v0.5.0.md).
+
+**v0.4.0 is the previous published immutable release and remains the first formal
+release**, with its original tag/SHA and historical evidence preserved above.
+Consumers can now explicitly adopt v0.5.0 through a separately approved task per
+consumer, including shared conformance against that exact release. Java and .NET
+still pin v0.4.0; neither is claimed conformant to v0.5.0. Angular has not yet
+adopted module administration. Contract publication does not establish backend
+conformance or client consumption. GitHub Release and package publication remain
+separately authorized operations.
 
 ## Compatibility and consumption policy
 

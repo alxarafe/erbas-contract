@@ -1,8 +1,8 @@
 # COLLECTIONS-001: standard paged collections
 
 Version `0.4.0` establishes ERBAS's base convention for future paged collections.
-USERS-001's `GET /api/users` (`UserCollection`) is its first application. Draft
-`0.5.0` adds `GET /api/modules` (`ModuleCollection`) as its second, using the
+USERS-001's `GET /api/users` (`UserCollection`) is its first application. Published
+`v0.5.0` adds `GET /api/modules` (`ModuleCollection`) as its second, using the
 same envelope, pagination limits and fixed id ASC order. OpenAPI is authoritative;
 the sole Bruno collection verifies this behavior independently of backend stack.
 See [versioning](versioning.md) for first-release preparation and publication.
@@ -107,7 +107,7 @@ and the User/UserCollection representation remain unchanged.
 ## Historical COLLECTIONS-001 conformance and compatibility
 
 The counts and verification below record the original COLLECTIONS-001 scope.
-Current draft suite coverage is documented in [modules](modules.md).
+Current suite coverage is documented in [modules](modules.md).
 
 At that milestone, the sole collection had **82 requests and 313 named checks**. COLLECTIONS-001
 modifies the existing list assertion and adds 15 requests / 60 named checks:

@@ -39,14 +39,14 @@ enabled administrator in an isolated validation environment before invoking
 usage error, never a skipped login check. USERS-001 creates and modifies users;
 never run the suite against production. Unique test users remain until the
 backend disposes of its environment. See [USERS-001](users-001.md) for required
-account state and mutations; current draft counters are in [modules](modules.md). COLLECTIONS-001
+account state and mutations; current suite counters are in [modules](modules.md). COLLECTIONS-001
 checks paged user windows and totals; use an environment without concurrent
 external mutations during the run. See [collections](collections.md).
 See
 [AUTH-001](auth-001.md) for
 negative fixture prerequisites, safe injection, scenarios and logging rules.
 
-Full draft 0.5.0 conformance requires the backend to register the canonical
+Full published v0.5.0 conformance requires the backend to register the canonical
 AVAILABLE development modules `erbas.dev.math` (no dependencies) and
 `erbas.dev.statistics` (depends exactly on Math). They are reserved ERBAS
 development/conformance infrastructure, not required production business modules;
@@ -60,7 +60,7 @@ CONTRACT-003 changes these modules' persistent enabled states. Use an isolated,
 disposable environment without concurrent administrators or functional use; never
 run the suite against production. Success leaves both enabled; after failure,
 discard the environment. Current Java/.NET releases have not implemented the new
-shared endpoints, so do not run draft conformance against them before adaptation.
+shared endpoints, so do not run v0.5.0 conformance against them before adaptation.
 
 | URL rule | Behavior |
 | --- | --- |

@@ -147,4 +147,4 @@ at 300 seconds. Per-request and Bruno watchdogs remain 2 and 30 seconds.
 `git diff --check`, shell syntax checks and sequence/count inspection passed.
 No external service was tested; no backend or client repository was changed.
 
-Current draft suite counters and additional modular coverage are in [modules](modules.md).
+Current suite counters and additional modular coverage are in [modules](modules.md).
