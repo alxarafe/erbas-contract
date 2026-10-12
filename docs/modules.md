@@ -3,13 +3,16 @@
 Draft HTTP contract **0.5.0** adds minimal CORE/platform administration of modules.
 OpenAPI is authoritative; the sole shared Bruno collection is backend-neutral.
 The latest published release remains **v0.4.0**. Consumer adaptation is separate.
+CONTRACT-003A refines conformance infrastructure within this unpublished draft;
+it changes neither the HTTP API nor development version 0.5.0.
 
 The cross-stack design uses concepts both Java and .NET can expose: registry
 availability, a public descriptor, persistent enabled state and dependency-safe
 transitions. Their existing administrator security and COLLECTIONS-001 behavior
 apply here too. Module sets may differ, including no production modules in Java;
-conformance therefore uses configurable test-only IDs. This specifies observable
-HTTP behavior without requiring shared discovery or persistence internals.
+conformance therefore uses canonical development modules shared by both stacks.
+This specifies observable HTTP behavior without requiring shared discovery or
+persistence internals.
 The existing published operations remain unchanged, making this a compatible
 minor addition. Neither backend is claimed conformant to the new draft yet.
 
@@ -105,64 +108,96 @@ functional-module response is introduced.
 
 ## Conformance fixture and mutations
 
-`./bin/test URL` requires an isolated disposable backend environment and four
-nonempty variables:
+`./bin/test URL` requires an isolated disposable backend environment with an
+existing enabled administrator (`ERBAS_TEST_EMAIL` and `ERBAS_TEST_PASSWORD`)
+and these two AVAILABLE, mutable canonical development modules:
 
-- `ERBAS_TEST_EMAIL` and `ERBAS_TEST_PASSWORD`: existing enabled admin credentials.
-- `ERBAS_TEST_MODULE_BASE_ID`: AVAILABLE mutable module with no dependencies.
-- `ERBAS_TEST_MODULE_DEPENDENT_ID`: AVAILABLE mutable module whose dependencies
-  are exactly `[BASE_ID]`.
+| Module ID | Required dependencies |
+| --- | --- |
+| `erbas.dev.math` | `[]` |
+| `erbas.dev.statistics` | `["erbas.dev.math"]` |
 
-IDs must differ. They are conformance inputs, not HTTP fields or credentials,
-and do not mandate any production modules. Backends may provide test-only modules.
+Both descriptors have a positive integer `moduleApiVersion` and a boolean
+`enabled`, as defined by Module. IDs are case-sensitive; `erbas.dev.*` is reserved
+for ERBAS development infrastructure. These modules serve development,
+integration, technical demonstrations and shared contract conformance. They are
+not business modules or mandatory production modules: normal production must
+be able to start without them, and must not register them by default.
+
+The backend controls composition and therefore AVAILABLE. Module has no
+`developmentOnly`, `testOnly`, environment or source field. Future Java and .NET
+implementations may use profiles, environments, conditional registration or a
+development/conformance ModuleSource idiomatically; the HTTP contract specifies
+none of those mechanisms. The runner uses the canonical IDs directly, with no
+configurable module-ID environment variables. Its synthetic fixture uses the
+same descriptors.
+
 No other enabled module may depend on these fixtures in a way that interferes;
-no concurrent administrators or external functionality may use them. The fixture
-must have no module whose ID collides with a case-altered variant used for testing.
-Names such as example-module above are documentation only.
-
-The suite reuses its disposable non-admin user. It checks list/security,
-pagination, closed representations, invalid PATCH bodies, unknown IDs and
-idempotence. It verifies concrete fixture descriptors through PATCH responses
-rather than assuming a first-page position or at most 100 installed modules.
-Repeated descriptors and page windows verify deterministic representation and
-ordering before pagination without imposing a JavaScript ID comparator on the
-server. Native backend tests must also verify their own stable id ASC criterion.
+no concurrent administrators or external functionality may use them. Other
+AVAILABLE modules are allowed. The suite checks both descriptors through GET,
+following pages until both are found or the collection ends, and through PATCH
+responses. It assumes neither positions nor a maximum of 100 installed modules.
+It reuses its disposable non-admin user and checks security, pagination, closed
+representations, invalid bodies, unknown IDs and idempotence. Repeated
+descriptors and page windows check deterministic representation and ordering
+before pagination without imposing a JavaScript ID comparator on the server.
+Native backend tests must also verify their own stable id ASC criterion.
 
 The dependency sequence uses only the public API:
 
-1. Enable BASE, then DEPENDENT; repeat BASE enable successfully.
-2. Disable BASE: 409; confirm DEPENDENT can still be enabled, proving BASE was
+1. Enable Math, then Statistics; repeat Math enable successfully.
+2. Disable Math: 409; confirm Statistics can still be enabled, proving Math was
    not disabled.
-3. Disable DEPENDENT; repeat its disable successfully.
-4. Disable BASE.
-5. Enable DEPENDENT: 409; enable BASE, then disable BASE successfully, proving
-   DEPENDENT stayed disabled.
-6. Enable BASE, then DEPENDENT.
+3. Disable Statistics; repeat its disable successfully.
+4. Disable Math.
+5. Enable Statistics: 409; enable Math, then disable Math successfully, proving
+   Statistics stayed disabled.
+6. Enable Math, then Statistics.
 
 **The suite mutates persistent module state. Never run it against production.**
 Success leaves both fixtures enabled; failure makes the environment disposable.
 No backend rollback orchestration or hidden test endpoint is required.
 
-Live fixtures may be arbitrary opaque IDs without safely alterable case, so the
-suite does not impose an ID format or perform a live case-variant assertion.
-Case-sensitive matching is specified in OpenAPI and checked by synthetic runner
-tests; a consumer should also prove it in native tests. The runner's unknown-ID
-case uses a newly generated ID. No backend-specific module IDs are hardcoded.
+Case-sensitive matching remains specified in OpenAPI and checked by synthetic
+runner tests. The unknown-ID case uses a newly generated ID. No production
+business module is assumed by the suite.
 
-The sole collection has **129 requests / 501 named checks**, adding **47 requests
-/ 188 checks** after the existing sequence 1–82. Synthetic verification adds 19
-deliberate module faults plus fixture-input, empty/case-sensitive/atomic-state and
-opaque-ID tests beyond the first 100 modules. Four shared folder assertions run
-for each module request, giving 501 executed named checks (317 test declarations).
-Faults cover extra/missing fields, invalid version/dependencies/enabled,
-ordering/pagination, security statuses, accepted invalid payloads, 404 status/body,
-accepted dependency violations, partial state changes despite 409, incorrect
-409/state, caching and unexpected bearer challenge. The runner explicitly
-executes root requests first, then the modular folder. The synthetic suite has
-91 tests. `bin/check` supplies its own fixture variables and validates the runner,
-not any real backend. Earlier dated reports retain their historical counts.
+The sole collection has **130 request definitions / 506 named checks** for the
+two-module synthetic fixture: 48 module requests, including the paginated GET
+descriptor discovery, follow the unchanged sequence 1–82. Four shared folder
+assertions run for each module request; discovery adds one named check. Each
+additional discovery page executes those five checks again. There are 318 test
+declarations. The synthetic suite has 96 tests and 24 deliberate module faults.
+These include absent Math/Statistics, missing/incorrect Statistics dependency,
+accepted disable/enable conflicts, partial changes despite 409, malformed
+representations, pagination, security, errors, caching and bearer headers.
+A positive fixture places both canonical modules beyond the first 100 entries.
+`bin/check` validates the runner, not any real backend. Earlier dated reports
+retain their historical counts.
 
-## Repository verification (2026-10-12)
+## Future fixture capabilities
+
+Math will provide a minimal public mathematical capability (for example,
+`add(a, b)`). Statistics will consume that public capability for an operation
+such as `average(values)`, rather than duplicating the arithmetic. It must not
+access Math's private tables, repositories or classes, use reflection or a named
+service locator. This is fixture architecture intent only: CONTRACT-003A defines
+IDs, dependency and development availability, not functional HTTP endpoints,
+service contracts, a capability registry, module bus or cross-module DI API.
+Implementation and communication design require separate tasks.
+
+## CONTRACT-003A verification (2026-10-12)
+
+`./bin/check` passed: OpenAPI validated and all 96 synthetic/unit tests passed,
+without failures, cancellations or skips, in 493.0 seconds. This includes GET
+canonical descriptor discovery beyond 100 modules, both dependency conflicts and
+all 24 module faults. Owned-runner cleanup passed. Shell syntax, contiguous
+request numbering, unique request names and `git diff --check` passed.
+OpenAPI and the original 82 Bruno requests remain byte-for-byte unchanged from
+the CONTRACT-003 baseline. Version remains draft 0.5.0, with v0.4.0 published.
+No live backend conformance or consumer implementation was performed.
+
+## Historical CONTRACT-003 verification (2026-10-12)
 
 `./bin/check` passed: OpenAPI validated and all 91 synthetic/unit tests passed,
 without failures, cancellations or skips, in 455.2 seconds. The expanded battery
