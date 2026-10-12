@@ -1,0 +1,37 @@
+meta {
+  name: Modules normalize-base
+  type: http
+  seq: 105
+}
+
+patch {
+  url: {{baseUrl}}{{modulesPath}}/{{moduleBaseIdPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"enabled":true}
+}
+
+script:pre-request {
+  bru.setVar("moduleBaseIdPath", encodeURIComponent(bru.getVar("moduleBaseId")));
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  responseKind: module
+  fixture: base
+  expectedEnabled: true
+}

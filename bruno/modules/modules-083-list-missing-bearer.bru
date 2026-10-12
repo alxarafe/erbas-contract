@@ -1,0 +1,31 @@
+meta {
+  name: Modules list-missing-bearer
+  type: http
+  seq: 83
+}
+
+get {
+  url: {{baseUrl}}{{modulesPath}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+script:pre-request {
+  bru.setVar("moduleBaseId", bru.getProcessEnv("ERBAS_TEST_MODULE_BASE_ID"));
+  bru.setVar("moduleDependentId", bru.getProcessEnv("ERBAS_TEST_MODULE_DEPENDENT_ID"));
+  bru.setVar("moduleUnknownId", "absent-module-" + Date.now() + "-" + Math.random().toString(36).slice(2));
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 401
+  responseKind: error
+}

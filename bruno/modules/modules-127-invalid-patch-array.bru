@@ -1,0 +1,35 @@
+meta {
+  name: Modules invalid-patch-array
+  type: http
+  seq: 127
+}
+
+patch {
+  url: {{baseUrl}}{{modulesPath}}/{{moduleBaseIdPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  []
+}
+
+script:pre-request {
+  bru.setVar("moduleBaseIdPath", encodeURIComponent(bru.getVar("moduleBaseId")));
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  responseKind: error
+}

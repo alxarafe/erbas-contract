@@ -104,7 +104,7 @@ emails, consumes opaque returned IDs and retains passwords/tokens only in the
 process. Created accounts remain until the backend removes its disposable
 environment; the contract runner neither provisions nor cleans backend data.
 
-The collection has **82 requests and 313 named checks**: the original 15
+At the COLLECTIONS-001 milestone, the collection had **82 requests and 313 named checks**: the original 15
 Health/AUTH-001 requests and 45 checks, 52 USERS-001 requests and 208 checks,
 and 15 COLLECTIONS-001 requests and 60 checks.
 The added flow verifies admin login/current user, missing/invalid bearer,
@@ -122,7 +122,7 @@ administrator exclusion and allowed self-disable/self-demotion with another
 enabled admin.
 Native Java/.NET tests remain mandatory; the fixture is only a runner test.
 
-The repository check runs **69 automated synthetic/unit checks**, retaining all
+At that milestone, the repository check ran **69 automated synthetic/unit checks**, retaining all
 Health/AUTH-001 cases and adding 16 deliberate USERS-001 nonconformances,
 a disabled-token fault, the deterministic last-admin test and exact
 collection-counter verification. Negative cases
@@ -146,3 +146,5 @@ watchdog was insufficient for repeated full-collection runs; it is now bounded
 at 300 seconds. Per-request and Bruno watchdogs remain 2 and 30 seconds.
 `git diff --check`, shell syntax checks and sequence/count inspection passed.
 No external service was tested; no backend or client repository was changed.
+
+Current draft suite counters and additional modular coverage are in [modules](modules.md).

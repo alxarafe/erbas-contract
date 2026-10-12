@@ -39,12 +39,26 @@ enabled administrator in an isolated validation environment before invoking
 usage error, never a skipped login check. USERS-001 creates and modifies users;
 never run the suite against production. Unique test users remain until the
 backend disposes of its environment. See [USERS-001](users-001.md) for required
-account state, mutations, coverage and current exact counters. COLLECTIONS-001
+account state and mutations; current draft counters are in [modules](modules.md). COLLECTIONS-001
 checks paged user windows and totals; use an environment without concurrent
 external mutations during the run. See [collections](collections.md).
 See
 [AUTH-001](auth-001.md) for
 negative fixture prerequisites, safe injection, scenarios and logging rules.
+
+Full draft 0.5.0 conformance also requires nonempty
+`ERBAS_TEST_MODULE_BASE_ID` and `ERBAS_TEST_MODULE_DEPENDENT_ID`, with distinct
+values. These are opaque IDs of disposable AVAILABLE test modules, not credentials
+or production module requirements. BASE has no dependencies; DEPENDENT requires
+exactly BASE. See [fixture prerequisites](modules.md#conformance-fixture-and-mutations).
+`bin/test` passes all four required variables to its runner without logging secrets.
+`bin/check` requires none of them and supplies its own synthetic fixtures.
+
+CONTRACT-003 changes these modules' persistent enabled states. Use an isolated,
+disposable environment without concurrent administrators or functional use; never
+run the suite against production. Success leaves both enabled; after failure,
+discard the environment. Current Java/.NET releases have not implemented the new
+shared endpoints, so do not run draft conformance against them before adaptation.
 
 | URL rule | Behavior |
 | --- | --- |
@@ -104,13 +118,16 @@ for platform support and limitations.
 | HTTP request | 2 seconds |
 | Bruno process watchdog | 30 seconds |
 | OpenAPI lint | 30 seconds |
-| Synthetic test suite | 450 seconds |
+| Synthetic test suite | 600 seconds |
 
 Within the synthetic suite, full Bruno runs and late pagination-fault tests have
 a 35-second outer test budget so the 30-second process watchdog and fixture
 cleanup can finish on slower hosted runners. Shorter Bruno tests retain their
 15-second budgets; HTTP timeout and stuck-subprocess assertions remain bounded
 independently.
+
+The expanded CONTRACT-003 fault battery uses a bounded 600-second suite budget;
+individual HTTP and Bruno watchdogs remain unchanged.
 
 These limits bound tool execution, not image downloads or Docker builds.
 The runner does not retry failed HTTP responses.

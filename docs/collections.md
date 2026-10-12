@@ -1,14 +1,17 @@
 # COLLECTIONS-001: standard paged collections
 
 Version `0.4.0` establishes ERBAS's base convention for future paged collections.
-USERS-001's `GET /api/users` is its first application. OpenAPI is authoritative;
+USERS-001's `GET /api/users` (`UserCollection`) is its first application. Draft
+`0.5.0` adds `GET /api/modules` (`ModuleCollection`) as its second, using the
+same envelope, pagination limits and fixed id ASC order. OpenAPI is authoritative;
 the sole Bruno collection verifies this behavior independently of backend stack.
 See [versioning](versioning.md) for first-release preparation and publication.
 
 ## Representation and semantics
 
 Conceptually `PagedCollection<T>` has exactly five required fields. OpenAPI uses
-the concrete closed `UserCollection` schema rather than simulating generics.
+concrete closed `UserCollection` and `ModuleCollection` schemas rather than
+simulating generics.
 
 ```json
 {
@@ -32,7 +35,7 @@ the concrete closed `UserCollection` schema rather than simulating generics.
 
 Collection objects reject extra properties. Each closed `Order` entry contains
 exactly nonempty string `field` and `direction` (`asc` or `desc`). An array allows
-future composite criteria without replacing the envelope. Users currently
+future composite criteria without replacing the envelope. Users and modules
 require exactly one entry: `[{"field":"id","direction":"asc"}]`.
 User items remain the existing closed `id`, `email`, `enabled`, `admin` model.
 
@@ -92,9 +95,21 @@ derived `count`, `hasMore`, page totals, next/previous offsets or navigation
 fields preemptively. Large-scale performance requirements can justify a later
 cursor/keyset contract; they do not introduce one here.
 
-## Conformance and compatibility
+## Second application: modules
 
-The sole collection has **82 requests and 313 named checks**. COLLECTIONS-001
+`GET /api/modules` counts and returns only AVAILABLE modules in the current
+process registry. A disabled module remains in the collection; historical state
+for an absent module does not. Module items use the closed descriptor/state
+representation in [module administration](modules.md). Zero AVAILABLE modules
+return an empty 200 envelope with total 0. All existing COLLECTIONS-001 rules
+and the User/UserCollection representation remain unchanged.
+
+## Historical COLLECTIONS-001 conformance and compatibility
+
+The counts and verification below record the original COLLECTIONS-001 scope.
+Current draft suite coverage is documented in [modules](modules.md).
+
+At that milestone, the sole collection had **82 requests and 313 named checks**. COLLECTIONS-001
 modifies the existing list assertion and adds 15 requests / 60 named checks:
 defaults, limit 1, offset 1/limit 1, offset-only defaults, maximum limit 100,
 offset beyond total, the last item, offset exactly total, negative offset,
@@ -109,7 +124,7 @@ Run conformance in an isolated disposable environment without concurrent externa
 mutations. The existing suite already creates three unique disposable users;
 pagination introduces no additional credentials or user creations.
 
-Repository verification runs **69 synthetic/unit tests**. Nine new deliberate
+Repository verification ran **69 synthetic/unit tests**. Nine new deliberate
 faults cover wrong total/limit/offset/order/window, accepted negative offset or
 excessive limit, extra envelope fields and extra order fields. The existing
 bare-array fault remains rejected. Two additional tests prove empty metadata

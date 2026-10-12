@@ -1,0 +1,29 @@
+meta {
+  name: Modules limit-one
+  type: http
+  seq: 94
+}
+
+get {
+  url: {{baseUrl}}{{modulesPath}}?limit=1
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  responseKind: collection
+  expectedOffset: 0
+  expectedLimit: 1
+  window: limit-one
+}

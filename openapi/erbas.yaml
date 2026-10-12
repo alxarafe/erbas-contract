@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
   title: ERBAS shared HTTP contract
-  version: 0.4.0
+  version: 0.5.0
   description: >-
-    ERBAS Contract 0.4.0: liveness, bearer login and CORE user administration with paged collections.
+    ERBAS Contract 0.5.0 development draft: liveness, bearer login, CORE user and module administration with paged collections. Latest published release: v0.4.0.
 security: []
 paths:
   /health:
@@ -201,6 +201,95 @@ paths:
           $ref: '#/components/responses/UserNotFound'
         '409':
           $ref: '#/components/responses/LastAdmin'
+  /api/modules:
+    get:
+      operationId: listModules
+      summary: List AVAILABLE modules
+      description: >-
+        CORE endpoint, never module-gated, even when all modules are disabled.
+        Administrator only (User.admin true). Authentication and administrator
+        authorization precede pagination validation. Only modules discovered by
+        the current process registry are AVAILABLE; historical persisted states
+        of absent modules are excluded. Stable server-side id ASC order is applied
+        before offset/limit. IDs are opaque; clients need not reproduce comparison.
+        All responses are JSON with Cache-Control no-store, without redirects.
+        Only 401 includes WWW-Authenticate Bearer; all other responses omit it.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: offset
+          in: query
+          description: Nonnegative integer displacement before taking items. Beyond total returns an empty page, not an error.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: limit
+          in: query
+          description: Effective maximum number of items, not the returned item count. Invalid values are rejected without clamping.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          $ref: '#/components/responses/ModuleList'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/modules/{id}:
+    patch:
+      operationId: updateModule
+      summary: Set persistent module enabled state
+      description: >-
+        CORE endpoint, never module-gated. Administrator only (User.admin true).
+        Authenticate and authorize before body validation, lookup or transition.
+        Only AVAILABLE module IDs match; matching is case-sensitive. Enabled is
+        persistent administrative state, not availability, initialization or health.
+        Success returns the complete module after persistence; repeated requests
+        for the current state also succeed. Changes take effect without restart.
+        Every enabled module must have all required dependencies enabled throughout
+        the graph. Reject enable with a disabled dependency or disable with an
+        enabled dependent, including indirect dependencies. No automatic cascades.
+        A conflict is atomic and leaves no partial persisted change. For an admin
+        submitting both invalid body and unknown ID, 400 versus 404 precedence is
+        unspecified. Malformed JSON, non-object bodies, missing/nonboolean enabled
+        and any additional property are invalid. All responses are JSON with
+        Cache-Control no-store; no redirects. Only 401 includes WWW-Authenticate
+        Bearer; all other responses omit it. No internal details are exposed.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Stable opaque case-sensitive module identifier; its format must not be interpreted.
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateModuleRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/UpdatedModule'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/ModuleNotFound'
+        '409':
+          $ref: '#/components/responses/ModuleDependencyConflict'
 components:
   securitySchemes:
     bearerAuth:
@@ -321,6 +410,54 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/LastAdmin'
+    ModuleList:
+      description: AVAILABLE module window in stable id ASC order. Empty or out-of-range windows return 200 with complete metadata. WWW-Authenticate must be absent.
+      headers:
+        Cache-Control:
+          required: true
+          schema:
+            type: string
+            const: no-store
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ModuleCollection'
+    UpdatedModule:
+      description: Complete module after an idempotent persisted transition. WWW-Authenticate must be absent.
+      headers:
+        Cache-Control:
+          required: true
+          schema:
+            type: string
+            const: no-store
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Module'
+    ModuleNotFound:
+      description: No AVAILABLE module matches the case-sensitive ID. Historical persisted state does not make a module available. WWW-Authenticate must be absent.
+      headers:
+        Cache-Control:
+          required: true
+          schema:
+            type: string
+            const: no-store
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ModuleNotFound'
+    ModuleDependencyConflict:
+      description: Transition would violate required dependencies. No cascades or partial persisted change. WWW-Authenticate must be absent.
+      headers:
+        Cache-Control:
+          required: true
+          schema:
+            type: string
+            const: no-store
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ModuleDependencyConflict'
   schemas:
     LoginRequest:
       type: object
@@ -498,3 +635,86 @@ components:
         code:
           type: string
           const: last_admin
+    Module:
+      type: object
+      additionalProperties: false
+      required: [id, moduleApiVersion, dependencies, enabled]
+      properties:
+        id:
+          type: string
+          minLength: 1
+          description: Stable opaque case-sensitive ID, independent of class, package, assembly or file names.
+        moduleApiVersion:
+          type: integer
+          minimum: 1
+          description: Compatible modular API version, not package, product or HTTP contract version.
+        dependencies:
+          type: array
+          uniqueItems: true
+          description: Required module IDs in stable server-side id ASC order; never null.
+          items:
+            type: string
+            minLength: 1
+        enabled:
+          type: boolean
+          description: Current persistent administrative state, independent of availability, initialization and health.
+    UpdateModuleRequest:
+      type: object
+      additionalProperties: false
+      required: [enabled]
+      properties:
+        enabled:
+          type: boolean
+    ModuleCollection:
+      type: object
+      additionalProperties: false
+      required: [items, offset, limit, total, order]
+      properties:
+        items:
+          type: array
+          description: Exactly the requested window; never null. Empty windows use an empty array.
+          items:
+            $ref: '#/components/schemas/Module'
+        offset:
+          type: integer
+          minimum: 0
+          description: Applied displacement, including when greater than total.
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: Effective requested limit; never replaced by items length.
+        total:
+          type: integer
+          minimum: 0
+          description: Total AVAILABLE modules before offset and limit.
+        order:
+          type: array
+          minItems: 1
+          maxItems: 1
+          description: Fixed effective id ASC criterion. The ID comparison belongs to the server; IDs remain opaque.
+          items:
+            $ref: '#/components/schemas/Order'
+          const: [{field: id, direction: asc}]
+      example:
+        items: []
+        offset: 0
+        limit: 50
+        total: 0
+        order: [{field: id, direction: asc}]
+    ModuleNotFound:
+      type: object
+      additionalProperties: false
+      required: [code]
+      properties:
+        code:
+          type: string
+          const: module_not_found
+    ModuleDependencyConflict:
+      type: object
+      additionalProperties: false
+      required: [code]
+      properties:
+        code:
+          type: string
+          const: module_dependency_conflict

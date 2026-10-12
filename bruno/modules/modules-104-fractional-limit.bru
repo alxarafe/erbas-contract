@@ -1,0 +1,26 @@
+meta {
+  name: Modules fractional-limit
+  type: http
+  seq: 104
+}
+
+get {
+  url: {{baseUrl}}{{modulesPath}}?limit=1.5
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  responseKind: error
+}

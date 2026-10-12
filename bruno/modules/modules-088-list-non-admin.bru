@@ -1,0 +1,26 @@
+meta {
+  name: Modules list-non-admin
+  type: http
+  seq: 88
+}
+
+get {
+  url: {{baseUrl}}{{modulesPath}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{userToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 403
+  responseKind: error
+}

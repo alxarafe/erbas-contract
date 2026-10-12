@@ -1,0 +1,29 @@
+meta {
+  name: Modules maximum-limit
+  type: http
+  seq: 97
+}
+
+get {
+  url: {{baseUrl}}{{modulesPath}}?limit={{maximumLimit}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  responseKind: collection
+  expectedOffset: 0
+  expectedLimit: maximum
+  window: maximum-limit
+}

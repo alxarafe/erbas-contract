@@ -1,0 +1,34 @@
+meta {
+  name: Modules unknown-missing-bearer
+  type: http
+  seq: 85
+}
+
+patch {
+  url: {{baseUrl}}{{modulesPath}}/{{moduleUnknownIdPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {"enabled":true}
+}
+
+script:pre-request {
+  bru.setVar("moduleUnknownIdPath", encodeURIComponent(bru.getVar("moduleUnknownId")));
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 401
+  responseKind: error
+}

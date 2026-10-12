@@ -1,0 +1,26 @@
+meta {
+  name: Modules fractional-offset
+  type: http
+  seq: 103
+}
+
+get {
+  url: {{baseUrl}}{{modulesPath}}?offset=0.5
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  responseKind: error
+}

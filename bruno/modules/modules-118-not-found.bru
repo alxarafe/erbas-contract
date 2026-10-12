@@ -1,0 +1,35 @@
+meta {
+  name: Modules not-found
+  type: http
+  seq: 118
+}
+
+patch {
+  url: {{baseUrl}}{{modulesPath}}/{{moduleUnknownIdPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"enabled":true}
+}
+
+script:pre-request {
+  bru.setVar("moduleUnknownIdPath", encodeURIComponent(bru.getVar("moduleUnknownId")));
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 404
+  responseKind: error
+}

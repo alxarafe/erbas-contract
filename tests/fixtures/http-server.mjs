@@ -1,24 +1,107 @@
 import { createServer } from 'node:http';
 
-export const fixtureEnv = { ...process.env, ERBAS_TEST_EMAIL: 'fixture@example.test', ERBAS_TEST_PASSWORD: 'synthetic-"-\\-password' };
+export const fixtureEnv = { ...process.env, ERBAS_TEST_EMAIL: 'fixture@example.test', ERBAS_TEST_PASSWORD: 'synthetic-"-\\-password',
+  ERBAS_TEST_MODULE_BASE_ID: 'fixture-base', ERBAS_TEST_MODULE_DEPENDENT_ID: 'fixture-dependent' };
+
+export const modulesPath = '/api/modules';
+export const moduleNotFound = 'module_not_found';
+export const moduleDependencyConflict = 'module_dependency_conflict';
+const fixtureModuleApiVersion = 1;
+const defaultCollectionLimit = 50;
+const maximumCollectionLimit = 100;
+
+export function fixtureModules() {
+  const baseId = fixtureEnv.ERBAS_TEST_MODULE_BASE_ID;
+  return [
+    { id: fixtureEnv.ERBAS_TEST_MODULE_DEPENDENT_ID, moduleApiVersion: fixtureModuleApiVersion, dependencies: [baseId], enabled: true },
+    { id: baseId, moduleApiVersion: fixtureModuleApiVersion, dependencies: [], enabled: true }
+  ];
+}
 
 // The fixture owns its comparison; consumers only observe stable opaque IDs.
-export function userCollection(users, offset = 0, limit = 50) {
+export function userCollection(users, offset = 0, limit = defaultCollectionLimit) {
   const ordered = [...users].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
   return { items: ordered.slice(offset, offset + limit), offset, limit, total: ordered.length,
     order: [{ field: 'id', direction: 'asc' }] };
 }
 
-export async function startFixture({ status = 200, contentType = 'application/json', body = '{"status":"ok"}', redirect = false, hang = false, auth = {}, users = {}, acceptDisabledTokens = false, collectionFault } = {}) {
+export async function startFixture({ status = 200, contentType = 'application/json', body = '{"status":"ok"}', redirect = false, hang = false, auth = {}, users = {}, acceptDisabledTokens = false, collectionFault, modules = {}, moduleFault, availableModules = fixtureModules() } = {}) {
   const requests = [];
   const accounts = new Map([['synthetic-admin', { id: 'synthetic-admin', email: fixtureEnv.ERBAS_TEST_EMAIL,
     enabled: true, admin: true, password: fixtureEnv.ERBAS_TEST_PASSWORD }]]);
   const tokens = new Map([['synthetic.token_123', 'synthetic-admin']]);
+  const registry = new Map(availableModules.map(module => [module.id, structuredClone(module)]));
   const publicUser = ({ id, email, enabled, admin }) => ({ id, email, enabled, admin });
   let nextId = 1;
   const server = createServer(async (request, response) => {
     const url = new URL(request.url, 'http://fixture.test');
     const path = url.pathname;
+    if (path === modulesPath || path.startsWith(`${modulesPath}/`)) {
+      const operation = request.method === 'PATCH' ? 'patch' : 'list';
+      const actor = accounts.get(tokens.get((request.headers.authorization ?? '').replace(/^Bearer /, '')));
+      let expected;
+      let result;
+      if (!actor?.enabled) { expected = 401; result = { code: 'unauthorized' }; }
+      else if (!actor.admin) { expected = 403; result = { code: 'forbidden' }; }
+      else if (operation === 'list') {
+        const offsetText = url.searchParams.get('offset');
+        const limitText = url.searchParams.get('limit');
+        const offset = offsetText === null ? 0 : Number(offsetText);
+        const limit = limitText === null ? defaultCollectionLimit : Number(limitText);
+        const integer = text => text === null || /^-?\d+$/.test(text);
+        if (!integer(offsetText) || !integer(limitText) || !Number.isInteger(offset) || offset < 0
+            || !Number.isInteger(limit) || limit < 1 || limit > maximumCollectionLimit) {
+          expected = 400; result = { code: 'invalid_request' };
+        } else {
+          expected = 200; result = userCollection([...registry.values()], offset, limit);
+          // Mutations are synthetic runner faults, never alternative backend behavior.
+          result = structuredClone(result);
+          const first = result.items[0];
+          if (first && moduleFault === 'extra') first.extra = true;
+          if (first && moduleFault === 'missing') delete first.enabled;
+          if (first && moduleFault === 'api-version') first.moduleApiVersion = 0;
+          if (first && moduleFault === 'dependencies') first.dependencies = null;
+          if (first && moduleFault === 'enabled') first.enabled = 'true';
+          if (moduleFault === 'order') result.items.reverse();
+          if (moduleFault === 'pagination') result.limit++;
+        }
+      } else {
+        let raw = '';
+        for await (const chunk of request) raw += chunk;
+        let input;
+        try { input = JSON.parse(raw); } catch { /* Invalid JSON is 400 after authorization. */ }
+        const valid = input && typeof input === 'object' && !Array.isArray(input)
+          && Object.keys(input).length === 1 && typeof input.enabled === 'boolean';
+        const id = decodeURIComponent(path.slice(modulesPath.length + 1));
+        const target = registry.get(id);
+        if (!valid) { expected = 400; result = { code: 'invalid_request' }; }
+        else if (!target) { expected = 404; result = { code: moduleNotFound }; }
+        else {
+          const conflict = input.enabled
+            ? target.dependencies.some(dependency => !registry.get(dependency).enabled)
+            : [...registry.values()].some(module => module.enabled && module.dependencies.includes(id));
+          if (conflict && moduleFault !== 'accepted-conflict') {
+            expected = 409; result = { code: moduleDependencyConflict };
+            if (moduleFault === 'partial-disable-conflict' && !input.enabled
+                || moduleFault === 'partial-enable-conflict' && input.enabled) {
+              target.enabled = input.enabled;
+            }
+          } else {
+            target.enabled = input.enabled;
+            expected = 200; result = structuredClone(target);
+            if (moduleFault === 'stale-state') result.enabled = !input.enabled;
+          }
+        }
+      }
+      requests.push({ method: request.method, path: request.url, accept: request.headers.accept, expected });
+      const override = modules[`${operation}:${expected}`] ?? {};
+      response.writeHead(override.status ?? expected, {
+        'Content-Type': override.contentType ?? 'application/json', 'Cache-Control': 'no-store',
+        ...(expected === 401 ? { 'WWW-Authenticate': 'Bearer' } : {}), ...override.headers
+      });
+      response.end(override.body ?? JSON.stringify(result));
+      return;
+    }
     if (request.url === '/api/auth/login') {
       let raw = '';
       for await (const chunk of request) raw += chunk;
@@ -98,10 +181,10 @@ export async function startFixture({ status = 200, contentType = 'application/js
         const offsetText = url.searchParams.get('offset');
         const limitText = url.searchParams.get('limit');
         const offset = offsetText === null ? 0 : Number(offsetText);
-        const limit = limitText === null ? 50 : Number(limitText);
+        const limit = limitText === null ? defaultCollectionLimit : Number(limitText);
         const integer = value => value === null || /^-?\d+$/.test(value);
         const validOffset = integer(offsetText) && Number.isInteger(offset) && offset >= 0;
-        const validLimit = integer(limitText) && Number.isInteger(limit) && limit >= 1 && limit <= 100;
+        const validLimit = integer(limitText) && Number.isInteger(limit) && limit >= 1 && limit <= maximumCollectionLimit;
         if ((!validOffset && !(collectionFault === 'negative-offset' && offset === -1))
             || (!validLimit && !(collectionFault === 'excessive-limit' && limit === 101))) {
           expected = 400; result = { code: 'invalid_request' };

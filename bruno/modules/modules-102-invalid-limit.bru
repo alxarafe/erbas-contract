@@ -1,0 +1,26 @@
+meta {
+  name: Modules invalid-limit
+  type: http
+  seq: 102
+}
+
+get {
+  url: {{baseUrl}}{{modulesPath}}?limit=oops
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  responseKind: error
+}

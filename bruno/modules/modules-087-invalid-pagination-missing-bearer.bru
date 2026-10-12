@@ -1,0 +1,25 @@
+meta {
+  name: Modules invalid-pagination-missing-bearer
+  type: http
+  seq: 87
+}
+
+get {
+  url: {{baseUrl}}{{modulesPath}}?offset=-1
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 401
+  responseKind: error
+}

@@ -1,0 +1,35 @@
+meta {
+  name: Modules enable-conflict
+  type: http
+  seq: 113
+}
+
+patch {
+  url: {{baseUrl}}{{modulesPath}}/{{moduleDependentIdPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"enabled":true}
+}
+
+script:pre-request {
+  bru.setVar("moduleDependentIdPath", encodeURIComponent(bru.getVar("moduleDependentId")));
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 409
+  responseKind: error
+}
