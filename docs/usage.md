@@ -46,13 +46,15 @@ See
 [AUTH-001](auth-001.md) for
 negative fixture prerequisites, safe injection, scenarios and logging rules.
 
-Full draft 0.5.0 conformance also requires nonempty
-`ERBAS_TEST_MODULE_BASE_ID` and `ERBAS_TEST_MODULE_DEPENDENT_ID`, with distinct
-values. These are opaque IDs of disposable AVAILABLE test modules, not credentials
-or production module requirements. BASE has no dependencies; DEPENDENT requires
-exactly BASE. See [fixture prerequisites](modules.md#conformance-fixture-and-mutations).
-`bin/test` passes all four required variables to its runner without logging secrets.
-`bin/check` requires none of them and supplies its own synthetic fixtures.
+Full draft 0.5.0 conformance requires the backend to register the canonical
+AVAILABLE development modules `erbas.dev.math` (no dependencies) and
+`erbas.dev.statistics` (depends exactly on Math). They are reserved ERBAS
+development/conformance infrastructure, not required production business modules;
+normal production does not register them by default. No module-ID environment
+variables are required or accepted as fixture configuration. See
+[fixture prerequisites](modules.md#conformance-fixture-and-mutations).
+`bin/test` passes only the two administrator credential variables without logging
+secrets. `bin/check` requires neither and uses the same canonical synthetic modules.
 
 CONTRACT-003 changes these modules' persistent enabled states. Use an isolated,
 disposable environment without concurrent administrators or functional use; never

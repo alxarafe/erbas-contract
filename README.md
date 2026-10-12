@@ -42,7 +42,8 @@ same-origin Nginx proxy, keeping each opaque token only in memory.
 
 ```bash
 ./bin/check
-# Export the four isolated conformance fixture variables documented in docs/usage.md:
+# Export ERBAS_TEST_EMAIL and ERBAS_TEST_PASSWORD for an isolated administrator.
+# Register the canonical development modules; see docs/usage.md.
 ./bin/test URL
 ```
 

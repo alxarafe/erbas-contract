@@ -4,7 +4,7 @@
 | --- | --- |
 | [Usage](usage.md) | Local commands, Docker networking, limits, cleanup, and pinned tooling. |
 | [COLLECTIONS-001](collections.md) | Standard paged envelope, user and module pagination, order, totals and compatibility. |
-| [Module administration](modules.md) | Draft 0.5.0 CORE administration, availability, dependency invariants and disposable module fixtures. |
+| [Module administration](modules.md) | Draft 0.5.0 CORE administration, availability, dependency invariants and canonical development/conformance modules. |
 | [USERS-001](users-001.md) | CORE user model, current user, administration, security invariants and conformance coverage. |
 | [AUTH-001](auth-001.md) | Login behavior, credentials, scope and backend adaptation requirements. |
 | [Shared demo defaults](../demo/README.md) | Canonical public initial demo values, override precedence and adoption boundaries. |
@@ -66,6 +66,7 @@ The development specification prepares **0.5.0 draft**, adding CONTRACT-003
 module administration. **v0.4.0 remains the latest published immutable release**.
 Java and .NET still consume v0.4.0; no backend or Angular adoption of CONTRACT-003
 is claimed. Consumer adaptation and publication require separately approved tasks.
-The current sole Bruno collection has 129 requests and 501 named checks; see
+The current sole Bruno collection has 130 request definitions and 506 named
+checks for the two-module synthetic fixture; see
 [module conformance](modules.md#conformance-fixture-and-mutations). Historical
 verification reports retain their original counts and results.

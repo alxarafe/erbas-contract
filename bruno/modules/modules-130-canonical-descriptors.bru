@@ -1,0 +1,62 @@
+meta {
+  name: Modules canonical descriptors
+  type: http
+  seq: 130
+}
+
+get {
+  url: {{baseUrl}}{{modulesPath}}?offset={{moduleDiscoveryOffset}}&limit={{maximumLimit}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+script:pre-request {
+  bru.setVar("moduleDiscoveryOffset", bru.getVar("moduleDiscoveryNextOffset") || 0);
+  if (bru.getVar("moduleDiscoveryFound") === undefined) {
+    bru.setVar("moduleDiscoveryFound", []);
+  }
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  responseKind: collection
+  expectedOffset: discovery
+  expectedLimit: maximum
+  window: discovery
+}
+
+tests {
+  test("GET discovers both canonical development descriptors across pages", function () {
+    const result = res.getBody();
+    const math = bru.getFolderVar("MATH_ID");
+    const statistics = bru.getFolderVar("STATISTICS_ID");
+    const found = bru.getVar("moduleDiscoveryFound");
+    for (const module of result.items) {
+      if (module.id === math || module.id === statistics) {
+        expect(module.dependencies).to.deep.equal(module.id === math ? [] : [math]);
+        expect(found).not.to.include(module.id);
+        found.push(module.id);
+      }
+    }
+    bru.setVar("moduleDiscoveryFound", found);
+    const nextOffset = result.offset + result.limit;
+    if (found.length < 2 && nextOffset < result.total) {
+      // Keep the current offset intact for inherited folder assertions, which
+      // Bruno executes after this request's assertions.
+      bru.setVar("moduleDiscoveryNextOffset", nextOffset);
+      bru.setNextRequest("Modules canonical descriptors");
+    } else {
+      expect(found).to.have.members([math, statistics]);
+    }
+  });
+}

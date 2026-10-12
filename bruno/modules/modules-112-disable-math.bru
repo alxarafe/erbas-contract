@@ -1,11 +1,11 @@
 meta {
-  name: Modules disable-base
+  name: Modules disable-math
   type: http
   seq: 112
 }
 
 patch {
-  url: {{baseUrl}}{{modulesPath}}/{{moduleBaseIdPath}}
+  url: {{baseUrl}}{{modulesPath}}/{{moduleMathIdPath}}
   body: json
   auth: none
 }
@@ -21,7 +21,7 @@ body:json {
 }
 
 script:pre-request {
-  bru.setVar("moduleBaseIdPath", encodeURIComponent(bru.getVar("moduleBaseId")));
+  bru.setVar("moduleMathIdPath", encodeURIComponent(bru.getFolderVar("MATH_ID")));
 }
 
 settings {
@@ -32,6 +32,6 @@ settings {
 vars:pre-request {
   expectedStatus: 200
   responseKind: module
-  fixture: base
+  fixture: math
   expectedEnabled: false
 }
