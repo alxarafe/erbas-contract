@@ -16,6 +16,19 @@ the published tag. Current backend adoption is documented in the
 [documentation index](README.md#verification-badges).
 Demo defaults remain outside the HTTP contract.
 
+## Development draft: 0.5.0
+
+CONTRACT-003 adds CORE module listing and enabled-state administration. This is
+a compatible addition: existing operations, closed User/UserCollection schemas,
+status codes and security remain unchanged. Compatible additions increment MINOR
+under the pre-1.0 policy, so OpenAPI's development version is **0.5.0**.
+
+**v0.5.0 is not published. v0.4.0 remains the current immutable release** with
+its existing tag/SHA. Consumers must keep their current published pin until a
+separately approved adaptation task; this repository does not update them.
+Publication, tags, releases and pushes require separate express authorization.
+No v0.5.0 release notes or tag are created by CONTRACT-003.
+
 ## Compatibility and consumption policy
 
 Use semantic versions with immutable `vMAJOR.MINOR.PATCH` tags. Each backend

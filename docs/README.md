@@ -3,7 +3,8 @@
 | Document | What to find |
 | --- | --- |
 | [Usage](usage.md) | Local commands, Docker networking, limits, cleanup, and pinned tooling. |
-| [COLLECTIONS-001](collections.md) | Standard paged envelope, users pagination, order, totals and compatibility. |
+| [COLLECTIONS-001](collections.md) | Standard paged envelope, user and module pagination, order, totals and compatibility. |
+| [Module administration](modules.md) | Draft 0.5.0 CORE administration, availability, dependency invariants and disposable module fixtures. |
 | [USERS-001](users-001.md) | CORE user model, current user, administration, security invariants and conformance coverage. |
 | [AUTH-001](auth-001.md) | Login behavior, credentials, scope and backend adaptation requirements. |
 | [Shared demo defaults](../demo/README.md) | Canonical public initial demo values, override precedence and adoption boundaries. |
@@ -58,3 +59,13 @@ The historical WEB-002 real dual-backend demo has
 Shared demo defaults are a development convention consumed by Java, .NET and
 the client's full-stack demo orchestration; they do not change this HTTP version
 or conformance. Demo defaults are outside the HTTP release scope.
+
+## Development contract
+
+The development specification prepares **0.5.0 draft**, adding CONTRACT-003
+module administration. **v0.4.0 remains the latest published immutable release**.
+Java and .NET still consume v0.4.0; no backend or Angular adoption of CONTRACT-003
+is claimed. Consumer adaptation and publication require separately approved tasks.
+The current sole Bruno collection has 129 requests and 501 named checks; see
+[module conformance](modules.md#conformance-fixture-and-mutations). Historical
+verification reports retain their original counts and results.

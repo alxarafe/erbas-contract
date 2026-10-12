@@ -29,7 +29,7 @@ flowchart LR
 
 | Repository | Responsibility | Current status |
 | --- | --- | --- |
-| [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Published immutable v0.4.0: Health, AUTH-001, USERS-001 and COLLECTIONS-001 |
+| [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Published immutable v0.4.0; development prepares draft 0.5.0 with CORE module administration |
 | [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 | Adopted v0.4.0; authoritative `./bin/check` requires shared conformance locally and in CI |
 | [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 plus platform modules | Adopted v0.4.0; authoritative `./bin/check` requires shared conformance locally and in CI |
 | [erbas-client](https://github.com/alxarafe/erbas-client) | Angular 22 client consuming Health, AUTH-001, USERS-001 basic user administration and COLLECTIONS-001 pagination from either backend | Shared client for both backends; real Java/.NET interoperability verified |
@@ -42,7 +42,7 @@ same-origin Nginx proxy, keeping each opaque token only in memory.
 
 ```bash
 ./bin/check
-# Export disposable enabled-admin ERBAS_TEST_EMAIL and ERBAS_TEST_PASSWORD first:
+# Export the four isolated conformance fixture variables documented in docs/usage.md:
 ./bin/test URL
 ```
 
@@ -51,12 +51,16 @@ same-origin Nginx proxy, keeping each opaque token only in memory.
 The added `Contract CI` workflow invokes `./bin/check` on pull requests and
 pushes to `main`, without publishing anything.
 
-USERS-001 conformance mutates users and requires an isolated disposable environment.
+Conformance mutates users and module fixture states and requires an isolated disposable environment.
 Both run through Docker; see [usage and networking](docs/usage.md).
 
 See [development ports](docs/development-ports.md) for local infrastructure conventions.
 
 ## Current contractual coverage
+
+Development prepares **0.5.0 draft** with administrator-only CORE module
+administration. See [module administration](docs/modules.md). The published
+release remains **v0.4.0**; consumers have not adopted the new API.
 
 ```text
 GET /health
