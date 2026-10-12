@@ -12,6 +12,7 @@
 | [Development ports](development-ports.md) | Shared host-port conventions, overrides and internal networking for both backends and the client. |
 | [Versioning](versioning.md) | Published release identity, immutable tags, compatibility, consumption and exact publication procedure. |
 | [v0.4.0 release notes](releases/v0.4.0.md) | First executable release scope and exclusions. |
+| [v0.5.0 release notes](releases/v0.5.0.md) | Prepared for publication: compatible module administration and canonical development/conformance fixtures. Not yet published. |
 | [Architecture decision](decisions/0001-contract-foundation.md) | Why `/health` was chosen and where contract and backend responsibilities belong. |
 | [CONTRACT-001A verification](verification/contract-001a.md) | Synthetic test cases, measured results, tool identity, and coverage limits. |
 | [Working agreement](../AGENTS.md) | Scope, preservation, validation, and authorization rules. |
@@ -62,10 +63,13 @@ or conformance. Demo defaults are outside the HTTP release scope.
 
 ## Development contract
 
-The development specification prepares **0.5.0 draft**, adding CONTRACT-003
-module administration. **v0.4.0 remains the latest published immutable release**.
-Java and .NET still consume v0.4.0; no backend or Angular adoption of CONTRACT-003
-is claimed. Consumer adaptation and publication require separately approved tasks.
+**0.5.0 is prepared for publication**, incorporating CONTRACT-003 module
+administration and CONTRACT-003A canonical development/conformance modules.
+See [release notes](releases/v0.5.0.md).
+**v0.4.0 remains the latest published immutable release**; v0.5.0 has no tag yet.
+Java and .NET still consume v0.4.0; no v0.5.0 backend conformance or Angular
+adoption is claimed. Consumer adaptation and publication require separately
+approved tasks, independent of repository verification below.
 The current sole Bruno collection has 130 request definitions and 506 named
 checks for the two-module synthetic fixture; see
 [module conformance](modules.md#conformance-fixture-and-mutations). Historical

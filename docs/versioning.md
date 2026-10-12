@@ -16,18 +16,27 @@ the published tag. Current backend adoption is documented in the
 [documentation index](README.md#verification-badges).
 Demo defaults remain outside the HTTP contract.
 
-## Development draft: 0.5.0
+## Release prepared for publication: v0.5.0
 
-CONTRACT-003 adds CORE module listing and enabled-state administration. This is
-a compatible addition: existing operations, closed User/UserCollection schemas,
-status codes and security remain unchanged. Compatible additions increment MINOR
-under the pre-1.0 policy, so OpenAPI's development version is **0.5.0**.
+The target release is **v0.5.0**, a compatible additive MINOR release incorporating
+CONTRACT-003 (CORE module administration) and CONTRACT-003A (canonical development
+conformance modules). OpenAPI remains **0.5.0**. Existing Health, AUTH-001,
+USERS-001 and COLLECTIONS-001 operations, closed User/UserCollection schemas,
+status codes, headers and security remain unchanged. See
+[prepared release notes](releases/v0.5.0.md) for scope and exclusions.
 
-**v0.5.0 is not published. v0.4.0 remains the current immutable release** with
-its existing tag/SHA. Consumers must keep their current published pin until a
-separately approved adaptation task; this repository does not update them.
-Publication, tags, releases and pushes require separate express authorization.
-No v0.5.0 release notes or tag are created by CONTRACT-003.
+**v0.5.0 is not published until its immutable tag exists. v0.4.0 remains the
+current published release**, with its original tag/SHA and historical evidence.
+Consumers must continue pinning v0.4.0 until v0.5.0 is published and adoption is
+separately approved. Java and .NET cannot yet be considered conformant to v0.5.0;
+no Angular consumption of that version is claimed.
+
+The future annotated v0.5.0 tag must point to the exact validated `main` commit
+resulting from merging CONTRACT-004, not its feature-branch commit or the earlier
+CONTRACT-003A merge. The definitive full SHA will be recorded after that merge;
+this preparation does not select or invent it. Tagging/pushing and any GitHub
+Release or package publication require separate express authorization. The
+procedure below is documentation only and is not executed by CONTRACT-004.
 
 ## Compatibility and consumption policy
 
@@ -71,10 +80,11 @@ Backend publication/deployment must depend on shared conformance against its
 own clean ephemeral environment. Backend CI/pin adoption is separate consumer
 work, not implemented by this repository's workflow.
 
-The publication sequence below is documentation only. It records the first-tag
-procedure and serves as a checklist for future releases with their own version
-and reviewed commit. `v0.4.0` already exists; do not repeat its creation or move it.
-Do not execute publication without separate authorization for tagging/pushing
+The publication sequence below is reusable documentation for an authorized
+future release. The first release's v0.4.0 annotated tag and target SHA above
+remain the historical identity of that publication, with its original
+[release notes](releases/v0.4.0.md). Do not recreate or move that tag.
+Do not execute this procedure without separate authorization for tagging/pushing
 and, if desired, GitHub Release publication.
 
 1. Merge the approved release-preparation PR and require Contract CI to pass on
@@ -82,34 +92,41 @@ and, if desired, GitHub Release publication.
 2. Use a clean checkout, fetch `main` and tags, verify the recorded SHA belongs
    to `origin/main`, then validate that exact commit locally. Do not tag a feature
    branch commit or whichever later commit happens to be the current `main` tip.
-3. Confirm `v0.4.0` does not exist locally or remotely. Create an annotated tag
-   pointing to the recorded merged commit, verify its target, and push only that
-   tag. Never move, replace or force-push an existing release tag.
+3. Select the reviewed target version and its release notes. Confirm its tag
+   does not exist locally or remotely. Create an annotated tag pointing to the
+   recorded merged commit, verify its target, and push only that tag. Never move,
+   replace or force-push an existing release tag.
 
 ```bash
 set -euo pipefail
 git fetch origin main --tags
+release_version='REPLACE_WITH_REVIEWED_vMAJOR.MINOR.PATCH'
 release_commit='REPLACE_WITH_REVIEWED_MERGED_COMMIT_SHA'
+[[ "$release_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
 [[ "$release_commit" =~ ^[0-9a-f]{40}$ ]]
+release_notes="docs/releases/${release_version}.md"
 git cat-file -e "$release_commit^{commit}"
 git merge-base --is-ancestor "$release_commit" origin/main
 test -z "$(git status --porcelain=v1 --untracked-files=all)"
 git switch --detach "$release_commit"
+test -f "$release_notes"
 ./bin/check
-test -z "$(git tag --list v0.4.0)"
-remote_tag="$(git ls-remote --tags origin refs/tags/v0.4.0)"
+test -z "$(git tag --list "$release_version")"
+remote_tag="$(git ls-remote --tags origin "refs/tags/$release_version")"
 test -z "$remote_tag"
-git tag --annotate v0.4.0 "$release_commit" --message 'ERBAS Contract v0.4.0'
-test "$(git rev-parse 'v0.4.0^{commit}')" = "$release_commit"
-git push origin refs/tags/v0.4.0
+git tag --annotate "$release_version" "$release_commit" \
+  --message "ERBAS Contract $release_version"
+test "$(git rev-parse "$release_version^{commit}")" = "$release_commit"
+git push origin "refs/tags/$release_version"
 ```
 
 4. If GitHub Release publication is separately authorized, use the existing
-   pushed tag and these release notes; publish no packages:
+   pushed tag and its release notes; publish no packages. In the same shell with
+   the reviewed variables above:
 
 ```bash
-gh release create v0.4.0 --verify-tag --title 'ERBAS Contract v0.4.0' \
-  --notes-file docs/releases/v0.4.0.md
+gh release create "$release_version" --verify-tag \
+  --title "ERBAS Contract $release_version" --notes-file "$release_notes"
 ```
 
 5. Verify the published tag still resolves to the recorded merged SHA. Consumer
