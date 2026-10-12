@@ -1,0 +1,26 @@
+meta {
+  name: Modules invalid-pagination-non-admin
+  type: http
+  seq: 92
+}
+
+get {
+  url: {{baseUrl}}{{modulesPath}}?offset=-1
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{userToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 403
+  responseKind: error
+}

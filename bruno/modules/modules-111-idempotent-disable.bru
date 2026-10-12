@@ -1,0 +1,37 @@
+meta {
+  name: Modules idempotent-disable
+  type: http
+  seq: 111
+}
+
+patch {
+  url: {{baseUrl}}{{modulesPath}}/{{moduleDependentIdPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"enabled":false}
+}
+
+script:pre-request {
+  bru.setVar("moduleDependentIdPath", encodeURIComponent(bru.getVar("moduleDependentId")));
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  responseKind: module
+  fixture: dependent
+  expectedEnabled: false
+}

@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, rm, readdir, readFile } from 'node:fs/promises';
+import { mkdtemp, writeFile, rm, readdir, readFile, cp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { startFixture, fixtureEnv, userCollection } from './fixtures/http-server.mjs';
+import { startFixture, fixtureEnv, userCollection, fixtureModules, modulesPath, moduleNotFound, moduleDependencyConflict } from './fixtures/http-server.mjs';
 import { runBruno, normalizeBaseUrl, requireCredentials } from '../scripts/conformance.mjs';
 import { validateOpenApi } from '../scripts/validate.mjs';
 import { runProcess } from '../scripts/process.mjs';
@@ -19,12 +19,12 @@ test('credentials are mandatory and never included in validation errors', () => 
   requireCredentials(fixtureEnv);
 });
 
-test('full suite exercises Health, AUTH-001 and USERS-001 scenarios', { timeout: fullSuiteTestTimeoutMs }, async () => {
+test('full suite exercises published operations and CONTRACT-003', { timeout: fullSuiteTestTimeoutMs }, async () => {
   const fixture = await startFixture();
   try {
     const result = await runBruno(fixture.baseUrl, { env: fixtureEnv });
     assert.equal(result.code, 0, result.output);
-    assert.equal(fixture.requests.length, 82);
+    assert.equal(fixture.requests.length, 129);
     const login = fixture.requests.slice(1, 15);
     assert.ok(login.every(r => r.method === 'POST' && r.path === '/api/auth/login'
       && r.accept === 'application/json' && r.contentType.toLowerCase() === 'application/json'));
@@ -39,11 +39,18 @@ test('full suite exercises Health, AUTH-001 and USERS-001 scenarios', { timeout:
     assert.equal(users.filter(r => r.expected === 400).length, 20);
     assert.equal(users.filter(r => r.expected === 404).length, 2);
     assert.equal(users.filter(r => r.expected === 409).length, 1);
-    const collections = fixture.requests.slice(67);
+    const collections = fixture.requests.slice(67, 82);
     assert.equal(collections.length, 15);
     assert.ok(collections.every(r => r.method === 'GET' && r.path.startsWith('/api/users')));
     assert.equal(collections.filter(r => r.expected === 200).length, 8);
     assert.equal(collections.filter(r => r.expected === 400).length, 7);
+    const modules = fixture.requests.slice(82);
+    assert.equal(modules.length, 47);
+    assert.ok(modules.every(r => r.path.startsWith(modulesPath)));
+    assert.equal(modules.filter(r => r.expected === 409).length, 2);
+    assert.equal(modules.filter(r => r.expected === 404).length, 1);
+    const response = await fetch(`${fixture.baseUrl}${modulesPath}`, { headers: { Authorization: 'Bearer synthetic.token_123' } });
+    assert.ok((await response.json()).items.every(module => module.enabled));
   } finally { await fixture.close(); }
 });
 
@@ -361,11 +368,20 @@ test('last enabled administrator invariant and self updates in synthetic fixture
 });
 
 test('documented Bruno request and named-check counts match the sole collection', async () => {
-  const files = (await readdir('/runner/bruno')).filter(file => file.endsWith('.bru'));
-  assert.equal(files.length, 82);
+  const files = (await readdir('/runner/bruno', { recursive: true }))
+    .filter(file => file.endsWith('.bru') && !file.endsWith('folder.bru'));
+  assert.equal(files.length, 129);
   let checks = 0;
-  for (const file of files) checks += ((await readFile(join('/runner/bruno', file), 'utf8')).match(/\btest\("/g) ?? []).length;
-  assert.equal(checks, 313);
+  const moduleChecks = ((await readFile('/runner/bruno/modules/folder.bru', 'utf8')).match(/\btest\("/g) ?? []).length;
+  const sequences = [];
+  for (const file of files) {
+    const source = await readFile(join('/runner/bruno', file), 'utf8');
+    checks += (source.match(/\btest\("/g) ?? []).length;
+    if (file.startsWith('modules/')) checks += moduleChecks;
+    sequences.push(Number(source.match(/seq: (\d+)/)[1]));
+  }
+  assert.equal(checks, 501);
+  assert.deepEqual(sequences.sort((a, b) => a - b), Array.from({ length: files.length }, (_, i) => i + 1));
 });
 
 for (const collectionFault of ['total', 'limit', 'offset', 'order', 'window', 'negative-offset',
@@ -413,5 +429,102 @@ test('fixture orders before slicing rather than relying on insertion order', asy
     assert.equal(beyond.status, 200);
     assert.deepEqual(await beyond.json(), { items: [], offset: 100, limit: 50, total: 3,
       order: [{ field: 'id', direction: 'asc' }] });
+  } finally { await fixture.close(); }
+});
+
+
+test('module fixture IDs are mandatory, distinct, opaque and not disclosed by errors', () => {
+  for (const key of ['ERBAS_TEST_MODULE_BASE_ID', 'ERBAS_TEST_MODULE_DEPENDENT_ID']) {
+    assert.throws(() => requireCredentials({ ...fixtureEnv, [key]: '' }), /required for full conformance/);
+  }
+  assert.throws(() => requireCredentials({ ...fixtureEnv,
+    ERBAS_TEST_MODULE_DEPENDENT_ID: fixtureEnv.ERBAS_TEST_MODULE_BASE_ID }), /must be distinct/);
+  requireCredentials({ ...fixtureEnv, ERBAS_TEST_MODULE_BASE_ID: 'a/b #?', ERBAS_TEST_MODULE_DEPENDENT_ID: '123' });
+});
+
+const moduleFailures = [
+  ...['extra', 'missing', 'api-version', 'dependencies', 'enabled', 'order', 'pagination',
+    'accepted-conflict', 'partial-disable-conflict', 'partial-enable-conflict',
+    'stale-state'].map(moduleFault => [moduleFault, { moduleFault }]),
+  ['unauthenticated response', { modules: { 'list:401': { status: 200 } } }],
+  ['non-admin response', { modules: { 'list:403': { status: 200 } } }],
+  ['accepted invalid patch', { modules: { 'patch:400': { status: 200 } } }],
+  ['missing module status', { modules: { 'patch:404': { status: 200 } } }],
+  ['missing module body', { modules: { 'patch:404': { body: '{"code":"user_not_found"}' } } }],
+  ['dependency conflict body', { modules: { 'patch:409': { body: '{"code":"conflict"}' } } }],
+  ['missing module no-store', { modules: { 'list:200': { headers: { 'Cache-Control': 'public' } } } }],
+  ['module challenge on success', { modules: { 'patch:200': { headers: { 'WWW-Authenticate': 'Bearer' } } } }]
+];
+
+async function runModuleSubset(baseUrl, env = fixtureEnv) {
+  const subset = await mkdtemp(join(tmpdir(), 'erbas-module-fault-'));
+  try {
+    // Reuse unchanged definitions from the sole collection and its login/create/login
+    // bootstrap, without repeating unrelated user scenarios for every module fault.
+    for (const file of ['bruno.json', 'login-success.bru', 'users-19-create-normal-user.bru',
+      'users-22-normal-user-login.bru', 'modules']) {
+      await cp(join('/runner/bruno', file), join(subset, file), { recursive: true });
+    }
+    return await runBruno(baseUrl, { env, cwd: subset });
+  } finally { await rm(subset, { recursive: true, force: true }); }
+}
+
+for (const [name, options] of moduleFailures) {
+  test(`runner rejects module fault: ${name}`, { timeout: fullSuiteTestTimeoutMs }, async () => {
+    const fixture = await startFixture(options);
+    try {
+      const result = await runModuleSubset(fixture.baseUrl);
+      assert.notEqual(result.code, 0, result.output);
+      assert.notEqual(result.code, 124);
+      assert.ok(fixture.requests.at(-1).path.startsWith(modulesPath), 'fault must reach module administration');
+      assert.ok(!result.output.includes(fixtureEnv.ERBAS_TEST_PASSWORD));
+    } finally { await fixture.close(); }
+  });
+}
+
+test('module conformance accepts opaque fixture IDs beyond the first 100 modules', { timeout: fullSuiteTestTimeoutMs }, async () => {
+  const baseId = 'z/base?模块#%';
+  const dependentId = 'z/dependent?模块#%';
+  const availableModules = Array.from({ length: 101 }, (_, index) => ({
+    ...fixtureModules()[1], id: `a-${index}`
+  }));
+  availableModules.push({ ...fixtureModules()[1], id: baseId },
+    { ...fixtureModules()[0], id: dependentId, dependencies: [baseId] });
+  const fixture = await startFixture({ availableModules });
+  try {
+    const result = await runModuleSubset(fixture.baseUrl, { ...fixtureEnv,
+      ERBAS_TEST_MODULE_BASE_ID: baseId, ERBAS_TEST_MODULE_DEPENDENT_ID: dependentId });
+    assert.equal(result.code, 0, result.output);
+    assert.equal(fixture.requests.length, 50);
+    const response = await fetch(`${fixture.baseUrl}${modulesPath}?offset=101`, {
+      headers: { Authorization: 'Bearer synthetic.token_123' }
+    });
+    assert.ok((await response.json()).items.every(module => module.enabled));
+  } finally { await fixture.close(); }
+});
+
+test('module fixture handles empty availability, case-sensitive lookup and retained atomic state', async () => {
+  const headers = { 'Content-Type': 'application/json', Authorization: 'Bearer synthetic.token_123' };
+  const empty = await startFixture({ availableModules: [] });
+  try {
+    const response = await fetch(`${empty.baseUrl}${modulesPath}`, { headers });
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), userCollection([]));
+  } finally { await empty.close(); }
+  const fixture = await startFixture();
+  const patch = async (id, enabled) => fetch(`${fixture.baseUrl}${modulesPath}/${encodeURIComponent(id)}`,
+    { method: 'PATCH', headers, body: JSON.stringify({ enabled }) });
+  try {
+    const base = fixtureEnv.ERBAS_TEST_MODULE_BASE_ID;
+    const changedCase = await patch(base.toUpperCase(), true);
+    assert.equal(changedCase.status, 404);
+    assert.deepEqual(await changedCase.json(), { code: moduleNotFound });
+    const conflict = await patch(base, false);
+    assert.equal(conflict.status, 409);
+    assert.deepEqual(await conflict.json(), { code: moduleDependencyConflict });
+    const response = await fetch(`${fixture.baseUrl}${modulesPath}?limit=1&offset=1`, { headers });
+    assert.deepEqual(await response.json(), userCollection(fixtureModules(), 1, 1));
+    const original = await fetch(`${fixture.baseUrl}${modulesPath}`, { headers });
+    assert.ok((await original.json()).items.every(module => module.enabled));
   } finally { await fixture.close(); }
 });

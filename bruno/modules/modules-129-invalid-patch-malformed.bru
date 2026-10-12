@@ -1,0 +1,35 @@
+meta {
+  name: Modules invalid-patch-malformed
+  type: http
+  seq: 129
+}
+
+patch {
+  url: {{baseUrl}}{{modulesPath}}/{{moduleBaseIdPath}}
+  body: text
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:text {
+  {"enabled":
+}
+
+script:pre-request {
+  bru.setVar("moduleBaseIdPath", encodeURIComponent(bru.getVar("moduleBaseId")));
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  responseKind: error
+}

@@ -34,7 +34,9 @@ run_container() {
     local -a transport=(--network "$network")
     if [[ "$1" == test ]]; then
         export ERBAS_TEST_EMAIL ERBAS_TEST_PASSWORD
+        export ERBAS_TEST_MODULE_BASE_ID ERBAS_TEST_MODULE_DEPENDENT_ID
         transport+=(--env ERBAS_TEST_EMAIL --env ERBAS_TEST_PASSWORD)
+        transport+=(--env ERBAS_TEST_MODULE_BASE_ID --env ERBAS_TEST_MODULE_DEPENDENT_ID)
     fi
     if [[ "$network" == bridge ]]; then
         transport+=(--add-host host.docker.internal:host-gateway)

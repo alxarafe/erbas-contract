@@ -12,12 +12,19 @@ export function requireCredentials(env = process.env) {
   if (!env.ERBAS_TEST_EMAIL || !env.ERBAS_TEST_PASSWORD) {
     throw new Error('ERBAS_TEST_EMAIL and ERBAS_TEST_PASSWORD are required for full conformance.');
   }
+  if (!env.ERBAS_TEST_MODULE_BASE_ID || !env.ERBAS_TEST_MODULE_DEPENDENT_ID) {
+    throw new Error('ERBAS_TEST_MODULE_BASE_ID and ERBAS_TEST_MODULE_DEPENDENT_ID are required for full conformance.');
+  }
+  if (env.ERBAS_TEST_MODULE_BASE_ID === env.ERBAS_TEST_MODULE_DEPENDENT_ID) {
+    throw new Error('Module fixture IDs must be distinct.');
+  }
 }
 
 export async function runBruno(baseUrl, options = {}) {
   requireCredentials(options.env ?? process.env);
   const result = await runProcess(process.execPath, [
-    '/runner/node_modules/@usebruno/cli/bin/bru.js', 'run', '.',
+    // Explicit scopes preserve the existing root sequence before module requests.
+    '/runner/node_modules/@usebruno/cli/bin/bru.js', 'run', '.', 'modules',
     '--env-var', `baseUrl=${normalizeBaseUrl(baseUrl)}`, '--sandbox', 'safe', '--bail'
   ], { cwd: '/runner/bruno', timeoutMs: 30000, ...options, capture: true });
   // Assertion and transport diagnostics may contain credentials or tokens.

@@ -1,0 +1,29 @@
+meta {
+  name: Modules at-total
+  type: http
+  seq: 96
+}
+
+get {
+  url: {{baseUrl}}{{modulesPath}}?offset={{moduleTotal}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  responseKind: collection
+  expectedOffset: total
+  expectedLimit: default
+  window: at-total
+}

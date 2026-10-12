@@ -1,0 +1,97 @@
+meta {
+  name: Module administration
+  seq: 83
+}
+
+vars:pre-request {
+  modulesPath: /api/modules
+  defaultLimit: 50
+  maximumLimit: 100
+}
+
+tests {
+  test("Expected HTTP status", function () {
+    expect(res.getStatus()).to.equal(Number(bru.getRequestVar("expectedStatus")));
+  });
+
+  test("Content-Type is JSON with syntactically valid optional parameters", function () {
+    const token = "[!#$%&'*+.^_`|~0-9A-Za-z-]+";
+    const quoted = '"(?:[\\t\\x20\\x21\\x23-\\x5b\\x5d-\\x7e\\x80-\\xff]|\\\\[\\t\\x20-\\x7e\\x80-\\xff])*"';
+    const mediaType = new RegExp("^application/json(?:[ \\t]*;[ \\t]*" + token + "=(?:" + token + "|" + quoted + "))*[ \\t]*$", "i");
+    expect(res.getHeader("content-type")).to.be.a("string").and.match(mediaType);
+  });
+
+  test("Contractual response headers", function () {
+    expect(res.getHeader("cache-control")).to.equal("no-store");
+    expect(res.getHeader("www-authenticate")).to.equal(
+      Number(bru.getRequestVar("expectedStatus")) === 401 ? "Bearer" : undefined);
+  });
+
+  test("Closed response and expected state", function () {
+    const validateModule = module => {
+      expect(module).to.be.an("object");
+      expect(Object.keys(module).sort()).to.deep.equal(["dependencies", "enabled", "id", "moduleApiVersion"]);
+      expect(module.id).to.be.a("string").and.not.equal("");
+      expect(Number.isInteger(module.moduleApiVersion) && module.moduleApiVersion >= 1).to.equal(true);
+      expect(module.enabled).to.be.a("boolean");
+      expect(module.dependencies).to.be.an("array");
+      expect(new Set(module.dependencies).size).to.equal(module.dependencies.length);
+      for (const id of module.dependencies) expect(id).to.be.a("string").and.not.equal("");
+      // IDs are opaque: check repeated descriptor stability without imposing a
+      // JavaScript comparison algorithm on the server's id ASC criterion.
+      const descriptors = bru.getVar("moduleDescriptors") || [];
+      const previous = descriptors.find(descriptor => descriptor.id === module.id);
+      if (previous) {
+        expect(module.dependencies).to.deep.equal(previous.dependencies);
+        expect(module.moduleApiVersion).to.equal(previous.moduleApiVersion);
+      } else {
+        descriptors.push({id: module.id, dependencies: module.dependencies,
+          moduleApiVersion: module.moduleApiVersion});
+        bru.setVar("moduleDescriptors", descriptors);
+      }
+    };
+    const kind = bru.getRequestVar("responseKind");
+    const result = res.getBody();
+    if (kind === "error") {
+      const codes = {400: "invalid_request", 401: "unauthorized", 403: "forbidden",
+        404: "module_not_found", 409: "module_dependency_conflict"};
+      expect(result).to.deep.equal({code: codes[Number(bru.getRequestVar("expectedStatus"))]});
+    } else if (kind === "module") {
+      validateModule(result);
+      const base = bru.getVar("moduleBaseId");
+      const target = bru.getRequestVar("fixture") === "base" ? base : bru.getVar("moduleDependentId");
+      expect(result.id).to.equal(target);
+      expect(result.enabled).to.equal(bru.getRequestVar("expectedEnabled") === "true");
+      expect(result.dependencies).to.deep.equal(target === base ? [] : [base]);
+    } else {
+      expect(result).to.be.an("object");
+      expect(Object.keys(result).sort()).to.deep.equal(["items", "limit", "offset", "order", "total"]);
+      const offsetValue = bru.getRequestVar("expectedOffset");
+      const offset = offsetValue === "total" ? bru.getVar("moduleTotal") : Number(offsetValue);
+      expect(result.offset).to.equal(offset);
+      const limitValue = bru.getRequestVar("expectedLimit");
+      const limit = limitValue === "default" ? Number(bru.getFolderVar("defaultLimit"))
+        : limitValue === "maximum" ? Number(bru.getFolderVar("maximumLimit")) : Number(limitValue);
+      expect(result.limit).to.equal(limit);
+      expect(Number.isInteger(result.total)).to.equal(true);
+      expect(result.total).to.be.at.least(2);
+      expect(result.order).to.deep.equal([{field: "id", direction: "asc"}]);
+      expect(result.items).to.be.an("array").with.lengthOf(Math.min(result.limit, Math.max(0, result.total - result.offset)));
+      result.items.forEach(validateModule);
+      const ids = result.items.map(module => module.id);
+      expect(new Set(ids).size).to.equal(ids.length);
+      const window = bru.getRequestVar("window");
+      if (window === "defaults") {
+        bru.setVar("moduleReference", result);
+        bru.setVar("moduleTotal", result.total);
+      } else {
+        const reference = bru.getVar("moduleReference");
+        expect(result.total).to.equal(reference.total);
+        if (window === "limit-one") expect(result.items).to.deep.equal(reference.items.slice(0, 1));
+        if (window === "offset-one") expect(result.items).to.deep.equal(reference.items.slice(1, 2));
+        if (window === "at-total") expect(result.items).to.deep.equal([]);
+        if (window === "maximum-limit") expect(result.items.slice(0, reference.items.length)).to.deep.equal(reference.items);
+      }
+    }
+  });
+}

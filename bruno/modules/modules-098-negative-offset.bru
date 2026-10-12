@@ -1,0 +1,26 @@
+meta {
+  name: Modules negative-offset
+  type: http
+  seq: 98
+}
+
+get {
+  url: {{baseUrl}}{{modulesPath}}?offset=-1
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  responseKind: error
+}

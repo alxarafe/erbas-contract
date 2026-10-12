@@ -1,0 +1,29 @@
+meta {
+  name: Modules defaults
+  type: http
+  seq: 93
+}
+
+get {
+  url: {{baseUrl}}{{modulesPath}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  responseKind: collection
+  expectedOffset: 0
+  expectedLimit: default
+  window: defaults
+}
