@@ -1,20 +1,21 @@
 import { createServer } from 'node:http';
 
-export const fixtureEnv = { ...process.env, ERBAS_TEST_EMAIL: 'fixture@example.test', ERBAS_TEST_PASSWORD: 'synthetic-"-\\-password',
-  ERBAS_TEST_MODULE_BASE_ID: 'fixture-base', ERBAS_TEST_MODULE_DEPENDENT_ID: 'fixture-dependent' };
+export const fixtureEnv = { ...process.env, ERBAS_TEST_EMAIL: 'fixture@example.test', ERBAS_TEST_PASSWORD: 'synthetic-"-\\-password' };
+
+export const MATH_ID = 'erbas.dev.math';
+export const STATISTICS_ID = 'erbas.dev.statistics';
 
 export const modulesPath = '/api/modules';
 export const moduleNotFound = 'module_not_found';
 export const moduleDependencyConflict = 'module_dependency_conflict';
 const fixtureModuleApiVersion = 1;
 const defaultCollectionLimit = 50;
-const maximumCollectionLimit = 100;
+export const maximumCollectionLimit = 100;
 
 export function fixtureModules() {
-  const baseId = fixtureEnv.ERBAS_TEST_MODULE_BASE_ID;
   return [
-    { id: fixtureEnv.ERBAS_TEST_MODULE_DEPENDENT_ID, moduleApiVersion: fixtureModuleApiVersion, dependencies: [baseId], enabled: true },
-    { id: baseId, moduleApiVersion: fixtureModuleApiVersion, dependencies: [], enabled: true }
+    { id: STATISTICS_ID, moduleApiVersion: fixtureModuleApiVersion, dependencies: [MATH_ID], enabled: true },
+    { id: MATH_ID, moduleApiVersion: fixtureModuleApiVersion, dependencies: [], enabled: true }
   ];
 }
 
@@ -53,10 +54,16 @@ export async function startFixture({ status = 200, contentType = 'application/js
             || !Number.isInteger(limit) || limit < 1 || limit > maximumCollectionLimit) {
           expected = 400; result = { code: 'invalid_request' };
         } else {
-          expected = 200; result = userCollection([...registry.values()], offset, limit);
+          const listed = [...registry.values()].filter(module =>
+            !(moduleFault === 'math-absent' && module.id === MATH_ID)
+            && !(moduleFault === 'statistics-absent' && module.id === STATISTICS_ID));
+          expected = 200; result = userCollection(listed, offset, limit);
           // Mutations are synthetic runner faults, never alternative backend behavior.
           result = structuredClone(result);
           const first = result.items[0];
+          const statistics = result.items.find(module => module.id === STATISTICS_ID);
+          if (statistics && moduleFault === 'statistics-no-math') statistics.dependencies = [];
+          if (statistics && moduleFault === 'statistics-wrong-dependency') statistics.dependencies = ['wrong-fixture'];
           if (first && moduleFault === 'extra') first.extra = true;
           if (first && moduleFault === 'missing') delete first.enabled;
           if (first && moduleFault === 'api-version') first.moduleApiVersion = 0;
@@ -80,7 +87,8 @@ export async function startFixture({ status = 200, contentType = 'application/js
           const conflict = input.enabled
             ? target.dependencies.some(dependency => !registry.get(dependency).enabled)
             : [...registry.values()].some(module => module.enabled && module.dependencies.includes(id));
-          if (conflict && moduleFault !== 'accepted-conflict') {
+          if (conflict && moduleFault !== 'accepted-conflict'
+              && !(moduleFault === 'accepted-enable-conflict' && input.enabled)) {
             expected = 409; result = { code: moduleDependencyConflict };
             if (moduleFault === 'partial-disable-conflict' && !input.enabled
                 || moduleFault === 'partial-enable-conflict' && input.enabled) {

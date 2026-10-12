@@ -1,11 +1,11 @@
 meta {
-  name: Modules normalize-base
+  name: Modules normalize-statistics
   type: http
-  seq: 105
+  seq: 106
 }
 
 patch {
-  url: {{baseUrl}}{{modulesPath}}/{{moduleBaseIdPath}}
+  url: {{baseUrl}}{{modulesPath}}/{{moduleStatisticsIdPath}}
   body: json
   auth: none
 }
@@ -21,7 +21,7 @@ body:json {
 }
 
 script:pre-request {
-  bru.setVar("moduleBaseIdPath", encodeURIComponent(bru.getVar("moduleBaseId")));
+  bru.setVar("moduleStatisticsIdPath", encodeURIComponent(bru.getFolderVar("STATISTICS_ID")));
 }
 
 settings {
@@ -32,6 +32,6 @@ settings {
 vars:pre-request {
   expectedStatus: 200
   responseKind: module
-  fixture: base
+  fixture: statistics
   expectedEnabled: true
 }

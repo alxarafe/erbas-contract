@@ -1,11 +1,11 @@
 meta {
-  name: Modules probe-base-disable-after-conflict
+  name: Modules statistics-remains-enabled-after-conflict
   type: http
-  seq: 115
+  seq: 109
 }
 
 patch {
-  url: {{baseUrl}}{{modulesPath}}/{{moduleBaseIdPath}}
+  url: {{baseUrl}}{{modulesPath}}/{{moduleStatisticsIdPath}}
   body: json
   auth: none
 }
@@ -17,11 +17,11 @@ headers {
 }
 
 body:json {
-  {"enabled":false}
+  {"enabled":true}
 }
 
 script:pre-request {
-  bru.setVar("moduleBaseIdPath", encodeURIComponent(bru.getVar("moduleBaseId")));
+  bru.setVar("moduleStatisticsIdPath", encodeURIComponent(bru.getFolderVar("STATISTICS_ID")));
 }
 
 settings {
@@ -32,6 +32,6 @@ settings {
 vars:pre-request {
   expectedStatus: 200
   responseKind: module
-  fixture: base
-  expectedEnabled: false
+  fixture: statistics
+  expectedEnabled: true
 }

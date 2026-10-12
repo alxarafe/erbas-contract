@@ -5,7 +5,7 @@ meta {
 }
 
 patch {
-  url: {{baseUrl}}{{modulesPath}}/{{moduleDependentIdPath}}
+  url: {{baseUrl}}{{modulesPath}}/{{moduleStatisticsIdPath}}
   body: json
   auth: none
 }
@@ -21,7 +21,7 @@ body:json {
 }
 
 script:pre-request {
-  bru.setVar("moduleDependentIdPath", encodeURIComponent(bru.getVar("moduleDependentId")));
+  bru.setVar("moduleStatisticsIdPath", encodeURIComponent(bru.getFolderVar("STATISTICS_ID")));
 }
 
 settings {

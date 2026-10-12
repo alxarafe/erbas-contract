@@ -1,11 +1,11 @@
 meta {
-  name: Modules normalize-dependent
+  name: Modules probe-math-disable-after-conflict
   type: http
-  seq: 106
+  seq: 115
 }
 
 patch {
-  url: {{baseUrl}}{{modulesPath}}/{{moduleDependentIdPath}}
+  url: {{baseUrl}}{{modulesPath}}/{{moduleMathIdPath}}
   body: json
   auth: none
 }
@@ -17,11 +17,11 @@ headers {
 }
 
 body:json {
-  {"enabled":true}
+  {"enabled":false}
 }
 
 script:pre-request {
-  bru.setVar("moduleDependentIdPath", encodeURIComponent(bru.getVar("moduleDependentId")));
+  bru.setVar("moduleMathIdPath", encodeURIComponent(bru.getFolderVar("MATH_ID")));
 }
 
 settings {
@@ -32,6 +32,6 @@ settings {
 vars:pre-request {
   expectedStatus: 200
   responseKind: module
-  fixture: dependent
-  expectedEnabled: true
+  fixture: math
+  expectedEnabled: false
 }

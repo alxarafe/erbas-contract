@@ -15,8 +15,6 @@ headers {
 }
 
 script:pre-request {
-  bru.setVar("moduleBaseId", bru.getProcessEnv("ERBAS_TEST_MODULE_BASE_ID"));
-  bru.setVar("moduleDependentId", bru.getProcessEnv("ERBAS_TEST_MODULE_DEPENDENT_ID"));
   bru.setVar("moduleUnknownId", "absent-module-" + Date.now() + "-" + Math.random().toString(36).slice(2));
 }
 

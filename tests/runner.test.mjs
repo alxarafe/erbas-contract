@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, writeFile, rm, readdir, readFile, cp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { startFixture, fixtureEnv, userCollection, fixtureModules, modulesPath, moduleNotFound, moduleDependencyConflict } from './fixtures/http-server.mjs';
+import { startFixture, fixtureEnv, userCollection, fixtureModules, modulesPath, moduleNotFound, moduleDependencyConflict, MATH_ID, STATISTICS_ID, maximumCollectionLimit } from './fixtures/http-server.mjs';
 import { runBruno, normalizeBaseUrl, requireCredentials } from '../scripts/conformance.mjs';
 import { validateOpenApi } from '../scripts/validate.mjs';
 import { runProcess } from '../scripts/process.mjs';
@@ -24,7 +24,7 @@ test('full suite exercises published operations and CONTRACT-003', { timeout: fu
   try {
     const result = await runBruno(fixture.baseUrl, { env: fixtureEnv });
     assert.equal(result.code, 0, result.output);
-    assert.equal(fixture.requests.length, 129);
+    assert.equal(fixture.requests.length, 130);
     const login = fixture.requests.slice(1, 15);
     assert.ok(login.every(r => r.method === 'POST' && r.path === '/api/auth/login'
       && r.accept === 'application/json' && r.contentType.toLowerCase() === 'application/json'));
@@ -45,7 +45,7 @@ test('full suite exercises published operations and CONTRACT-003', { timeout: fu
     assert.equal(collections.filter(r => r.expected === 200).length, 8);
     assert.equal(collections.filter(r => r.expected === 400).length, 7);
     const modules = fixture.requests.slice(82);
-    assert.equal(modules.length, 47);
+    assert.equal(modules.length, 48);
     assert.ok(modules.every(r => r.path.startsWith(modulesPath)));
     assert.equal(modules.filter(r => r.expected === 409).length, 2);
     assert.equal(modules.filter(r => r.expected === 404).length, 1);
@@ -370,7 +370,7 @@ test('last enabled administrator invariant and self updates in synthetic fixture
 test('documented Bruno request and named-check counts match the sole collection', async () => {
   const files = (await readdir('/runner/bruno', { recursive: true }))
     .filter(file => file.endsWith('.bru') && !file.endsWith('folder.bru'));
-  assert.equal(files.length, 129);
+  assert.equal(files.length, 130);
   let checks = 0;
   const moduleChecks = ((await readFile('/runner/bruno/modules/folder.bru', 'utf8')).match(/\btest\("/g) ?? []).length;
   const sequences = [];
@@ -380,7 +380,7 @@ test('documented Bruno request and named-check counts match the sole collection'
     if (file.startsWith('modules/')) checks += moduleChecks;
     sequences.push(Number(source.match(/seq: (\d+)/)[1]));
   }
-  assert.equal(checks, 501);
+  assert.equal(checks, 506);
   assert.deepEqual(sequences.sort((a, b) => a - b), Array.from({ length: files.length }, (_, i) => i + 1));
 });
 
@@ -433,19 +433,23 @@ test('fixture orders before slicing rather than relying on insertion order', asy
 });
 
 
-test('module fixture IDs are mandatory, distinct, opaque and not disclosed by errors', () => {
-  for (const key of ['ERBAS_TEST_MODULE_BASE_ID', 'ERBAS_TEST_MODULE_DEPENDENT_ID']) {
-    assert.throws(() => requireCredentials({ ...fixtureEnv, [key]: '' }), /required for full conformance/);
-  }
-  assert.throws(() => requireCredentials({ ...fixtureEnv,
-    ERBAS_TEST_MODULE_DEPENDENT_ID: fixtureEnv.ERBAS_TEST_MODULE_BASE_ID }), /must be distinct/);
-  requireCredentials({ ...fixtureEnv, ERBAS_TEST_MODULE_BASE_ID: 'a/b #?', ERBAS_TEST_MODULE_DEPENDENT_ID: '123' });
+test('canonical module IDs agree with Bruno and require no ID environment variables', async () => {
+  const folder = await readFile('/runner/bruno/modules/folder.bru', 'utf8');
+  assert.ok(folder.includes(`MATH_ID: ${MATH_ID}`));
+  assert.ok(folder.includes(`STATISTICS_ID: ${STATISTICS_ID}`));
+  requireCredentials({ ERBAS_TEST_EMAIL: fixtureEnv.ERBAS_TEST_EMAIL,
+    ERBAS_TEST_PASSWORD: fixtureEnv.ERBAS_TEST_PASSWORD });
 });
 
 const moduleFailures = [
   ...['extra', 'missing', 'api-version', 'dependencies', 'enabled', 'order', 'pagination',
-    'accepted-conflict', 'partial-disable-conflict', 'partial-enable-conflict',
-    'stale-state'].map(moduleFault => [moduleFault, { moduleFault }]),
+    'math-absent', 'statistics-absent', 'statistics-no-math', 'statistics-wrong-dependency',
+    'accepted-enable-conflict', 'accepted-conflict', 'partial-disable-conflict', 'partial-enable-conflict',
+    'stale-state'].map(moduleFault => [moduleFault, { moduleFault,
+      // An otherwise valid collection must still fail when a canonical ID is
+      // omitted; do not rely on the minimum-total assertion to detect absence.
+      ...(moduleFault.endsWith('-absent') ? { availableModules: [...fixtureModules(),
+        { ...fixtureModules()[1], id: 'unrelated-development-module' }] } : {}) }]),
   ['unauthenticated response', { modules: { 'list:401': { status: 200 } } }],
   ['non-admin response', { modules: { 'list:403': { status: 200 } } }],
   ['accepted invalid patch', { modules: { 'patch:400': { status: 200 } } }],
@@ -477,29 +481,33 @@ for (const [name, options] of moduleFailures) {
       assert.notEqual(result.code, 0, result.output);
       assert.notEqual(result.code, 124);
       assert.ok(fixture.requests.at(-1).path.startsWith(modulesPath), 'fault must reach module administration');
+      if (name.endsWith('-absent')) {
+        assert.equal(fixture.requests.at(-1).path,
+          `${modulesPath}?offset=0&limit=${maximumCollectionLimit}`,
+          'absence must fail GET descriptor discovery, not an unrelated assertion');
+      }
       assert.ok(!result.output.includes(fixtureEnv.ERBAS_TEST_PASSWORD));
     } finally { await fixture.close(); }
   });
 }
 
-test('module conformance accepts opaque fixture IDs beyond the first 100 modules', { timeout: fullSuiteTestTimeoutMs }, async () => {
-  const baseId = 'z/base?模块#%';
-  const dependentId = 'z/dependent?模块#%';
-  const availableModules = Array.from({ length: 101 }, (_, index) => ({
+test('canonical descriptors are discovered beyond the first 100 modules', { timeout: fullSuiteTestTimeoutMs }, async () => {
+  const availableModules = Array.from({ length: maximumCollectionLimit + 1 }, (_, index) => ({
     ...fixtureModules()[1], id: `a-${index}`
   }));
-  availableModules.push({ ...fixtureModules()[1], id: baseId },
-    { ...fixtureModules()[0], id: dependentId, dependencies: [baseId] });
+  availableModules.push(...fixtureModules());
   const fixture = await startFixture({ availableModules });
   try {
-    const result = await runModuleSubset(fixture.baseUrl, { ...fixtureEnv,
-      ERBAS_TEST_MODULE_BASE_ID: baseId, ERBAS_TEST_MODULE_DEPENDENT_ID: dependentId });
+    const result = await runModuleSubset(fixture.baseUrl);
     assert.equal(result.code, 0, result.output);
-    assert.equal(fixture.requests.length, 50);
-    const response = await fetch(`${fixture.baseUrl}${modulesPath}?offset=101`, {
+    assert.equal(fixture.requests.length, 52);
+    assert.ok(fixture.requests.some(request => request.path === `${modulesPath}?offset=${maximumCollectionLimit}&limit=${maximumCollectionLimit}`));
+    const response = await fetch(`${fixture.baseUrl}${modulesPath}?offset=${maximumCollectionLimit + 1}`, {
       headers: { Authorization: 'Bearer synthetic.token_123' }
     });
-    assert.ok((await response.json()).items.every(module => module.enabled));
+    const items = (await response.json()).items;
+    assert.deepEqual(items.map(module => module.id), [MATH_ID, STATISTICS_ID]);
+    assert.ok(items.every(module => module.enabled));
   } finally { await fixture.close(); }
 });
 
@@ -515,11 +523,10 @@ test('module fixture handles empty availability, case-sensitive lookup and retai
   const patch = async (id, enabled) => fetch(`${fixture.baseUrl}${modulesPath}/${encodeURIComponent(id)}`,
     { method: 'PATCH', headers, body: JSON.stringify({ enabled }) });
   try {
-    const base = fixtureEnv.ERBAS_TEST_MODULE_BASE_ID;
-    const changedCase = await patch(base.toUpperCase(), true);
+    const changedCase = await patch(MATH_ID.toUpperCase(), true);
     assert.equal(changedCase.status, 404);
     assert.deepEqual(await changedCase.json(), { code: moduleNotFound });
-    const conflict = await patch(base, false);
+    const conflict = await patch(MATH_ID, false);
     assert.equal(conflict.status, 409);
     assert.deepEqual(await conflict.json(), { code: moduleDependencyConflict });
     const response = await fetch(`${fixture.baseUrl}${modulesPath}?limit=1&offset=1`, { headers });

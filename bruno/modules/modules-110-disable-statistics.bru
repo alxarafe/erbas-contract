@@ -1,11 +1,11 @@
 meta {
-  name: Modules restore-dependent
+  name: Modules disable-statistics
   type: http
-  seq: 117
+  seq: 110
 }
 
 patch {
-  url: {{baseUrl}}{{modulesPath}}/{{moduleDependentIdPath}}
+  url: {{baseUrl}}{{modulesPath}}/{{moduleStatisticsIdPath}}
   body: json
   auth: none
 }
@@ -17,11 +17,11 @@ headers {
 }
 
 body:json {
-  {"enabled":true}
+  {"enabled":false}
 }
 
 script:pre-request {
-  bru.setVar("moduleDependentIdPath", encodeURIComponent(bru.getVar("moduleDependentId")));
+  bru.setVar("moduleStatisticsIdPath", encodeURIComponent(bru.getFolderVar("STATISTICS_ID")));
 }
 
 settings {
@@ -32,6 +32,6 @@ settings {
 vars:pre-request {
   expectedStatus: 200
   responseKind: module
-  fixture: dependent
-  expectedEnabled: true
+  fixture: statistics
+  expectedEnabled: false
 }
