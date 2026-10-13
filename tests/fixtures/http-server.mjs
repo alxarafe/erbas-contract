@@ -5,6 +5,8 @@ export const fixtureEnv = { ...process.env, ERBAS_TEST_EMAIL: 'fixture@example.t
 export const MATH_ID = 'erbas.dev.math';
 export const STATISTICS_ID = 'erbas.dev.statistics';
 
+export const disabledTokenFault = 'acceptDisabledTokens';
+
 export const modulesPath = '/api/modules';
 export const moduleNotFound = 'module_not_found';
 export const moduleDependencyConflict = 'module_dependency_conflict';
@@ -28,6 +30,14 @@ export function userCollection(users, offset = 0, limit = defaultCollectionLimit
 
 export async function startFixture({ status = 200, contentType = 'application/json', body = '{"status":"ok"}', redirect = false, hang = false, auth = {}, users = {}, acceptDisabledTokens = false, collectionFault, modules = {}, moduleFault, availableModules = fixtureModules() } = {}) {
   const requests = [];
+  const faultsReached = [];
+  // Record fault application, never secrets or response bodies. A reduced bootstrap
+  // must reach the configured defect rather than fail on unrelated missing state.
+  const hasFault = (configured, name) => {
+    if (configured !== name) return false;
+    faultsReached.push(name);
+    return true;
+  };
   const accounts = new Map([['synthetic-admin', { id: 'synthetic-admin', email: fixtureEnv.ERBAS_TEST_EMAIL,
     enabled: true, admin: true, password: fixtureEnv.ERBAS_TEST_PASSWORD }]]);
   const tokens = new Map([['synthetic.token_123', 'synthetic-admin']]);
@@ -55,22 +65,22 @@ export async function startFixture({ status = 200, contentType = 'application/js
           expected = 400; result = { code: 'invalid_request' };
         } else {
           const listed = [...registry.values()].filter(module =>
-            !(moduleFault === 'math-absent' && module.id === MATH_ID)
-            && !(moduleFault === 'statistics-absent' && module.id === STATISTICS_ID));
+            !(module.id === MATH_ID && hasFault(moduleFault, 'math-absent'))
+            && !(module.id === STATISTICS_ID && hasFault(moduleFault, 'statistics-absent')));
           expected = 200; result = userCollection(listed, offset, limit);
           // Mutations are synthetic runner faults, never alternative backend behavior.
           result = structuredClone(result);
           const first = result.items[0];
           const statistics = result.items.find(module => module.id === STATISTICS_ID);
-          if (statistics && moduleFault === 'statistics-no-math') statistics.dependencies = [];
-          if (statistics && moduleFault === 'statistics-wrong-dependency') statistics.dependencies = ['wrong-fixture'];
-          if (first && moduleFault === 'extra') first.extra = true;
-          if (first && moduleFault === 'missing') delete first.enabled;
-          if (first && moduleFault === 'api-version') first.moduleApiVersion = 0;
-          if (first && moduleFault === 'dependencies') first.dependencies = null;
-          if (first && moduleFault === 'enabled') first.enabled = 'true';
-          if (moduleFault === 'order') result.items.reverse();
-          if (moduleFault === 'pagination') result.limit++;
+          if (statistics && hasFault(moduleFault, 'statistics-no-math')) statistics.dependencies = [];
+          if (statistics && hasFault(moduleFault, 'statistics-wrong-dependency')) statistics.dependencies = ['wrong-fixture'];
+          if (first && hasFault(moduleFault, 'extra')) first.extra = true;
+          if (first && hasFault(moduleFault, 'missing')) delete first.enabled;
+          if (first && hasFault(moduleFault, 'api-version')) first.moduleApiVersion = 0;
+          if (first && hasFault(moduleFault, 'dependencies')) first.dependencies = null;
+          if (first && hasFault(moduleFault, 'enabled')) first.enabled = 'true';
+          if (hasFault(moduleFault, 'order')) result.items.reverse();
+          if (hasFault(moduleFault, 'pagination')) result.limit++;
         }
       } else {
         let raw = '';
@@ -87,22 +97,23 @@ export async function startFixture({ status = 200, contentType = 'application/js
           const conflict = input.enabled
             ? target.dependencies.some(dependency => !registry.get(dependency).enabled)
             : [...registry.values()].some(module => module.enabled && module.dependencies.includes(id));
-          if (conflict && moduleFault !== 'accepted-conflict'
-              && !(moduleFault === 'accepted-enable-conflict' && input.enabled)) {
+          if (conflict && !hasFault(moduleFault, 'accepted-conflict')
+              && !(input.enabled && hasFault(moduleFault, 'accepted-enable-conflict'))) {
             expected = 409; result = { code: moduleDependencyConflict };
-            if (moduleFault === 'partial-disable-conflict' && !input.enabled
-                || moduleFault === 'partial-enable-conflict' && input.enabled) {
+            if (!input.enabled && hasFault(moduleFault, 'partial-disable-conflict')
+                || input.enabled && hasFault(moduleFault, 'partial-enable-conflict')) {
               target.enabled = input.enabled;
             }
           } else {
             target.enabled = input.enabled;
             expected = 200; result = structuredClone(target);
-            if (moduleFault === 'stale-state') result.enabled = !input.enabled;
+            if (hasFault(moduleFault, 'stale-state')) result.enabled = !input.enabled;
           }
         }
       }
       requests.push({ method: request.method, path: request.url, accept: request.headers.accept, expected });
       const override = modules[`${operation}:${expected}`] ?? {};
+      if (modules[`${operation}:${expected}`]) faultsReached.push(`${operation}:${expected}`);
       response.writeHead(override.status ?? expected, {
         'Content-Type': override.contentType ?? 'application/json', 'Cache-Control': 'no-store',
         ...(expected === 401 ? { 'WWW-Authenticate': 'Bearer' } : {}), ...override.headers
@@ -128,6 +139,7 @@ export async function startFixture({ status = 200, contentType = 'application/js
       requests.push({ method: request.method, path: request.url, accept: request.headers.accept,
         contentType: request.headers['content-type'], expected, malformed: input === undefined });
       const override = auth[expected] ?? {};
+      if (auth[expected]) faultsReached.push(String(expected));
       if (override.hang) return;
       response.writeHead(override.status ?? expected, {
         'Content-Type': override.contentType ?? 'application/json',
@@ -193,25 +205,27 @@ export async function startFixture({ status = 200, contentType = 'application/js
         const integer = value => value === null || /^-?\d+$/.test(value);
         const validOffset = integer(offsetText) && Number.isInteger(offset) && offset >= 0;
         const validLimit = integer(limitText) && Number.isInteger(limit) && limit >= 1 && limit <= maximumCollectionLimit;
-        if ((!validOffset && !(collectionFault === 'negative-offset' && offset === -1))
-            || (!validLimit && !(collectionFault === 'excessive-limit' && limit === 101))) {
+        if ((!validOffset && !(offset === -1 && hasFault(collectionFault, 'negative-offset')))
+            || (!validLimit && !(limit === 101 && hasFault(collectionFault, 'excessive-limit')))) {
           expected = 400; result = { code: 'invalid_request' };
         } else {
           expected = 200; result = userCollection([...accounts.values()].map(publicUser),
-            collectionFault === 'offset' ? 0 : offset, limit);
-          if (collectionFault === 'total') result.total++;
-          if (collectionFault === 'limit') result.limit = result.items.length;
-          if (collectionFault === 'order') result.order = [{ field: 'email', direction: 'asc' }];
-          if (collectionFault === 'window' && offset === 1) {
+            hasFault(collectionFault, 'offset') ? 0 : offset, limit);
+          if (hasFault(collectionFault, 'total')) result.total++;
+          if (hasFault(collectionFault, 'limit')) result.limit = result.items.length;
+          if (hasFault(collectionFault, 'order')) result.order = [{ field: 'email', direction: 'asc' }];
+          if (offset === 1 && hasFault(collectionFault, 'window')) {
             result.items = userCollection([...accounts.values()].map(publicUser), 0, limit).items;
           }
-          if (collectionFault === 'extra') result.hasMore = true;
-          if (collectionFault === 'order-extra') result.order[0].comparison = 'internal';
+          if (hasFault(collectionFault, 'extra')) result.hasMore = true;
+          if (hasFault(collectionFault, 'order-extra')) result.order[0].comparison = 'internal';
         }
       } else if (!target) { expected = 404; result = { code: 'user_not_found' }; }
       else { expected = 200; result = publicUser(target); }
+      if (actor && !actor.enabled && acceptDisabledTokens) faultsReached.push(disabledTokenFault);
       requests.push({ method: request.method, path: request.url, accept: request.headers.accept, expected });
       const override = users[`${operation}:${expected}`] ?? {};
+      if (users[`${operation}:${expected}`]) faultsReached.push(`${operation}:${expected}`);
       if (override.hang) return;
       response.writeHead(override.status ?? expected, {
         'Content-Type': override.contentType ?? 'application/json', 'Cache-Control': 'no-store',
@@ -237,6 +251,7 @@ export async function startFixture({ status = 200, contentType = 'application/js
   return {
     baseUrl: `http://127.0.0.1:${server.address().port}`,
     requests,
+    faultsReached,
     async close() {
       server.closeAllConnections();
       await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
