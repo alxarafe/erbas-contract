@@ -1,0 +1,33 @@
+meta {
+  name: WMS duplicate
+  type: http
+  seq: 145
+}
+
+post {
+  url: {{baseUrl}}{{uomsPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+  Accept-Language: en
+}
+
+body:json {
+  {"code": "M", "description": "Changed label"}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 409
+  responseKind: error
+  expectedCode: wms_uom_code_conflict
+}

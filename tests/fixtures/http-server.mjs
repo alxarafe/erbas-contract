@@ -1,9 +1,16 @@
 import { createServer } from 'node:http';
+import { randomUUID } from 'node:crypto';
 
 export const fixtureEnv = { ...process.env, ERBAS_TEST_EMAIL: 'fixture@example.test', ERBAS_TEST_PASSWORD: 'synthetic-"-\\-password' };
 
 export const MATH_ID = 'erbas.dev.math';
 export const STATISTICS_ID = 'erbas.dev.statistics';
+export const WMS_ID = 'erbas.wms';
+export const uomsPath = '/api/wms/uoms';
+export const uomCodePattern = /^[A-Z][A-Z0-9]{0,9}$/;
+export const uomDescriptionMaximum = 255;
+export const uomCodeConflict = 'wms_uom_code_conflict';
+export const moduleDisabled = 'module_disabled';
 
 export const disabledTokenFault = 'acceptDisabledTokens';
 
@@ -17,7 +24,8 @@ export const maximumCollectionLimit = 100;
 export function fixtureModules() {
   return [
     { id: STATISTICS_ID, moduleApiVersion: fixtureModuleApiVersion, dependencies: [MATH_ID], enabled: true },
-    { id: MATH_ID, moduleApiVersion: fixtureModuleApiVersion, dependencies: [], enabled: true }
+    { id: MATH_ID, moduleApiVersion: fixtureModuleApiVersion, dependencies: [], enabled: true },
+    { id: WMS_ID, moduleApiVersion: fixtureModuleApiVersion, dependencies: [], enabled: true }
   ];
 }
 
@@ -28,7 +36,7 @@ export function userCollection(users, offset = 0, limit = defaultCollectionLimit
     order: [{ field: 'id', direction: 'asc' }] };
 }
 
-export async function startFixture({ status = 200, contentType = 'application/json', body = '{"status":"ok"}', redirect = false, hang = false, auth = {}, users = {}, acceptDisabledTokens = false, collectionFault, modules = {}, moduleFault, availableModules = fixtureModules() } = {}) {
+export async function startFixture({ status = 200, contentType = 'application/json', body = '{"status":"ok"}', redirect = false, hang = false, auth = {}, users = {}, acceptDisabledTokens = false, collectionFault, modules = {}, moduleFault, wmsFault, availableModules = fixtureModules() } = {}) {
   const requests = [];
   const faultsReached = [];
   // Record fault application, never secrets or response bodies. A reduced bootstrap
@@ -42,11 +50,76 @@ export async function startFixture({ status = 200, contentType = 'application/js
     enabled: true, admin: true, password: fixtureEnv.ERBAS_TEST_PASSWORD }]]);
   const tokens = new Map([['synthetic.token_123', 'synthetic-admin']]);
   const registry = new Map(availableModules.map(module => [module.id, structuredClone(module)]));
+  const uoms = [];
   const publicUser = ({ id, email, enabled, admin }) => ({ id, email, enabled, admin });
   let nextId = 1;
   const server = createServer(async (request, response) => {
     const url = new URL(request.url, 'http://fixture.test');
     const path = url.pathname;
+    if (path === uomsPath) {
+      const actor = accounts.get(tokens.get((request.headers.authorization ?? '').replace(/^Bearer /, '')));
+      const disabled = registry.get(WMS_ID)?.enabled === false;
+      let expected;
+      let result;
+      if (disabled && !actor?.enabled && hasFault(wmsFault, 'gate-before-auth')) {
+        expected = 503; result = { code: moduleDisabled };
+      } else if (!actor?.enabled) { expected = 401; result = { code: 'unauthorized' }; }
+      else if (!actor.admin) { expected = 403; result = { code: 'forbidden' }; }
+      else if (disabled && !hasFault(wmsFault, 'ignored-gate')) {
+        expected = 503; result = { code: moduleDisabled };
+      } else if (request.method === 'POST') {
+        let raw = '';
+        for await (const chunk of request) raw += chunk;
+        let input;
+        try { input = JSON.parse(raw); } catch { /* Invalid JSON follows authorization and gating. */ }
+        const unicodeFault = typeof input?.description === 'string'
+          && input.description.length !== [...input.description].length && hasFault(wmsFault, 'unicode-length');
+        const length = typeof input?.description === 'string'
+          ? unicodeFault ? input.description.length : [...input.description].length : 0;
+        const valid = input && !Array.isArray(input)
+          && Object.keys(input).sort().join(',') === 'code,description'
+          && (raw.match(/"(?:code|description)"\s*:/g) ?? []).length === 2
+          && typeof input.code === 'string' && uomCodePattern.test(input.code)
+          && !/[\r\n]/.test(input.code)
+          && typeof input.description === 'string' && length > 0 && length <= uomDescriptionMaximum
+          && /[^ \t\r\n]/.test(input.description) && !/[\u0000\uD800-\uDFFF]/u.test(input.description)
+          && !url.search;
+        if (!valid) { expected = 400; result = { code: 'invalid_request' }; }
+        else if (uoms.some(uom => uom.code === input.code) && !hasFault(wmsFault, 'accepted-duplicate')) {
+          expected = 409; result = { code: uomCodeConflict };
+        } else {
+          result = { id: randomUUID(), code: input.code, description: input.description };
+          uoms.push(structuredClone(result));
+          expected = 201;
+          if (hasFault(wmsFault, 'extra')) result.extra = true;
+        }
+      } else {
+        const query = url.searchParams;
+        const offsetText = query.get('offset');
+        const limitText = query.get('limit');
+        const offset = offsetText === null ? 0 : Number(offsetText);
+        const limit = limitText === null ? defaultCollectionLimit : Number(limitText);
+        const integer = text => text === null || /^-?\d+$/.test(text);
+        const valid = [...query.keys()].every(key => ['offset', 'limit'].includes(key) && query.getAll(key).length === 1)
+          && integer(offsetText) && integer(limitText) && Number.isInteger(offset) && offset >= 0
+          && Number.isInteger(limit) && limit >= 1 && limit <= maximumCollectionLimit;
+        if (!valid) { expected = 400; result = { code: 'invalid_request' }; }
+        else {
+          const ordered = [...uoms].sort((a, b) => a.code < b.code ? -1 : a.code > b.code ? 1 : 0);
+          if (ordered.length > 0 && hasFault(wmsFault, 'lost-state')) ordered.length = 0;
+          if (ordered.length > 1 && hasFault(wmsFault, 'order')) ordered.reverse();
+          expected = 200;
+          result = { items: ordered.slice(offset, offset + limit), offset, limit, total: ordered.length,
+            order: [{ field: 'code', direction: 'asc' }] };
+          if (hasFault(wmsFault, 'pagination')) result.offset++;
+        }
+      }
+      requests.push({ method: request.method, path: request.url, accept: request.headers.accept, expected });
+      response.writeHead(expected, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store',
+        ...(expected === 401 ? { 'WWW-Authenticate': 'Bearer' } : {}) });
+      response.end(JSON.stringify(result));
+      return;
+    }
     if (path === modulesPath || path.startsWith(`${modulesPath}/`)) {
       const operation = request.method === 'PATCH' ? 'patch' : 'list';
       const actor = accounts.get(tokens.get((request.headers.authorization ?? '').replace(/^Bearer /, '')));

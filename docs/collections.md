@@ -7,6 +7,10 @@ same envelope, pagination limits and fixed id ASC order. OpenAPI is authoritativ
 the sole Bruno collection verifies this behavior independently of backend stack.
 See [versioning](versioning.md) for first-release preparation and publication.
 
+Unpublished v0.6.0 preparation adds WMS UoM listing with the same closed envelope
+and pagination limits, but a fixed **code ASC ordinal** criterion. No existing
+user/module ordering changes. See [WMS-001](wms-001.md).
+
 ## Representation and semantics
 
 Conceptually `PagedCollection<T>` has exactly five required fields. OpenAPI uses

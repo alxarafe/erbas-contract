@@ -30,8 +30,8 @@ flowchart LR
 | Repository | Responsibility | Current status |
 | --- | --- | --- |
 | [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Current published immutable v0.5.0 with CORE module administration |
-| [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 | Adopted v0.4.0; authoritative `./bin/check` requires shared conformance locally and in CI |
-| [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 plus platform modules | Adopted v0.4.0; authoritative `./bin/check` requires shared conformance locally and in CI |
+| [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 | Adopted v0.5.0; authoritative `./bin/check` requires shared conformance locally and in CI |
+| [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 plus platform modules | Adopted v0.5.0; authoritative `./bin/check` requires shared conformance locally and in CI |
 | [erbas-client](https://github.com/alxarafe/erbas-client) | Angular 22 client consuming Health, AUTH-001, USERS-001 basic user administration and COLLECTIONS-001 pagination from either backend | Shared client for both backends; real Java/.NET interoperability verified |
 
 Backends own their builds and isolated test infrastructure; this repository
@@ -43,7 +43,7 @@ same-origin Nginx proxy, keeping each opaque token only in memory.
 ```bash
 ./bin/check
 # Export ERBAS_TEST_EMAIL and ERBAS_TEST_PASSWORD for an isolated administrator.
-# Register the canonical development modules; see docs/usage.md.
+# Configure disposable conformance composition; see docs/usage.md.
 ./bin/test URL
 ```
 
@@ -52,16 +52,20 @@ same-origin Nginx proxy, keeping each opaque token only in memory.
 The added `Contract CI` workflow invokes `./bin/check` on pull requests and
 pushes to `main`, without publishing anything.
 
-Conformance mutates users and module fixture states and requires an isolated disposable environment.
+Conformance mutates users, module states and (in the v0.6.0 draft) WMS UoMs and requires an isolated disposable environment.
 Both run through Docker; see [usage and networking](docs/usage.md).
 
 See [development ports](docs/development-ports.md) for local infrastructure conventions.
+
+This development branch prepares **unpublished v0.6.0** with the first WMS
+vertical. See [WMS-001](docs/wms-001.md); current backends continue consuming
+published v0.5.0 and do not implement the draft WMS API.
 
 ## Current contractual coverage
 
 **v0.5.0 is the current published immutable release**, including administrator-only
 CORE module administration. See [release notes](docs/releases/v0.5.0.md) and
-[module administration](docs/modules.md). Java and .NET still adopt **v0.4.0**;
+[module administration](docs/modules.md). Java and .NET adopt **v0.5.0**;
 Angular does not yet consume module administration. Contract publication,
 backend adoption, shared conformance and client consumption are separate facts.
 
@@ -89,7 +93,7 @@ pagination from either backend. See the
 [client development guide](https://github.com/alxarafe/erbas-client/blob/main/docs/full-stack-development.md)
 for behavior and verification scope.
 
-Java and .NET both pin published `v0.4.0` and require the shared suite through
+Java and .NET both pin published `v0.5.0` and require the shared suite through
 their authoritative `./bin/check`, locally and in GitHub Actions.
 .NET's `POST /api/auth/register` remains an
 [implementation-specific extension](docs/implementation-extensions.md).

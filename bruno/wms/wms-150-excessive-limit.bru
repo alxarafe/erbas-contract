@@ -1,0 +1,27 @@
+meta {
+  name: WMS excessive-limit
+  type: http
+  seq: 150
+}
+
+get {
+  url: {{baseUrl}}{{uomsPath}}?limit=101
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  responseKind: error
+  expectedCode: invalid_request
+}

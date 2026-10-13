@@ -1,0 +1,33 @@
+meta {
+  name: WMS duplicate-spanish
+  type: http
+  seq: 172
+}
+
+post {
+  url: {{baseUrl}}{{uomsPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+  Accept-Language: es
+}
+
+body:json {
+  {"code": "M", "description": "Otro nombre"}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 409
+  responseKind: error
+  expectedCode: wms_uom_code_conflict
+}

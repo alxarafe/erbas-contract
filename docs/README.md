@@ -5,6 +5,9 @@
 | [Usage](usage.md) | Local commands, Docker networking, limits, cleanup, and pinned tooling. |
 | [COLLECTIONS-001](collections.md) | Standard paged envelope, user and module pagination, order, totals and compatibility. |
 | [Module administration](modules.md) | Published v0.5.0 CORE administration, availability, dependency invariants and canonical development/conformance modules. |
+| [WMS-001](wms-001.md) | Unpublished v0.6.0 UoM vertical, laboratory audit, design decisions, security, gating and portability. |
+| [WMS-001 verification](verification/wms-001.md) | Local contract validation, compatibility preservation, scoped faults and deliberate limitations. |
+| [v0.6.0 preparation](releases/v0.6.0.md) | Compatible additive draft; not published or adopted. |
 | [USERS-001](users-001.md) | CORE user model, current user, administration, security invariants and conformance coverage. |
 | [AUTH-001](auth-001.md) | Login behavior, credentials, scope and backend adaptation requirements. |
 | [Shared demo defaults](../demo/README.md) | Canonical public initial demo values, override precedence and adoption boundaries. |
@@ -27,15 +30,15 @@ it is not a test result.
 | Workflow source | What the workflow checks |
 | --- | --- |
 | [Contract CI](../.github/workflows/ci.yml) | The authoritative Docker-based `./bin/check`: OpenAPI validation and synthetic/unit runner tests. No live backend conformance or publication. |
-| [Java backend CI](https://github.com/alxarafe/erbas/actions/workflows/ci.yml) | Authoritative `./bin/check`: Docker build, native/integration tests, clean PostgreSQL, application readiness, Flyway, mandatory shared Bruno against published `v0.4.0`, and cleanup. Its workflow display name is `Java CI`. |
-| [.NET backend CI / shared conformance](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml) | Authoritative `./bin/check`: native/module tests, validation Host, mandatory shared Bruno against published `v0.4.0`, persistence and cleanup. Its display name is `.NET CI / shared conformance`. This is a combined workflow result, not a separate Bruno-only result. |
+| [Java backend CI](https://github.com/alxarafe/erbas/actions/workflows/ci.yml) | Authoritative `./bin/check`: Docker build, native/integration tests, clean PostgreSQL, application readiness, Flyway, mandatory shared Bruno against published `v0.5.0`, and cleanup. Its workflow display name is `Java CI`. |
+| [.NET backend CI / shared conformance](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml) | Authoritative `./bin/check`: native/module tests, validation Host, mandatory shared Bruno against published `v0.5.0`, persistence and cleanup. Its display name is `.NET CI / shared conformance`. This is a combined workflow result, not a separate Bruno-only result. |
 | [Angular client CI](https://github.com/alxarafe/erbas-client/actions/workflows/ci.yml) | Client `bin/check`: Angular tests, production build, Docker runtime and isolated shared API proxies. No backend shared-conformance claim. Real dual-backend demo verification is separate. |
 
 External badges report the checks of their named repositories, not tests of this
 hosting repository. Workflow results, historical local conformance evidence,
 real demo verification and declared releases remain separate facts.
-CONTRACT-002 is complete: `v0.4.0` is published, and Java and .NET both declare it
-in `contract.revision` and enforce shared conformance locally and in CI.
+CONTRACT-002 established published `v0.4.0` consumption. Java and .NET subsequently
+adopted `v0.5.0`, declared in `contract.revision` and checked locally and in CI.
 Their [Java](https://github.com/alxarafe/erbas/blob/main/docs/verification/collections-001.md)
 and [.NET](https://github.com/alxarafe/alxarafe-dotnet/blob/main/docs/verification/users-001-collections-001.md)
 verification reports retain evidence against earlier draft revisions.
@@ -68,11 +71,13 @@ or conformance. Demo defaults are outside the HTTP release scope.
 module administration and CONTRACT-003A canonical development/conformance modules.
 See [release notes](releases/v0.5.0.md) and [exact tag identity](versioning.md).
 **v0.4.0 is the previous release and the first formal published release**.
-Java and .NET still consume v0.4.0; no v0.5.0 backend conformance or Angular
-module-administration adoption is claimed. Adoption requires separately approved
-consumer tasks. Publication, backend adoption, client consumption and repository
+Java and .NET declare v0.5.0 and verify that immutable release in their own
+validation; Angular module-administration adoption is not claimed. Neither backend
+implements the unpublished v0.6.0 WMS preparation. Publication, backend adoption,
+client consumption and repository
 verification below are distinct facts.
-The current sole Bruno collection has 130 request definitions and 506 named
-checks for the two-module synthetic fixture; see
+The published v0.5.0 collection has 130 request definitions and 506 named checks.
+The v0.6.0 preparation retains them and adds WMS: 176 definitions / 690 checks
+for the standard synthetic fixture; see [WMS-001](wms-001.md) and
 [module conformance](modules.md#conformance-fixture-and-mutations). Historical
 verification reports retain their original counts and results.
