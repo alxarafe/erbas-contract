@@ -21,7 +21,7 @@ body:json {
 }
 
 script:pre-request {
-  const input = {code: "Z123456789", description: "📦".repeat(Number(bru.getFolderVar("descriptionMaximum")))}; bru.setVar("wmsInput", input); req.setBody(input);
+  const input = {code: "Z123456789", description: " \t" + "📦".repeat(Number(bru.getFolderVar("descriptionMaximum"))) + "\r\n "}; bru.setVar("wmsInput", input); req.setBody(input);
 }
 
 settings {

@@ -21,7 +21,7 @@ body:json {
 }
 
 script:pre-request {
-  req.setBody({code: "KG", description: "📦".repeat(Number(bru.getFolderVar("descriptionMaximum")) + 1)});
+  req.setBody({code: "KG", description: " " + "📦".repeat(Number(bru.getFolderVar("descriptionMaximum")) + 1) + " "});
 }
 
 settings {

@@ -7,6 +7,7 @@
 | [Module administration](modules.md) | Published v0.5.0 CORE administration, availability, dependency invariants and canonical development/conformance modules. |
 | [WMS-001](wms-001.md) | Unpublished v0.6.0 UoM vertical, laboratory audit, design decisions, security, gating and portability. |
 | [WMS-001 verification](verification/wms-001.md) | Local contract validation, compatibility preservation, scoped faults and deliberate limitations. |
+| [WMS-001A verification](verification/wms-001a.md) | Pre-publication description normalization, code boundaries and revised conformance evidence. |
 | [v0.6.0 preparation](releases/v0.6.0.md) | Compatible additive draft; not published or adopted. |
 | [USERS-001](users-001.md) | CORE user model, current user, administration, security invariants and conformance coverage. |
 | [AUTH-001](auth-001.md) | Login behavior, credentials, scope and backend adaptation requirements. |
@@ -77,7 +78,7 @@ implements the unpublished v0.6.0 WMS preparation. Publication, backend adoption
 client consumption and repository
 verification below are distinct facts.
 The published v0.5.0 collection has 130 request definitions and 506 named checks.
-The v0.6.0 preparation retains them and adds WMS: 176 definitions / 690 checks
+The v0.6.0 preparation retains them and adds WMS: 182 definitions / 714 checks
 for the standard synthetic fixture; see [WMS-001](wms-001.md) and
 [module conformance](modules.md#conformance-fixture-and-mutations). Historical
 verification reports retain their original counts and results.

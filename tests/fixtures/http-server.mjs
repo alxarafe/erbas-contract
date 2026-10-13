@@ -9,6 +9,7 @@ export const WMS_ID = 'erbas.wms';
 export const uomsPath = '/api/wms/uoms';
 export const uomCodePattern = /^[A-Z][A-Z0-9]{0,9}$/;
 export const uomDescriptionMaximum = 255;
+const uomDescriptionTrimPattern = /^[ \t\r\n]+|[ \t\r\n]+$/g;
 export const uomCodeConflict = 'wms_uom_code_conflict';
 export const moduleDisabled = 'module_disabled';
 
@@ -72,10 +73,13 @@ export async function startFixture({ status = 200, contentType = 'application/js
         for await (const chunk of request) raw += chunk;
         let input;
         try { input = JSON.parse(raw); } catch { /* Invalid JSON follows authorization and gating. */ }
-        const unicodeFault = typeof input?.description === 'string'
-          && input.description.length !== [...input.description].length && hasFault(wmsFault, 'unicode-length');
-        const length = typeof input?.description === 'string'
-          ? unicodeFault ? input.description.length : [...input.description].length : 0;
+        const description = typeof input?.description === 'string'
+          ? input.description.replace(uomDescriptionTrimPattern, '') : undefined;
+        const unicodeFault = typeof description === 'string'
+          && description.length !== [...description].length && hasFault(wmsFault, 'unicode-length');
+        const length = typeof description === 'string'
+          ? hasFault(wmsFault, 'length-before-trim') ? [...input.description].length
+            : unicodeFault ? description.length : [...description].length : 0;
         const valid = input && !Array.isArray(input)
           && Object.keys(input).sort().join(',') === 'code,description'
           && (raw.match(/"(?:code|description)"\s*:/g) ?? []).length === 2
@@ -88,8 +92,10 @@ export async function startFixture({ status = 200, contentType = 'application/js
         else if (uoms.some(uom => uom.code === input.code) && !hasFault(wmsFault, 'accepted-duplicate')) {
           expected = 409; result = { code: uomCodeConflict };
         } else {
-          result = { id: randomUUID(), code: input.code, description: input.description };
+          result = { id: randomUUID(), code: input.code,
+            description: hasFault(wmsFault, 'untrimmed-description') ? input.description : description };
           uoms.push(structuredClone(result));
+          if (wmsFault === 'untrimmed-persistence') uoms.at(-1).description = input.description;
           expected = 201;
           if (hasFault(wmsFault, 'extra')) result.extra = true;
         }
@@ -106,6 +112,9 @@ export async function startFixture({ status = 200, contentType = 'application/js
         if (!valid) { expected = 400; result = { code: 'invalid_request' }; }
         else {
           const ordered = [...uoms].sort((a, b) => a.code < b.code ? -1 : a.code > b.code ? 1 : 0);
+          if (ordered.some(uom => uom.description !== uom.description.replace(uomDescriptionTrimPattern, ''))) {
+            hasFault(wmsFault, 'untrimmed-persistence');
+          }
           if (ordered.length > 0 && hasFault(wmsFault, 'lost-state')) ordered.length = 0;
           if (ordered.length > 1 && hasFault(wmsFault, 'order')) ordered.reverse();
           expected = 200;

@@ -10,16 +10,17 @@ import { runProcess } from '../scripts/process.mjs';
 import { WMS_ID, uomsPath } from './fixtures/http-server.mjs';
 
 const publishedRequestCount = 130;
-const wmsRequestCount = 46;
+const wmsRequestCount = 52;
 const fullRequestCount = publishedRequestCount + wmsRequestCount;
-const fullNamedCheckCount = 690;
+const fullNamedCheckCount = 714;
 
 // Full-suite and late-failure runs need the 30-second Bruno watchdog plus cleanup
 // time on slower hosted runners. Short runs keep their existing test budgets.
 const fullSuiteTestTimeoutMs = 35000;
 
 for (const wmsFault of ['accepted-duplicate', 'lost-state', 'order', 'unicode-length',
-  'gate-before-auth', 'ignored-gate', 'extra', 'pagination']) {
+  'gate-before-auth', 'ignored-gate', 'extra', 'pagination',
+  'untrimmed-description', 'untrimmed-persistence', 'length-before-trim']) {
   test(`runner rejects WMS fault: ${wmsFault}`, { timeout: 15000 }, async () => {
     const fixture = await startFixture({ wmsFault });
     try {
@@ -28,6 +29,10 @@ for (const wmsFault of ['accepted-duplicate', 'lost-state', 'order', 'unicode-le
       assert.notEqual(result.code, 124, 'watchdog must not hide the target fault');
       assert.ok(fixture.faultsReached.includes(wmsFault), 'configured WMS defect must be reached');
       assert.equal(fixture.requests.at(-1).path.split('?')[0], uomsPath);
+      if (wmsFault === 'untrimmed-persistence') assert.equal(fixture.requests.at(-1).method, 'GET');
+      if (['untrimmed-description', 'length-before-trim'].includes(wmsFault)) {
+        assert.equal(fixture.requests.at(-1).method, 'POST');
+      }
       assert.ok(!result.output.includes(fixtureEnv.ERBAS_TEST_PASSWORD));
       assert.ok(!result.output.includes('synthetic.token_123'));
       assert.ok(fixture.requests.every(r => !r.path.includes('/api/users?')
@@ -76,7 +81,7 @@ test('full suite exercises published operations and CONTRACT-003', { timeout: fu
     const wms = fixture.requests.slice(publishedRequestCount);
     assert.equal(wms.length, wmsRequestCount);
     assert.ok(wms.every(r => r.path.startsWith(uomsPath) || r.path === `${modulesPath}/${WMS_ID}`));
-    assert.equal(wms.filter(r => r.expected === 201).length, 2);
+    assert.equal(wms.filter(r => r.expected === 201).length, 4);
     assert.equal(wms.filter(r => r.expected === 409).length, 2);
     assert.equal(wms.filter(r => r.expected === 503).length, 3);
     const response = await fetch(`${fixture.baseUrl}${modulesPath}`, { headers: { Authorization: 'Bearer synthetic.token_123' } });

@@ -9,6 +9,7 @@ vars:pre-request {
   wmsModulesPath: /api/modules
   uomCodePattern: ^[A-Z][A-Z0-9]{0,9}$
   descriptionMaximum: 255
+  descriptionTrimPattern: ^[ \t\r\n]+|[ \t\r\n]+$
   defaultLimit: 50
   maximumLimit: 100
   nilUuid: 00000000-0000-0000-0000-000000000000
@@ -47,6 +48,7 @@ tests {
         expect(uom.id).not.to.equal(bru.getFolderVar("nilUuid"));
         expect(uom.code).to.be.a("string").and.match(new RegExp(bru.getFolderVar("uomCodePattern")));
         expect(uom.description).to.be.a("string");
+        expect(uom.description).to.equal(uom.description.replace(new RegExp(bru.getFolderVar("descriptionTrimPattern"), "g"), ""));
         expect([...uom.description].length).to.be.within(1, Number(bru.getFolderVar("descriptionMaximum")));
       };
       if (kind === "uom") validate(result);
@@ -60,14 +62,14 @@ tests {
     }
   });
 
-  test("Persistent identity, exact text and ordered window", function () {
+  test("Persistent identity, normalized text and ordered window", function () {
     const kind = bru.getRequestVar("responseKind");
     const expected = bru.getVar("wmsUoms") || [];
     if (kind === "uom") {
       const input = bru.getVar("wmsInput");
       const result = res.getBody();
       expect(result.code).to.equal(input.code);
-      expect(result.description).to.equal(input.description);
+      expect(result.description).to.equal(input.description.replace(new RegExp(bru.getFolderVar("descriptionTrimPattern"), "g"), ""));
       expect(expected.map(uom => uom.id)).not.to.include(result.id);
       expected.push(result);
       bru.setVar("wmsUoms", expected);

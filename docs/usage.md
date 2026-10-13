@@ -18,7 +18,7 @@ inside its container. It does not establish external backend conformance.
 After the image has been built, the check container has no external network
 access; loopback is sufficient for its fixtures.
 
-The synthetic battery keeps one full positive run of all 176 draft requests,
+The synthetic battery keeps one full positive run of all 182 draft requests,
 including all 130 unchanged v0.5.0 definitions.
 Health cases and AUTH, Users, Collections, Modules and WMS faults select existing
 requests through internal scopes, with contractual HTTP bootstrap where needed.
@@ -73,7 +73,7 @@ run the suite against production. Success leaves both enabled; after failure,
 discard the environment. Java/.NET consume published v0.5.0. This development
 checkout prepares v0.6.0 and additionally requires enabled AVAILABLE `erbas.wms`
 with an initially empty UoM catalogue. Do not run this draft against those backends
-before separately approved WMS adoption. WMS mutations leave two UoMs and restore
+before separately approved WMS adoption. WMS mutations leave four UoMs and restore
 the module enabled; dispose of its environment. See [WMS-001](wms-001.md).
 
 | URL rule | Behavior |
