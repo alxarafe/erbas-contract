@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile, rm, readdir, readFile, cp } from 'node:fs/promises';
+import { mkdtemp, writeFile, rm, readdir, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { startFixture, fixtureEnv, userCollection, fixtureModules, modulesPath, moduleNotFound, moduleDependencyConflict, MATH_ID, STATISTICS_ID, maximumCollectionLimit } from './fixtures/http-server.mjs';
-import { runBruno, normalizeBaseUrl, requireCredentials } from '../scripts/conformance.mjs';
+import { startFixture, fixtureEnv, disabledTokenFault, userCollection, fixtureModules, modulesPath, moduleNotFound, moduleDependencyConflict, MATH_ID, STATISTICS_ID, maximumCollectionLimit } from './fixtures/http-server.mjs';
+import { runBruno, conformanceScopes, normalizeBaseUrl, requireCredentials } from '../scripts/conformance.mjs';
 import { validateOpenApi } from '../scripts/validate.mjs';
 import { runProcess } from '../scripts/process.mjs';
 
@@ -220,9 +220,11 @@ for (const [name, auth] of authFailures) {
   test(name, { timeout: 15000 }, async () => {
     const fixture = await startFixture({ auth });
     try {
-      const result = await runBruno(fixture.baseUrl, { env: fixtureEnv });
+      const result = await runBruno(fixture.baseUrl, { env: fixtureEnv, scope: conformanceScopes.auth });
       assert.notEqual(result.code, 0, result.output);
       assert.notEqual(result.code, 124);
+      assert.ok(fixture.faultsReached.includes(Object.keys(auth)[0]), 'fault must reach the targeted AUTH response');
+      assert.ok(fixture.requests.every(request => request.path === '/api/auth/login'), 'AUTH scope must exclude other groups');
       assert.ok(!result.output.includes(fixtureEnv.ERBAS_TEST_PASSWORD));
       assert.ok(!result.output.includes('synthetic.token_123'));
     } finally { await fixture.close(); }
@@ -252,11 +254,12 @@ for (const [name, fixtureOptions, success] of scenarios) {
     const fixture = await startFixture(fixtureOptions);
     try {
       const started = Date.now();
-      const result = await runBruno(fixture.baseUrl, { env: fixtureEnv });
+      const result = await runBruno(fixture.baseUrl, { env: fixtureEnv, scope: conformanceScopes.health });
       if (success) assert.equal(result.code, 0, result.output);
       else assert.notEqual(result.code, 0, result.output);
       assert.notEqual(result.code, 124, 'CLI watchdog hid the expected HTTP test result');
       assert.equal(fixture.requests.filter(r => r.path === '/health' || r.path === '/target').length, 1, 'Health must not be retried or redirected');
+      assert.equal(fixture.requests.length, 1, 'Health scope must exclude other groups');
       assert.deepEqual(fixture.requests[0], { method: 'GET', path: '/health', accept: 'application/json' });
       if (fixtureOptions.hang) {
         assert.match(result.output, /timeout|timed out/i);
@@ -312,9 +315,11 @@ for (const [name, users] of userFailures) {
   test(name, { timeout: 15000 }, async () => {
     const fixture = await startFixture({ users });
     try {
-      const result = await runBruno(fixture.baseUrl, { env: fixtureEnv });
+      const result = await runBruno(fixture.baseUrl, { env: fixtureEnv, scope: conformanceScopes.users });
       assert.notEqual(result.code, 0, result.output);
       assert.notEqual(result.code, 124);
+      assert.ok(fixture.faultsReached.includes(Object.keys(users)[0]), 'fault must reach the targeted Users response');
+      assert.ok(fixture.requests.every(request => !request.path.includes('?') && !request.path.startsWith(modulesPath)), 'Users scope must exclude Collections and Modules');
       assert.ok(!result.output.includes(fixtureEnv.ERBAS_TEST_PASSWORD));
       assert.ok(!result.output.includes('synthetic.token_123'));
     } finally { await fixture.close(); }
@@ -324,8 +329,9 @@ for (const [name, users] of userFailures) {
 test('runner rejects tokens belonging to disabled users', { timeout: 15000 }, async () => {
   const fixture = await startFixture({ acceptDisabledTokens: true });
   try {
-    const result = await runBruno(fixture.baseUrl, { env: fixtureEnv });
+    const result = await runBruno(fixture.baseUrl, { env: fixtureEnv, scope: conformanceScopes.users });
     assert.notEqual(result.code, 0, result.output);
+    assert.ok(fixture.faultsReached.includes(disabledTokenFault), 'fault must reach a disabled token');
   } finally { await fixture.close(); }
 });
 
@@ -391,7 +397,7 @@ for (const collectionFault of ['total', 'limit', 'offset', 'order', 'window', 'n
   test(`runner rejects collection fault: ${collectionFault}`, { timeout }, async () => {
     const fixture = await startFixture({ collectionFault });
     try {
-      const result = await runBruno(fixture.baseUrl, { env: fixtureEnv });
+      const result = await runBruno(fixture.baseUrl, { env: fixtureEnv, scope: conformanceScopes.collections });
       assert.notEqual(result.code, 0, result.output);
       assert.notEqual(result.code, 124);
       assert.ok(!result.output.includes(fixtureEnv.ERBAS_TEST_PASSWORD));
@@ -400,6 +406,8 @@ for (const collectionFault of ['total', 'limit', 'offset', 'order', 'window', 'n
         : collectionFault === 'negative-offset' ? '/api/users?offset=-1'
         : collectionFault === 'excessive-limit' ? '/api/users?limit=101' : '/api/users';
       assert.equal(fixture.requests.at(-1).path, expectedPath, 'failure must reach the targeted pagination fault');
+      assert.ok(fixture.faultsReached.includes(collectionFault), 'pagination fault must be applied');
+      assert.ok(fixture.requests.every(request => !request.path.startsWith(modulesPath)), 'Collections scope must exclude Modules');
     } finally { await fixture.close(); }
   });
 }
@@ -460,27 +468,16 @@ const moduleFailures = [
   ['module challenge on success', { modules: { 'patch:200': { headers: { 'WWW-Authenticate': 'Bearer' } } } }]
 ];
 
-async function runModuleSubset(baseUrl, env = fixtureEnv) {
-  const subset = await mkdtemp(join(tmpdir(), 'erbas-module-fault-'));
-  try {
-    // Reuse unchanged definitions from the sole collection and its login/create/login
-    // bootstrap, without repeating unrelated user scenarios for every module fault.
-    for (const file of ['bruno.json', 'login-success.bru', 'users-19-create-normal-user.bru',
-      'users-22-normal-user-login.bru', 'modules']) {
-      await cp(join('/runner/bruno', file), join(subset, file), { recursive: true });
-    }
-    return await runBruno(baseUrl, { env, cwd: subset });
-  } finally { await rm(subset, { recursive: true, force: true }); }
-}
-
 for (const [name, options] of moduleFailures) {
   test(`runner rejects module fault: ${name}`, { timeout: fullSuiteTestTimeoutMs }, async () => {
     const fixture = await startFixture(options);
     try {
-      const result = await runModuleSubset(fixture.baseUrl);
+      const result = await runBruno(fixture.baseUrl, { env: fixtureEnv, scope: conformanceScopes.modules });
       assert.notEqual(result.code, 0, result.output);
       assert.notEqual(result.code, 124);
       assert.ok(fixture.requests.at(-1).path.startsWith(modulesPath), 'fault must reach module administration');
+      const target = options.moduleFault ?? Object.keys(options.modules)[0];
+      assert.ok(fixture.faultsReached.includes(target), 'fault must reach the targeted module operation');
       if (name.endsWith('-absent')) {
         assert.equal(fixture.requests.at(-1).path,
           `${modulesPath}?offset=0&limit=${maximumCollectionLimit}`,
@@ -498,7 +495,7 @@ test('canonical descriptors are discovered beyond the first 100 modules', { time
   availableModules.push(...fixtureModules());
   const fixture = await startFixture({ availableModules });
   try {
-    const result = await runModuleSubset(fixture.baseUrl);
+    const result = await runBruno(fixture.baseUrl, { env: fixtureEnv, scope: conformanceScopes.modules });
     assert.equal(result.code, 0, result.output);
     assert.equal(fixture.requests.length, 52);
     assert.ok(fixture.requests.some(request => request.path === `${modulesPath}?offset=${maximumCollectionLimit}&limit=${maximumCollectionLimit}`));
