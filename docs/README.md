@@ -14,6 +14,7 @@
 | [v0.4.0 release notes](releases/v0.4.0.md) | First executable release scope and exclusions. |
 | [v0.5.0 release notes](releases/v0.5.0.md) | Current published immutable release: compatible module administration, canonical conformance fixtures and exact release identity. |
 | [Architecture decision](decisions/0001-contract-foundation.md) | Why `/health` was chosen and where contract and backend responsibilities belong. |
+| [CONTRACT-006B verification](verification/contract-006b.md) | Scoped synthetic execution, preserved coverage and performance measurements. |
 | [CONTRACT-001A verification](verification/contract-001a.md) | Synthetic test cases, measured results, tool identity, and coverage limits. |
 | [Working agreement](../AGENTS.md) | Scope, preservation, validation, and authorization rules. |
 

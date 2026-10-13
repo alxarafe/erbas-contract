@@ -18,6 +18,16 @@ inside its container. It does not establish external backend conformance.
 After the image has been built, the check container has no external network
 access; loopback is sufficient for its fixtures.
 
+The synthetic battery keeps one full positive run of all 130 published requests.
+Health cases and AUTH, Users, Collections and Modules faults select existing
+requests through internal scopes, with contractual HTTP bootstrap where needed.
+Every negative case must reach its configured defect; scope selection does not
+change request assertions, fault coverage or the shared HTTP contract. Each run
+starts a fresh Bruno process, sequentially, with the same `--bail` and watchdogs.
+`bin/test` always executes the complete collection. Scope selection is not a
+public command option. See [scoped verification evidence](verification/contract-006b.md)
+for bootstrap sequences, coverage and the measured comparison with CONTRACT-006A.
+
 Both public commands build the runner with the pinned base image and lockfile,
 then execute the resulting immutable local image ID without tagging or
 publishing it. The first build needs network access to obtain the image and
