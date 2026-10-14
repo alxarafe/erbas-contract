@@ -132,18 +132,19 @@ for platform support and limitations.
 | Operation | Limit |
 | --- | --- |
 | HTTP request | 2 seconds |
-| Bruno process watchdog | 30 seconds |
+| Bruno process watchdog (full conformance) | 45 seconds |
+| Bruno process watchdog (scoped conformance) | 30 seconds |
 | OpenAPI lint | 30 seconds |
 | Synthetic test suite | 600 seconds |
 
 Within the synthetic suite, full Bruno runs and late pagination-fault tests have
-a 35-second outer test budget so the 30-second process watchdog and fixture
+a 50-second outer test budget so the 45-second full-conformance watchdog and fixture
 cleanup can finish on slower hosted runners. Shorter Bruno tests retain their
 15-second budgets; HTTP timeout and stuck-subprocess assertions remain bounded
 independently.
 
 The expanded CONTRACT-003 fault battery uses a bounded 600-second suite budget;
-individual HTTP and Bruno watchdogs remain unchanged.
+individual HTTP requests retain their 2-second limit.
 
 These limits bound tool execution, not image downloads or Docker builds.
 The runner does not retry failed HTTP responses.

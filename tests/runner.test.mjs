@@ -14,9 +14,9 @@ const wmsRequestCount = 52;
 const fullRequestCount = publishedRequestCount + wmsRequestCount;
 const fullNamedCheckCount = 714;
 
-// Full-suite and late-failure runs need the 30-second Bruno watchdog plus cleanup
-// time on slower hosted runners. Short runs keep their existing test budgets.
-const fullSuiteTestTimeoutMs = 35000;
+// Allow the 45-second full-suite Bruno watchdog plus cleanup time on slower
+// hosted runners. Short runs keep their existing test budgets.
+const fullSuiteTestTimeoutMs = 50000;
 
 for (const wmsFault of ['accepted-duplicate', 'lost-state', 'order', 'unicode-length',
   'gate-before-auth', 'ignored-gate', 'extra', 'pagination',
