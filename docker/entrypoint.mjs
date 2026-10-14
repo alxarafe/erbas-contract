@@ -16,7 +16,7 @@ async function main() {
   if (mode === 'test') {
     const result = await runBruno(args[0]);
     console.log(result.output);
-    if (result.code === 124) console.error('Conformance runner exceeded its 30-second deadline.');
+    if (result.code === 124) console.error('Conformance runner exceeded its deadline.');
     return result.code;
   }
   const result = await runProcess(process.execPath, ['--test', '/runner/tests/runner.test.mjs'], { timeoutMs: repositoryTestTimeoutMs });
