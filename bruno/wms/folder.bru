@@ -1,0 +1,83 @@
+meta {
+  name: WMS unit of measure
+  seq: 131
+}
+
+vars:pre-request {
+  WMS_ID: erbas.wms
+  uomsPath: /api/wms/uoms
+  wmsModulesPath: /api/modules
+  uomCodePattern: ^[A-Z][A-Z0-9]{0,9}$
+  descriptionMaximum: 255
+  descriptionTrimPattern: ^[ \t\r\n]+|[ \t\r\n]+$
+  defaultLimit: 50
+  maximumLimit: 100
+  nilUuid: 00000000-0000-0000-0000-000000000000
+}
+
+tests {
+  test("Expected HTTP status", function () {
+    expect(res.getStatus()).to.equal(Number(bru.getRequestVar("expectedStatus")));
+  });
+
+  test("JSON media type and contractual headers", function () {
+    const token = "[!#$%&'*+.^_`|~0-9A-Za-z-]+";
+    const quoted = '"(?:[\\t\\x20\\x21\\x23-\\x5b\\x5d-\\x7e\\x80-\\xff]|\\\\[\\t\\x20-\\x7e\\x80-\\xff])*"';
+    const mediaType = new RegExp("^application/json(?:[ \\t]*;[ \\t]*" + token + "=(?:" + token + "|" + quoted + "))*[ \\t]*$", "i");
+    expect(res.getHeader("content-type")).to.be.a("string").and.match(mediaType);
+    expect(res.getHeader("cache-control")).to.equal("no-store");
+    expect(res.getHeader("www-authenticate")).to.equal(Number(bru.getRequestVar("expectedStatus")) === 401 ? "Bearer" : undefined);
+    expect(res.getHeader("retry-after")).to.equal(undefined);
+  });
+
+  test("Closed response and technical semantics", function () {
+    const result = res.getBody();
+    const kind = bru.getRequestVar("responseKind");
+    if (kind === "error") {
+      expect(result).to.deep.equal({code: bru.getRequestVar("expectedCode")});
+    } else if (kind === "module") {
+      expect(Object.keys(result).sort()).to.deep.equal(["dependencies", "enabled", "id", "moduleApiVersion"]);
+      expect(result.id).to.equal(bru.getFolderVar("WMS_ID"));
+      expect(result.dependencies).to.deep.equal([]);
+      expect(Number.isInteger(result.moduleApiVersion) && result.moduleApiVersion >= 1).to.equal(true);
+      expect(result.enabled).to.equal(bru.getRequestVar("expectedEnabled") === "true");
+    } else {
+      const validate = uom => {
+        expect(Object.keys(uom).sort()).to.deep.equal(["code", "description", "id"]);
+        expect(uom.id).to.be.a("string").and.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+        expect(uom.id).not.to.equal(bru.getFolderVar("nilUuid"));
+        expect(uom.code).to.be.a("string").and.match(new RegExp(bru.getFolderVar("uomCodePattern")));
+        expect(uom.description).to.be.a("string");
+        expect(uom.description).to.equal(uom.description.replace(new RegExp(bru.getFolderVar("descriptionTrimPattern"), "g"), ""));
+        expect([...uom.description].length).to.be.within(1, Number(bru.getFolderVar("descriptionMaximum")));
+      };
+      if (kind === "uom") validate(result);
+      else {
+        expect(Object.keys(result).sort()).to.deep.equal(["items", "limit", "offset", "order", "total"]);
+        expect(result.offset).to.equal(Number(bru.getRequestVar("expectedOffset")));
+        expect(result.limit).to.equal(Number(bru.getRequestVar("expectedLimit")));
+        expect(result.order).to.deep.equal([{field: "code", direction: "asc"}]);
+        result.items.forEach(validate);
+      }
+    }
+  });
+
+  test("Persistent identity, normalized text and ordered window", function () {
+    const kind = bru.getRequestVar("responseKind");
+    const expected = bru.getVar("wmsUoms") || [];
+    if (kind === "uom") {
+      const input = bru.getVar("wmsInput");
+      const result = res.getBody();
+      expect(result.code).to.equal(input.code);
+      expect(result.description).to.equal(input.description.replace(new RegExp(bru.getFolderVar("descriptionTrimPattern"), "g"), ""));
+      expect(expected.map(uom => uom.id)).not.to.include(result.id);
+      expected.push(result);
+      bru.setVar("wmsUoms", expected);
+    } else if (kind === "collection") {
+      const result = res.getBody();
+      const ordered = [...expected].sort((a, b) => a.code < b.code ? -1 : a.code > b.code ? 1 : 0);
+      expect(result.total).to.equal(ordered.length);
+      expect(result.items).to.deep.equal(ordered.slice(result.offset, result.offset + result.limit));
+    }
+  });
+}

@@ -18,8 +18,9 @@ inside its container. It does not establish external backend conformance.
 After the image has been built, the check container has no external network
 access; loopback is sufficient for its fixtures.
 
-The synthetic battery keeps one full positive run of all 130 published requests.
-Health cases and AUTH, Users, Collections and Modules faults select existing
+The synthetic battery keeps one full positive run of all 182 draft requests,
+including all 130 unchanged v0.5.0 definitions.
+Health cases and AUTH, Users, Collections, Modules and WMS faults select existing
 requests through internal scopes, with contractual HTTP bootstrap where needed.
 Every negative case must reach its configured defect; scope selection does not
 change request assertions, fault coverage or the shared HTTP contract. Each run
@@ -69,8 +70,11 @@ secrets. `bin/check` requires neither and uses the same canonical synthetic modu
 CONTRACT-003 changes these modules' persistent enabled states. Use an isolated,
 disposable environment without concurrent administrators or functional use; never
 run the suite against production. Success leaves both enabled; after failure,
-discard the environment. Current Java/.NET releases have not implemented the new
-shared endpoints, so do not run v0.5.0 conformance against them before adaptation.
+discard the environment. Java/.NET consume published v0.5.0. This development
+checkout prepares v0.6.0 and additionally requires enabled AVAILABLE `erbas.wms`
+with an initially empty UoM catalogue. Do not run this draft against those backends
+before separately approved WMS adoption. WMS mutations leave four UoMs and restore
+the module enabled; dispose of its environment. See [WMS-001](wms-001.md).
 
 | URL rule | Behavior |
 | --- | --- |

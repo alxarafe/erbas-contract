@@ -1,0 +1,28 @@
+meta {
+  name: WMS initial-empty
+  type: http
+  seq: 131
+}
+
+get {
+  url: {{baseUrl}}{{uomsPath}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  responseKind: collection
+  expectedOffset: 0
+  expectedLimit: 50
+}

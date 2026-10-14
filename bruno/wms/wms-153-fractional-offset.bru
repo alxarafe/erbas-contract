@@ -1,0 +1,27 @@
+meta {
+  name: WMS fractional-offset
+  type: http
+  seq: 153
+}
+
+get {
+  url: {{baseUrl}}{{uomsPath}}?offset=0.5
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  responseKind: error
+  expectedCode: invalid_request
+}

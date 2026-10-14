@@ -1,0 +1,36 @@
+meta {
+  name: WMS long-description
+  type: http
+  seq: 171
+}
+
+post {
+  url: {{baseUrl}}{{uomsPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  req.setBody({code: "KG", description: " " + "📦".repeat(Number(bru.getFolderVar("descriptionMaximum")) + 1) + " "});
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  responseKind: error
+  expectedCode: invalid_request
+}

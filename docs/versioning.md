@@ -37,12 +37,21 @@ headers and security remain unchanged. See [release notes](releases/v0.5.0.md).
 
 **v0.4.0 is the previous published immutable release and remains the first formal
 release**, with its original tag/SHA and historical evidence preserved above.
-Consumers can now explicitly adopt v0.5.0 through a separately approved task per
-consumer, including shared conformance against that exact release. Java and .NET
-still pin v0.4.0; neither is claimed conformant to v0.5.0. Angular has not yet
-adopted module administration. Contract publication does not establish backend
+Consumers explicitly adopt published releases through a separately approved task
+per consumer, including shared conformance against that exact release. Java and
+.NET now pin v0.5.0; their backend verification remains separate from this runner.
+Angular has not yet adopted module administration. Contract publication does not establish backend
 conformance or client consumption. GitHub Release and package publication remain
 separately authorized operations.
+
+## Next revision preparation: v0.6.0
+
+OpenAPI on this development branch is 0.6.0, adding the first WMS business vertical:
+unit-of-measure creation and listing. This is an unpublished compatible MINOR
+preparation, not a moved v0.5.0 tag or a backend adoption. See
+[WMS-001 design](wms-001.md) and [draft release notes](releases/v0.6.0.md).
+Existing consumers must continue pinning their published release until separately
+authorized publication and adaptation. No tag or release is created by this task.
 
 ## Compatibility and consumption policy
 

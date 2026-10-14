@@ -1,0 +1,29 @@
+meta {
+  name: WMS persisted-spanish
+  type: http
+  seq: 176
+}
+
+get {
+  url: {{baseUrl}}{{uomsPath}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Accept-Language: es-ES
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  responseKind: collection
+  expectedOffset: 0
+  expectedLimit: 50
+}
