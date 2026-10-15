@@ -1,0 +1,32 @@
+parameters:
+  Offset:
+    name: offset
+    in: query
+    required: false
+    description: Nonnegative base-10 integer displacement; exactly one value. No fractional, exponent, empty or whitespace value.
+    schema:
+      type: integer
+      minimum: 0
+      default: 0
+  Limit:
+    name: limit
+    in: query
+    required: false
+    description: Window size from 1 through 100; exactly one base-10 integer value.
+    schema:
+      type: integer
+      minimum: 1
+      maximum: 100
+      default: 50
+schemas:
+  Order:
+    type: object
+    additionalProperties: false
+    required: [field, direction]
+    properties:
+      field:
+        type: string
+        minLength: 1
+      direction:
+        type: string
+        enum: [asc, desc]

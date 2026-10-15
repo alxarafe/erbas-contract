@@ -1,0 +1,134 @@
+responses:
+  InvalidRequest:
+    description: Malformed JSON, structurally invalid body or invalid list pagination.
+    headers:
+      Cache-Control:
+        required: true
+        schema:
+          type: string
+          const: no-store
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/InvalidLoginRequest'
+  Unauthorized:
+    description: Missing, invalid, expired or disabled bearer; no external distinction.
+    headers:
+      Cache-Control:
+        required: true
+        schema:
+          type: string
+          const: no-store
+      WWW-Authenticate:
+        required: true
+        schema:
+          type: string
+          const: Bearer
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/Unauthorized'
+  Forbidden:
+    description: Authenticated user is not an administrator. WWW-Authenticate must be absent.
+    headers:
+      Cache-Control:
+        required: true
+        schema:
+          type: string
+          const: no-store
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/Forbidden'
+schemas:
+  ModuleDisabled:
+    allOf:
+      - $ref: '#/schemas/ErrorResponse'
+      - properties:
+          code:
+            const: module_disabled
+          errors:
+            minItems: 1
+            maxItems: 1
+            items:
+              allOf:
+                - $ref: '#/schemas/ErrorDetail'
+                - properties:
+                    code:
+                      const: module_disabled
+  InvalidLoginRequest:
+    allOf:
+      - $ref: '#/schemas/ErrorResponse'
+      - properties:
+          code:
+            const: invalid_request
+          errors:
+            minItems: 1
+            maxItems: 1
+            items:
+              allOf:
+                - $ref: '#/schemas/ErrorDetail'
+                - properties:
+                    code:
+                      const: invalid_request
+  Unauthorized:
+    allOf:
+      - $ref: '#/schemas/ErrorResponse'
+      - properties:
+          code:
+            const: unauthorized
+          errors:
+            minItems: 1
+            maxItems: 1
+            items:
+              allOf:
+                - $ref: '#/schemas/ErrorDetail'
+                - properties:
+                    code:
+                      const: unauthorized
+  Forbidden:
+    allOf:
+      - $ref: '#/schemas/ErrorResponse'
+      - properties:
+          code:
+            const: forbidden
+          errors:
+            minItems: 1
+            maxItems: 1
+            items:
+              allOf:
+                - $ref: '#/schemas/ErrorDetail'
+                - properties:
+                    code:
+                      const: forbidden
+  ErrorDetail:
+    type: object
+    additionalProperties: false
+    required: [code]
+    properties:
+      code:
+        type: string
+        description: Stable non-localized technical code.
+      resource:
+        type: string
+        description: Stable technical resource name, never a persistence name.
+      resourceId:
+        type: string
+        description: Opaque resource identity.
+      path:
+        type: string
+        description: Request location when useful; JSON body locations use RFC 6901 JSON Pointer.
+  ErrorResponse:
+    type: object
+    additionalProperties: false
+    required: [code, errors]
+    properties:
+      code:
+        type: string
+        description: Required in v0.8.x. Intended to remain supported but deprecated from v1.0; no removal in v1.x, removal no earlier than v2.0.
+      errors:
+        type: array
+        minItems: 1
+        items:
+          $ref: '#/schemas/ErrorDetail'
+    description: HTTP status is authoritative. No localized messages, status duplication or implementation details. See docs/api-conventions.md.

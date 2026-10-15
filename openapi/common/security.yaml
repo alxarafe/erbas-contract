@@ -1,0 +1,5 @@
+securitySchemes:
+  bearerAuth:
+    type: http
+    scheme: bearer
+    description: Opaque client token; no required token encoding or signing format.

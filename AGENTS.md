@@ -15,7 +15,7 @@ bounded readiness waits, and cleanup. Never mount or access the Docker socket
 from the runner. Synthetic HTTP fixtures exist only to test the runner.
 
 Development ports are local infrastructure conventions, documented in
-`docs/development-ports.md`, never HTTP contract requirements. Keep OpenAPI and
+`docs/common/development-ports.md`, never HTTP contract requirements. Keep OpenAPI and
 Bruno independent of fixed ports and accept a supplied base URL. The runner must
 not publish a stable port. Prefer Docker network access for validation.
 
@@ -38,7 +38,7 @@ differently and idiomatically internally. Java need not copy .NET internals,
 and .NET need not copy Spring internals. The contract standardizes observable
 behavior only. Promotion of an implementation-specific capability requires
 this explicit review and an approved contract change; see
-`docs/implementation-extensions.md`.
+`docs/common/implementation-extensions.md`.
 
 ## Execution and dependencies
 
@@ -54,7 +54,7 @@ authorized, and pin the Docker base image by version and digest. Install with
 
 ## Versioning and compatibility
 
-Use semantic versioning and immutable release tags. See `docs/versioning.md`.
+Use semantic versioning and immutable release tags. See `docs/common/versioning.md`.
 The first published immutable release is `v0.4.0`. Preparing future releases
 does not create their tags or publish them. Consumers must pin an explicit
 published release; do not silently consume `main`.

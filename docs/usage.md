@@ -49,12 +49,12 @@ enabled administrator in an isolated validation environment before invoking
 `bin/test`. Missing credentials are a
 usage error, never a skipped login check. USERS-001 creates and modifies users;
 never run the suite against production. Unique test users remain until the
-backend disposes of its environment. See [USERS-001](users-001.md) for required
+backend disposes of its environment. See [USERS-001](core/users-001.md) for required
 account state and mutations; current suite counters are in [WMS-003](releases/v0.8.0.md). COLLECTIONS-001
 checks paged user windows and totals; use an environment without concurrent
-external mutations during the run. See [collections](collections.md).
+external mutations during the run. See [collections](common/collections.md).
 See
-[AUTH-001](auth-001.md) for
+[AUTH-001](core/auth-001.md) for
 negative fixture prerequisites, safe injection, scenarios and logging rules.
 
 Full conformance requires the backend to register the canonical
@@ -63,7 +63,7 @@ AVAILABLE development modules `erbas.dev.math` (no dependencies) and
 development/conformance infrastructure, not required production business modules;
 normal production does not register them by default. No module-ID environment
 variables are required or accepted as fixture configuration. See
-[fixture prerequisites](modules.md#conformance-fixture-and-mutations).
+[fixture prerequisites](core/modules.md#conformance-fixture-and-mutations).
 `bin/test` passes only the two administrator credential variables without logging
 secrets. `bin/check` requires neither and uses the same canonical synthetic modules.
 
@@ -77,7 +77,7 @@ This checkout prepares unpublished v0.8.0 and additionally requires an initially
 empty ItemFamily catalogue, association support and the standard error envelope.
 Use it against a backend only after separately approved adoption. WMS mutations
 persist catalogue rows and associations and restore the module enabled; dispose
-of the environment. See [WMS-003](wms-003.md). No backend/client v0.8.0 adoption
+of the environment. See [WMS-003](modules/wms/wms-003.md). No backend/client v0.8.0 adoption
 or conformance is claimed.
 
 | URL rule | Behavior |
@@ -162,7 +162,7 @@ The runner does not retry failed HTTP responses.
 
 A successful repository check is different from successful conformance of the
 service examined by `bin/test`. Any failure must block the consumer's validation
-flow; publication policy is documented in [versioning](versioning.md).
+flow; publication policy is documented in [versioning](common/versioning.md).
 
 ## Runner isolation and cleanup
 

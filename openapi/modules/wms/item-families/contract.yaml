@@ -1,0 +1,485 @@
+paths:
+  /api/wms/item-families:
+    get:
+      operationId: listWmsItemFamilies
+      summary: List Item Families
+      description: >-
+        Administrator only; erbas.wms enabled. Follow docs/api-conventions.md for HTTP,
+        security/gating precedence, headers and localization. No redirects; Cache-Control no-store;
+        only 401 carries WWW-Authenticate Bearer. See docs/wms-003.md for domain rules.
+        COLLECTIONS-001; only offset/limit, each at most once, strict decimal text, unknown queries
+        rejected. Ordinal code ASC before slicing, total before slicing, huge/beyond-total offset
+        returns empty items with complete metadata. Associations are never embedded in the family
+        catalogue.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '../../../common/pagination.yaml#/parameters/Offset'
+        - $ref: '../../../common/pagination.yaml#/parameters/Limit'
+      responses:
+        '200':
+          $ref: '#/responses/WmsItemFamilyList'
+        '400':
+          $ref: '../../../common/errors.yaml#/responses/InvalidRequest'
+        '401':
+          $ref: '../../../common/errors.yaml#/responses/Unauthorized'
+        '403':
+          $ref: '../../../common/errors.yaml#/responses/Forbidden'
+        '503':
+          $ref: '../shared.yaml#/responses/WmsDisabled'
+    post:
+      operationId: createWmsItemFamily
+      summary: Create an Item Family
+      description: >-
+        Administrator only; erbas.wms enabled. Follow docs/api-conventions.md for HTTP,
+        security/gating precedence, headers and localization. No redirects; Cache-Control no-store;
+        only 401 carries WWW-Authenticate Bearer. See docs/wms-003.md for domain rules. No query
+        parameters. Closed JSON bodies reject duplicate property names and malformed JSON. Exact
+        case-sensitive code uniqueness; persist normalized name. No individual family GET, PATCH or
+        DELETE.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/schemas/CreateWmsItemFamily'
+      responses:
+        '201':
+          $ref: '#/responses/CreatedWmsItemFamily'
+        '400':
+          $ref: '../../../common/errors.yaml#/responses/InvalidRequest'
+        '401':
+          $ref: '../../../common/errors.yaml#/responses/Unauthorized'
+        '403':
+          $ref: '../../../common/errors.yaml#/responses/Forbidden'
+        '409':
+          $ref: '#/responses/WmsItemFamilyCodeConflict'
+        '503':
+          $ref: '../shared.yaml#/responses/WmsDisabled'
+  /api/wms/item-families/{familyId}/storage-attributes:
+    get:
+      operationId: listWmsItemFamilyStorageAttributes
+      summary: List associated complete Storage Attributes
+      description: >-
+        Administrator only; erbas.wms enabled. Follow docs/api-conventions.md for HTTP,
+        security/gating precedence, headers and localization. No redirects; Cache-Control no-store;
+        only 401 carries WWW-Authenticate Bearer. See docs/wms-003.md for domain rules.
+        COLLECTIONS-001; only offset/limit, each at most once, strict decimal text, unknown queries
+        rejected. Ordinal code ASC before slicing, total before slicing, huge/beyond-total offset
+        returns empty items with complete metadata. Associations are never embedded in the family
+        catalogue. Malformed IDs return 400. Missing family detail uses wms_item_family_not_found;
+        missing master uses wms_storage_attribute_not_found. Return all safe missing-resource
+        details before any 409. A single missing resource uses its detail code as top-level code;
+        multiple use wms_item_family_storage_attributes_not_found. Context uses resource and
+        resourceId; body locations are JSON Pointers. Deterministic details: family first, then body
+        order (add before remove); repeated references retain their request locations.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/parameters/WmsItemFamilyId'
+        - $ref: '../../../common/pagination.yaml#/parameters/Offset'
+        - $ref: '../../../common/pagination.yaml#/parameters/Limit'
+      responses:
+        '200':
+          $ref: '../storage-attributes/contract.yaml#/responses/WmsStorageAttributeList'
+        '400':
+          $ref: '../../../common/errors.yaml#/responses/InvalidRequest'
+        '401':
+          $ref: '../../../common/errors.yaml#/responses/Unauthorized'
+        '403':
+          $ref: '../../../common/errors.yaml#/responses/Forbidden'
+        '404':
+          $ref: '#/responses/WmsAssociationNotFound'
+        '503':
+          $ref: '../shared.yaml#/responses/WmsDisabled'
+    post:
+      operationId: createWmsItemFamilyAssociation
+      summary: Create one unique association
+      description: >-
+        Administrator only; erbas.wms enabled. Follow docs/api-conventions.md for HTTP,
+        security/gating precedence, headers and localization. No redirects; Cache-Control no-store;
+        only 401 carries WWW-Authenticate Bearer. See docs/wms-003.md for domain rules. No query
+        parameters. Closed JSON bodies reject duplicate property names and malformed JSON. Malformed
+        IDs return 400. Missing family detail uses wms_item_family_not_found; missing master uses
+        wms_storage_attribute_not_found. Return all safe missing-resource details before any 409. A
+        single missing resource uses its detail code as top-level code; multiple use
+        wms_item_family_storage_attributes_not_found. Context uses resource and resourceId; body
+        locations are JSON Pointers. Deterministic details: family first, then body order (add
+        before remove); repeated references retain their request locations. Return exact Location
+        for the created pair. Existing pair returns 409 wms_item_family_storage_attribute_conflict
+        with detail wms_item_family_storage_attribute_already_exists. No partial mutation.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/parameters/WmsItemFamilyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/schemas/CreateWmsItemFamilyAssociation'
+      responses:
+        '201':
+          $ref: '#/responses/CreatedWmsItemFamilyAssociation'
+        '400':
+          $ref: '../../../common/errors.yaml#/responses/InvalidRequest'
+        '401':
+          $ref: '../../../common/errors.yaml#/responses/Unauthorized'
+        '403':
+          $ref: '../../../common/errors.yaml#/responses/Forbidden'
+        '404':
+          $ref: '#/responses/WmsAssociationNotFound'
+        '409':
+          $ref: '#/responses/WmsAssociationConflict'
+        '503':
+          $ref: '../shared.yaml#/responses/WmsDisabled'
+    put:
+      operationId: replaceWmsItemFamilyAssociations
+      summary: Replace complete association set
+      description: >-
+        Administrator only; erbas.wms enabled. Follow docs/api-conventions.md for HTTP,
+        security/gating precedence, headers and localization. No redirects; Cache-Control no-store;
+        only 401 carries WWW-Authenticate Bearer. See docs/wms-003.md for domain rules. No query
+        parameters. Closed JSON bodies reject duplicate property names and malformed JSON. Malformed
+        IDs return 400. Missing family detail uses wms_item_family_not_found; missing master uses
+        wms_storage_attribute_not_found. Return all safe missing-resource details before any 409. A
+        single missing resource uses its detail code as top-level code; multiple use
+        wms_item_family_storage_attributes_not_found. Context uses resource and resourceId; body
+        locations are JSON Pointers. Deterministic details: family first, then body order (add
+        before remove); repeated references retain their request locations. Replace the complete set
+        atomically and idempotently; empty array removes all. Duplicates return 400. All missing
+        masters return 404 with /storageAttributeIds/N paths. Identical set returns 204.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/parameters/WmsItemFamilyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/schemas/ReplaceWmsItemFamilyAssociations'
+      responses:
+        '204':
+          $ref: '#/responses/WmsAssociationsUpdated'
+        '400':
+          $ref: '../../../common/errors.yaml#/responses/InvalidRequest'
+        '401':
+          $ref: '../../../common/errors.yaml#/responses/Unauthorized'
+        '403':
+          $ref: '../../../common/errors.yaml#/responses/Forbidden'
+        '404':
+          $ref: '#/responses/WmsAssociationNotFound'
+        '503':
+          $ref: '../shared.yaml#/responses/WmsDisabled'
+    patch:
+      operationId: patchWmsItemFamilyAssociations
+      summary: Strict atomic association patch
+      description: >-
+        Administrator only; erbas.wms enabled. Follow docs/api-conventions.md for HTTP,
+        security/gating precedence, headers and localization. No redirects; Cache-Control no-store;
+        only 401 carries WWW-Authenticate Bearer. See docs/wms-003.md for domain rules. No query
+        parameters. Closed JSON bodies reject duplicate property names and malformed JSON. Malformed
+        IDs return 400. Missing family detail uses wms_item_family_not_found; missing master uses
+        wms_storage_attribute_not_found. Return all safe missing-resource details before any 409. A
+        single missing resource uses its detail code as top-level code; multiple use
+        wms_item_family_storage_attributes_not_found. Context uses resource and resourceId; body
+        locations are JSON Pointers. Deterministic details: family first, then body order (add
+        before remove); repeated references retain their request locations. At least one effective
+        add/remove is required. Duplicates within one array return 400; overlap across arrays is
+        structurally valid. Validate all masters first, then evaluate all operations against
+        original state. Adding existing and removing unassociated conflict. Return all 409 details
+        with top-level wms_item_family_storage_attributes_conflict and detail
+        wms_item_family_storage_attribute_already_exists or
+        wms_item_family_storage_attribute_not_associated; resource wms_storage_attribute, resourceId
+        UUID, path /add/N or /remove/N. Any 404 excludes later 409 details. No partial mutation.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/parameters/WmsItemFamilyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/schemas/PatchWmsItemFamilyAssociations'
+      responses:
+        '204':
+          $ref: '#/responses/WmsAssociationsUpdated'
+        '400':
+          $ref: '../../../common/errors.yaml#/responses/InvalidRequest'
+        '401':
+          $ref: '../../../common/errors.yaml#/responses/Unauthorized'
+        '403':
+          $ref: '../../../common/errors.yaml#/responses/Forbidden'
+        '404':
+          $ref: '#/responses/WmsAssociationNotFound'
+        '409':
+          $ref: '#/responses/WmsAssociationConflict'
+        '503':
+          $ref: '../shared.yaml#/responses/WmsDisabled'
+  /api/wms/item-families/{familyId}/storage-attributes/{storageAttributeId}:
+    delete:
+      operationId: deleteWmsItemFamilyAssociation
+      summary: Remove one association
+      description: >-
+        Administrator only; erbas.wms enabled. Follow docs/api-conventions.md for HTTP,
+        security/gating precedence, headers and localization. No redirects; Cache-Control no-store;
+        only 401 carries WWW-Authenticate Bearer. See docs/wms-003.md for domain rules. No query
+        parameters. Closed JSON bodies reject duplicate property names and malformed JSON. Malformed
+        IDs return 400. Missing family detail uses wms_item_family_not_found; missing master uses
+        wms_storage_attribute_not_found. Return all safe missing-resource details before any 409. A
+        single missing resource uses its detail code as top-level code; multiple use
+        wms_item_family_storage_attributes_not_found. Context uses resource and resourceId; body
+        locations are JSON Pointers. Deterministic details: family first, then body order (add
+        before remove); repeated references retain their request locations. When both masters exist
+        but pair does not, return 404 wms_item_family_storage_attribute_not_found. Repeated DELETE
+        normally returns 404; final state remains idempotent.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/parameters/WmsItemFamilyId'
+        - $ref: '../storage-attributes/contract.yaml#/parameters/WmsStorageAttributeId'
+      responses:
+        '204':
+          $ref: '#/responses/WmsAssociationsUpdated'
+        '400':
+          $ref: '../../../common/errors.yaml#/responses/InvalidRequest'
+        '401':
+          $ref: '../../../common/errors.yaml#/responses/Unauthorized'
+        '403':
+          $ref: '../../../common/errors.yaml#/responses/Forbidden'
+        '404':
+          $ref: '#/responses/WmsAssociationNotFound'
+        '503':
+          $ref: '../shared.yaml#/responses/WmsDisabled'
+parameters:
+  WmsItemFamilyId:
+    name: familyId
+    in: path
+    required: true
+    description: Canonical non-nil lowercase WMS UUID; malformed is 400, absent is 404.
+    schema:
+      $ref: '../shared.yaml#/schemas/WmsEntityId'
+responses:
+  CreatedWmsItemFamily:
+    description: Persisted normalized family. WWW-Authenticate must be absent.
+    headers:
+      Cache-Control:
+        required: true
+        schema:
+          type: string
+          const: no-store
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/WmsItemFamily'
+  WmsItemFamilyList:
+    description: COLLECTIONS-001 code ASC ordinal window. WWW-Authenticate must be absent.
+    headers:
+      Cache-Control:
+        required: true
+        schema:
+          type: string
+          const: no-store
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/WmsItemFamilyCollection'
+  WmsItemFamilyCodeConflict:
+    description: Exact family code already exists; no changes. WWW-Authenticate must be absent.
+    headers:
+      Cache-Control:
+        required: true
+        schema:
+          type: string
+          const: no-store
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/WmsItemFamilyCodeConflict'
+  CreatedWmsItemFamilyAssociation:
+    description: Created unique pair; complete persisted attribute. WWW-Authenticate must be absent.
+    headers:
+      Cache-Control:
+        required: true
+        schema:
+          type: string
+          const: no-store
+      Location:
+        required: true
+        schema:
+          type: string
+          pattern: '^/api/wms/item-families/[0-9a-f-]+/storage-attributes/[0-9a-f-]+$'
+        description: /api/wms/item-families/{familyId}/storage-attributes/{storageAttributeId} with the created pair IDs.
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/WmsItemFamilyAssociation'
+  WmsAssociationsUpdated:
+    description: Atomic mutation succeeded; no body. WWW-Authenticate must be absent.
+    headers:
+      Cache-Control:
+        required: true
+        schema:
+          type: string
+          const: no-store
+  WmsAssociationNotFound:
+    description: Existence stage only; all safely determinable missing resources, no later conflicts. See docs/wms-003.md for operation-specific top-level codes and details. WWW-Authenticate must be absent.
+    headers:
+      Cache-Control:
+        required: true
+        schema:
+          type: string
+          const: no-store
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/WmsAssociationNotFound'
+  WmsAssociationConflict:
+    description: All pre-state conflicts; no changes. POST uses singular top-level conflict; PATCH uses plural. WWW-Authenticate must be absent.
+    headers:
+      Cache-Control:
+        required: true
+        schema:
+          type: string
+          const: no-store
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/WmsAssociationConflict'
+schemas:
+  CreateWmsItemFamily:
+    type: object
+    additionalProperties: false
+    required: [code, name]
+    properties:
+      code:
+        $ref: '../shared.yaml#/schemas/WmsCatalogueCode'
+      name:
+        $ref: '../shared.yaml#/schemas/WmsCatalogueNameInput'
+  WmsItemFamily:
+    type: object
+    additionalProperties: false
+    required: [id, code, name]
+    properties:
+      id:
+        $ref: '../shared.yaml#/schemas/WmsEntityId'
+      code:
+        $ref: '../shared.yaml#/schemas/WmsCatalogueCode'
+      name:
+        $ref: '../shared.yaml#/schemas/WmsCatalogueName'
+  WmsItemFamilyCollection:
+    type: object
+    additionalProperties: false
+    required: [items, offset, limit, total, order]
+    properties:
+      items:
+        type: array
+        items:
+          $ref: '#/schemas/WmsItemFamily'
+      offset:
+        type: integer
+        minimum: 0
+      limit:
+        type: integer
+        minimum: 1
+        maximum: 100
+      total:
+        type: integer
+        minimum: 0
+      order:
+        type: array
+        minItems: 1
+        maxItems: 1
+        items:
+          $ref: '../../../common/pagination.yaml#/schemas/Order'
+        const: [{field: code, direction: asc}]
+  CreateWmsItemFamilyAssociation:
+    type: object
+    additionalProperties: false
+    required: [storageAttributeId]
+    properties:
+      storageAttributeId:
+        $ref: '../shared.yaml#/schemas/WmsEntityId'
+  WmsItemFamilyAssociation:
+    type: object
+    additionalProperties: false
+    required: [itemFamilyId, storageAttribute]
+    properties:
+      itemFamilyId:
+        $ref: '../shared.yaml#/schemas/WmsEntityId'
+      storageAttribute:
+        $ref: '../storage-attributes/contract.yaml#/schemas/WmsStorageAttribute'
+  ReplaceWmsItemFamilyAssociations:
+    type: object
+    additionalProperties: false
+    required: [storageAttributeIds]
+    properties:
+      storageAttributeIds:
+        $ref: '../shared.yaml#/schemas/WmsStorageAttributeIds'
+  PatchWmsItemFamilyAssociations:
+    type: object
+    additionalProperties: false
+    properties:
+      add:
+        $ref: '../shared.yaml#/schemas/WmsStorageAttributeIds'
+      remove:
+        $ref: '../shared.yaml#/schemas/WmsStorageAttributeIds'
+    anyOf:
+      - required: [add]
+        properties:
+          add:
+            minItems: 1
+      - required: [remove]
+        properties:
+          remove:
+            minItems: 1
+    description: Evaluate both arrays against pre-operation state. Overlap is structurally valid; duplicates within either array are invalid. Atomic; existence validation precedes relation conflicts.
+  WmsItemFamilyCodeConflict:
+    allOf:
+      - $ref: '../../../common/errors.yaml#/schemas/ErrorResponse'
+      - properties:
+          code:
+            enum: [wms_item_family_code_conflict]
+          errors:
+            items:
+              allOf:
+                - $ref: '../../../common/errors.yaml#/schemas/ErrorDetail'
+                - properties:
+                    code:
+                      enum: [wms_item_family_code_conflict]
+                    resource:
+                      enum: [wms_item_family, wms_storage_attribute, wms_item_family_storage_attribute]
+  WmsAssociationNotFound:
+    allOf:
+      - $ref: '../../../common/errors.yaml#/schemas/ErrorResponse'
+      - properties:
+          code:
+            enum: [wms_item_family_not_found, wms_storage_attribute_not_found, wms_item_family_storage_attribute_not_found, wms_item_family_storage_attributes_not_found]
+          errors:
+            items:
+              allOf:
+                - $ref: '../../../common/errors.yaml#/schemas/ErrorDetail'
+                - properties:
+                    code:
+                      enum: [wms_item_family_not_found, wms_storage_attribute_not_found, wms_item_family_storage_attribute_not_found]
+                    resource:
+                      enum: [wms_item_family, wms_storage_attribute, wms_item_family_storage_attribute]
+  WmsAssociationConflict:
+    allOf:
+      - $ref: '../../../common/errors.yaml#/schemas/ErrorResponse'
+      - properties:
+          code:
+            enum: [wms_item_family_storage_attribute_conflict, wms_item_family_storage_attributes_conflict]
+          errors:
+            items:
+              allOf:
+                - $ref: '../../../common/errors.yaml#/schemas/ErrorDetail'
+                - properties:
+                    code:
+                      enum: [wms_item_family_storage_attribute_already_exists, wms_item_family_storage_attribute_not_associated]
+                    resource:
+                      enum: [wms_item_family, wms_storage_attribute, wms_item_family_storage_attribute]

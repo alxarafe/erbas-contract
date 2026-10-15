@@ -1,0 +1,29 @@
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Check HTTP process liveness
+      description: >-
+        Public liveness probe. Clients send Accept application/json. The response
+        has exactly one property. JSON whitespace and property order have no
+        contractual significance. Valid media type parameters are accepted.
+        A redirect is not a conforming response.
+      responses:
+        '200':
+          description: The HTTP process is alive.
+          content:
+            application/json:
+              schema:
+                $ref: '#/schemas/HealthResponse'
+              example:
+                status: ok
+schemas:
+  HealthResponse:
+    type: object
+    additionalProperties: false
+    required:
+      - status
+    properties:
+      status:
+        type: string
+        const: ok

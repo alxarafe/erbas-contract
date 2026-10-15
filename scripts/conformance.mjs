@@ -1,5 +1,5 @@
-import { readdir, readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { coreScopes, coreFullPaths, coreScopePaths, administratorBootstrap } from './conformance/core.mjs';
+import { wmsScopes, wmsFullPaths, wmsScopePaths, wmsScopeTimeoutMs } from './conformance/modules/wms.mjs';
 import { runProcess } from './process.mjs';
 
 export function normalizeBaseUrl(input) {
@@ -17,51 +17,18 @@ export function requireCredentials(env = process.env) {
 }
 
 // Scope names are the only selection API; callers never assemble CLI paths.
-export const conformanceScopes = Object.freeze({
-  full: 'full', health: 'health', auth: 'auth', users: 'users',
-  collections: 'collections', modules: 'modules', wms: 'wms', storageAttributes: 'storage-attributes', itemFamilies: 'item-families'
-});
+export const conformanceScopes = Object.freeze({ full: 'full', ...coreScopes, ...wmsScopes });
 const collectionDirectory = '/runner/bruno';
 const scopedConformanceTimeoutMs = 30000;
 const fullConformanceTimeoutMs = 120000;
-const itemFamilyConformanceTimeoutMs = 90000;
-const administratorLogin = 'login-success.bru';
-const createNormalUser = 'users-19-create-normal-user.bru';
-const listUsers = 'users-20-list-users.bru';
-const normalUserLogin = 'users-22-normal-user-login.bru';
-const passwordBoundaryRequests = ['users-66-password-boundary-12.bru', 'users-67-password-boundary-256.bru'];
 
 async function scopePaths(scope) {
-  switch (scope) {
-    case conformanceScopes.full: return ['.', conformanceScopes.modules, conformanceScopes.wms, conformanceScopes.storageAttributes, conformanceScopes.itemFamilies];
-    case conformanceScopes.health: return ['health.bru'];
-    case conformanceScopes.modules:
-      return [administratorLogin, createNormalUser, normalUserLogin, conformanceScopes.modules];
-    case conformanceScopes.itemFamilies:
-      return [administratorLogin, createNormalUser, normalUserLogin, conformanceScopes.itemFamilies];
-    case conformanceScopes.storageAttributes:
-      return [administratorLogin, createNormalUser, normalUserLogin, conformanceScopes.storageAttributes];
-    case conformanceScopes.wms:
-      return [administratorLogin, createNormalUser, normalUserLogin, conformanceScopes.wms];
-    case conformanceScopes.auth:
-    case conformanceScopes.users:
-    case conformanceScopes.collections: {
-      const prefix = scope === conformanceScopes.auth ? 'login-'
-        : scope === conformanceScopes.users ? 'users-' : 'collections-';
-      const requests = [];
-      for (const file of await readdir(collectionDirectory)) {
-        if (file.startsWith(prefix) && file.endsWith('.bru')) {
-          const source = await readFile(join(collectionDirectory, file), 'utf8');
-          requests.push({ file, sequence: Number(source.match(/seq: (\d+)/)[1]) });
-        }
-      }
-      const selected = requests.sort((a, b) => a.sequence - b.sequence).map(request => request.file);
-      if (scope === conformanceScopes.auth) return selected;
-      if (scope === conformanceScopes.users) return [administratorLogin, ...selected];
-      return [administratorLogin, createNormalUser, listUsers, ...passwordBoundaryRequests, ...selected];
-    }
-    default: throw new Error('Unknown conformance scope.');
-  }
+  if (scope === conformanceScopes.full) return [...coreFullPaths, ...wmsFullPaths];
+  const core = await coreScopePaths(scope, collectionDirectory);
+  if (core) return core;
+  const module = wmsScopePaths(scope);
+  if (module) return [...administratorBootstrap, ...module];
+  throw new Error('Unknown conformance scope.');
 }
 
 export async function runBruno(baseUrl, { scope = conformanceScopes.full, env = process.env } = {}) {
@@ -69,7 +36,7 @@ export async function runBruno(baseUrl, { scope = conformanceScopes.full, env = 
   const paths = await scopePaths(scope);
   const timeoutMs = scope === conformanceScopes.full
     ? fullConformanceTimeoutMs
-    : scope === conformanceScopes.itemFamilies ? itemFamilyConformanceTimeoutMs : scopedConformanceTimeoutMs;
+    : wmsScopeTimeoutMs(scope) ?? scopedConformanceTimeoutMs;
   const result = await runProcess(process.execPath, [
     // Bruno 4.2.0 executes explicit paths in argument order, retaining folder checks.
     '/runner/node_modules/@usebruno/cli/bin/bru.js', 'run', ...paths,
