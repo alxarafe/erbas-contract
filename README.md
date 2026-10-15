@@ -16,6 +16,9 @@
 ERBAS Contract defines one observable HTTP API for independent backend stacks
 and a shared client. OpenAPI specifies the behavior; one Bruno collection checks
 it against a supplied URL, keeping implementation details outside the contract.
+Sources separate common HTTP primitives, CORE platform behavior and functional
+modules while retaining one API, version, OpenAPI root and collection. See the
+[source ownership decision](docs/decisions/0002-contract-source-boundaries.md).
 
 ## ERBAS ecosystem
 
@@ -55,17 +58,17 @@ pushes to `main`, without publishing anything.
 Conformance mutates users, module states and WMS catalogues and requires an isolated disposable environment.
 Both run through Docker; see [usage and networking](docs/usage.md).
 
-See [development ports](docs/development-ports.md) for local infrastructure conventions.
+See [development ports](docs/common/development-ports.md) for local infrastructure conventions.
 
 This branch prepares **unpublished v0.8.0** Item Families, Storage Attribute
-associations and the standard error envelope. See [WMS-003](docs/wms-003.md).
+associations and the standard error envelope. See [WMS-003](docs/modules/wms/wms-003.md).
 No backend or client v0.8.0 adoption or conformance is claimed.
 
 ## Current contractual coverage
 
 **v0.7.0 is the current published immutable release**, including CORE module
-administration, WMS UoMs and Storage Attributes. See [versioning](docs/versioning.md)
-and [WMS-002](docs/wms-002.md). Backend adoption, shared conformance and client
+administration, WMS UoMs and Storage Attributes. See [versioning](docs/common/versioning.md)
+and [WMS-002](docs/modules/wms/wms-002.md). Backend adoption, shared conformance and client
 consumption are separate facts; the recorded Java/.NET adoption remains v0.6.0.
 
 ```text
@@ -78,14 +81,14 @@ This public probe only establishes HTTP process liveness, not PostgreSQL or
 dependency health; exact response rules are in [OpenAPI](openapi/erbas.yaml).
 
 AUTH-001 adds `POST /api/auth/login`: email/password JSON, a minimal access-token
-response, and distinct 400/401 errors. See [AUTH-001](docs/auth-001.md) for the
+response, and distinct 400/401 errors. See [AUTH-001](docs/core/auth-001.md) for the
 contract and test credentials; its dated compatibility review records historical
 adaptation requirements.
 
 USERS-001 adds `/api/auth/me` and administrator-only user list, get, create and
 update operations. Disabled users cannot authenticate or retain access. See
-[USERS-001](docs/users-001.md) for the minimal model and rules.
-[COLLECTIONS-001](docs/collections.md) standardizes paged collections and applies
+[USERS-001](docs/core/users-001.md) for the minimal model and rules.
+[COLLECTIONS-001](docs/common/collections.md) standardizes paged collections and applies
 `items`, `offset`, `limit`, `total`, `order` to user listing. Both backends
 implement these capabilities; Angular consumes basic user administration and
 pagination from either backend. See the
@@ -95,7 +98,7 @@ for behavior and verification scope.
 Java and .NET both pin published `v0.6.0` and require the shared suite through
 their authoritative `./bin/check`, locally and in GitHub Actions.
 .NET's `POST /api/auth/register` remains an
-[implementation-specific extension](docs/implementation-extensions.md).
+[implementation-specific extension](docs/common/implementation-extensions.md).
 Angular CI checks the client and isolated runtime proxies; the
 [real dual-backend demo](https://github.com/alxarafe/erbas-client/blob/main/docs/full-stack-development.md#web-002-integration-verification-2026-10-09)
 provides separate integration evidence. Workflow results do not guarantee future
@@ -112,7 +115,7 @@ verification evidence, versioning, and working rules.
 
 `v0.4.0` is the first published immutable release, adopted by both backends.
 CONTRACT-002 is complete. See the [release notes](docs/releases/v0.4.0.md) and
-[versioning/publication procedure](docs/versioning.md) for its exact commit and
+[versioning/publication procedure](docs/common/versioning.md) for its exact commit and
 consumption policy. Consumers must pin the published version and verify conformance.
 Backend workflows and their coverage are described in the
 [documentation index](docs/README.md#verification-badges).

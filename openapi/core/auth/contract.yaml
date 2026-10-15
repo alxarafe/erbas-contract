@@ -1,0 +1,103 @@
+paths:
+  /api/auth/login:
+    post:
+      operationId: login
+      summary: Authenticate with email and password
+      description: >-
+        Public endpoint. Send Content-Type and Accept application/json.
+        Field names are case-sensitive. No trimming or transformation of the
+        password is permitted. Additional fields are rejected. Nonempty strings
+        are structurally valid; email syntax and password strength policies are
+        not login validation rules. All unsuccessful credential checks return
+        the same 401 representation, including nonexistent and disabled accounts. Disabled users cannot authenticate;
+        previously issued tokens become invalid on protected endpoints.
+        Tokens are opaque to clients and used as Authorization: Bearer TOKEN
+        against the issuing backend. Cross-backend token acceptance is not required.
+        No redirects. JSON whitespace and property order are insignificant;
+        syntactically valid media type parameters are accepted.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authentication succeeded. Token lifetime is backend-owned.
+          headers:
+            Cache-Control:
+              required: true
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/schemas/LoginResponse'
+        '400':
+          description: Malformed JSON or body not matching LoginRequest.
+          content:
+            application/json:
+              schema:
+                $ref: '../../common/errors.yaml#/schemas/InvalidLoginRequest'
+        '401':
+          description: Authentication failed, without revealing account existence.
+          headers:
+            WWW-Authenticate:
+              required: true
+              schema:
+                type: string
+                const: Bearer
+          content:
+            application/json:
+              schema:
+                $ref: '#/schemas/InvalidCredentials'
+  /api/auth/me:
+    get:
+      operationId: getCurrentUser
+      summary: Get the authenticated user
+      description: Any authenticated enabled user. The admin flag informs UI only. All responses use Cache-Control no-store. No redirects.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          $ref: '../users/contract.yaml#/responses/CurrentUser'
+        '401':
+          $ref: '../../common/errors.yaml#/responses/Unauthorized'
+schemas:
+  LoginRequest:
+    type: object
+    additionalProperties: false
+    required: [email, password]
+    properties:
+      email:
+        type: string
+        minLength: 1
+      password:
+        type: string
+        minLength: 1
+  LoginResponse:
+    type: object
+    additionalProperties: false
+    required: [accessToken]
+    properties:
+      accessToken:
+        type: string
+        minLength: 1
+        pattern: '^[A-Za-z0-9._~+/-]+=*(?![\s\S])'
+        description: Bearer header-compatible opaque token (RFC 6750 section 2.1).
+  InvalidCredentials:
+    allOf:
+      - $ref: '../../common/errors.yaml#/schemas/ErrorResponse'
+      - properties:
+          code:
+            const: invalid_credentials
+          errors:
+            minItems: 1
+            maxItems: 1
+            items:
+              allOf:
+                - $ref: '../../common/errors.yaml#/schemas/ErrorDetail'
+                - properties:
+                    code:
+                      const: invalid_credentials

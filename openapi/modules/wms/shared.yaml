@@ -1,0 +1,60 @@
+responses:
+  WmsDisabled:
+    description: erbas.wms is disabled; checked after authorization, before validation. No Retry-After header. WWW-Authenticate must be absent.
+    headers:
+      Cache-Control:
+        required: true
+        schema:
+          type: string
+          const: no-store
+    content:
+      application/json:
+        schema:
+          $ref: '../../common/errors.yaml#/schemas/ModuleDisabled'
+schemas:
+  WmsEntityId:
+    type: string
+    format: uuid
+    pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+    not:
+      const: 00000000-0000-0000-0000-000000000000
+    description: Server-generated non-nil UUID, canonical lowercase text; version unspecified. Clients treat it as opaque.
+  WmsCatalogueCode:
+    type: string
+    minLength: 1
+    maxLength: 30
+    pattern: '^[A-Z][A-Z0-9_]{0,29}$'
+    not:
+      pattern: '[\r\n]'
+    description: Unique code in the WMS Storage Attribute catalogue. 1..30 ASCII characters, exact case, no normalization. IS_* codes are permitted.
+  WmsCatalogueName:
+    type: string
+    minLength: 1
+    maxLength: 255
+    pattern: '[^ \t\r\n]'
+    not:
+      pattern: '\u0000'
+    description: >-
+      Normalized user-supplied label; never translated. Remove all consecutive
+      ASCII space (U+0020), tab (U+0009), CR (U+000D) and LF (U+000A) at each
+      boundary before validation and persistence. Length after trimming is
+      1..255 Unicode scalar values. Empty and whitespace-only values are invalid.
+      Preserve case, internal whitespace and all other characters. NUL and
+      unpaired surrogates are invalid. Responses contain the persisted normalized value.
+  WmsCatalogueNameInput:
+    type: string
+    minLength: 1
+    pattern: '[^ \t\r\n]'
+    not:
+      pattern: '\u0000'
+    description: >-
+      Required user content. Apply the boundary trimming defined by
+      WmsStorageAttributeName before validating its 1..255 Unicode scalar-value length
+      and persisting. Padding does not count toward this limit, so maxLength is
+      deliberately not imposed on the raw input. NUL and unpaired surrogates
+      are invalid. No translation or internal-space normalization.
+  WmsStorageAttributeIds:
+    type: array
+    uniqueItems: true
+    items:
+      $ref: '#/schemas/WmsEntityId'

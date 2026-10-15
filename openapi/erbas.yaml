@@ -7,1757 +7,199 @@ info:
 security: []
 paths:
   /health:
-    get:
-      operationId: getHealth
-      summary: Check HTTP process liveness
-      description: >-
-        Public liveness probe. Clients send Accept application/json. The response
-        has exactly one property. JSON whitespace and property order have no
-        contractual significance. Valid media type parameters are accepted.
-        A redirect is not a conforming response.
-      responses:
-        '200':
-          description: The HTTP process is alive.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HealthResponse'
-              example:
-                status: ok
+    $ref: './core/health/contract.yaml#/paths/~1health'
   /api/auth/login:
-    post:
-      operationId: login
-      summary: Authenticate with email and password
-      description: >-
-        Public endpoint. Send Content-Type and Accept application/json.
-        Field names are case-sensitive. No trimming or transformation of the
-        password is permitted. Additional fields are rejected. Nonempty strings
-        are structurally valid; email syntax and password strength policies are
-        not login validation rules. All unsuccessful credential checks return
-        the same 401 representation, including nonexistent and disabled accounts. Disabled users cannot authenticate;
-        previously issued tokens become invalid on protected endpoints.
-        Tokens are opaque to clients and used as Authorization: Bearer TOKEN
-        against the issuing backend. Cross-backend token acceptance is not required.
-        No redirects. JSON whitespace and property order are insignificant;
-        syntactically valid media type parameters are accepted.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LoginRequest'
-      responses:
-        '200':
-          description: Authentication succeeded. Token lifetime is backend-owned.
-          headers:
-            Cache-Control:
-              required: true
-              schema:
-                type: string
-                const: no-store
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LoginResponse'
-        '400':
-          description: Malformed JSON or body not matching LoginRequest.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InvalidLoginRequest'
-        '401':
-          description: Authentication failed, without revealing account existence.
-          headers:
-            WWW-Authenticate:
-              required: true
-              schema:
-                type: string
-                const: Bearer
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InvalidCredentials'
+    $ref: './core/auth/contract.yaml#/paths/~1api~1auth~1login'
   /api/auth/me:
-    get:
-      operationId: getCurrentUser
-      summary: Get the authenticated user
-      description: Any authenticated enabled user. The admin flag informs UI only. All responses use Cache-Control no-store. No redirects.
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          $ref: '#/components/responses/CurrentUser'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+    $ref: './core/auth/contract.yaml#/paths/~1api~1auth~1me'
   /api/users:
-    get:
-      operationId: listUsers
-      summary: List a user window
-      description: Administrator only. Offset/limit pagination after stable server-side id ASC ordering. IDs remain opaque; clients need not reproduce the comparison. No custom ordering, filters or search. All responses use Cache-Control no-store. No redirects.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: offset
-          in: query
-          description: Nonnegative integer displacement before taking items. Beyond total returns an empty page, not an error.
-          schema:
-            type: integer
-            minimum: 0
-            default: 0
-        - name: limit
-          in: query
-          description: Effective maximum number of items, not the returned item count. Invalid values are rejected without clamping.
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 50
-      responses:
-        '200':
-          $ref: '#/components/responses/UserList'
-        '400':
-          $ref: '#/components/responses/InvalidRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-    post:
-      operationId: createUser
-      summary: Create an enabled user
-      description: Administrator only. Exact duplicate email conflicts. Password is never returned. All responses use Cache-Control no-store. No redirects.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateUserRequest'
-      responses:
-        '201':
-          $ref: '#/components/responses/CreatedUser'
-        '400':
-          $ref: '#/components/responses/InvalidRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/EmailConflict'
+    $ref: './core/users/contract.yaml#/paths/~1api~1users'
   /api/users/{id}:
-    get:
-      operationId: getUser
-      summary: Get a user
-      description: Administrator only. Authenticate and authorize before lookup. All responses use Cache-Control no-store. No redirects.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: Opaque user identifier; consumers must not interpret its format.
-          schema:
-            type: string
-            minLength: 1
-      responses:
-        '200':
-          $ref: '#/components/responses/CurrentUser'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/UserNotFound'
-    patch:
-      operationId: updateUser
-      summary: Update enabled or admin
-      description: Administrator only. Authenticate and authorize before lookup. Atomically reject updates leaving no enabled administrator, including self-disable or self-demotion. Email and password cannot be edited. All responses use Cache-Control no-store. No redirects.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: Opaque user identifier; consumers must not interpret its format.
-          schema:
-            type: string
-            minLength: 1
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateUserRequest'
-      responses:
-        '200':
-          $ref: '#/components/responses/CurrentUser'
-        '400':
-          $ref: '#/components/responses/InvalidRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/UserNotFound'
-        '409':
-          $ref: '#/components/responses/LastAdmin'
+    $ref: './core/users/contract.yaml#/paths/~1api~1users~1{id}'
   /api/modules:
-    get:
-      operationId: listModules
-      summary: List AVAILABLE modules
-      description: >-
-        CORE endpoint, never module-gated, even when all modules are disabled.
-        Administrator only (User.admin true). Authentication and administrator
-        authorization precede pagination validation. Only modules discovered by
-        the current process registry are AVAILABLE; historical persisted states
-        of absent modules are excluded. Stable server-side id ASC order is applied
-        before offset/limit. IDs are opaque; clients need not reproduce comparison.
-        All responses are JSON with Cache-Control no-store, without redirects.
-        Only 401 includes WWW-Authenticate Bearer; all other responses omit it.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: offset
-          in: query
-          description: Nonnegative integer displacement before taking items. Beyond total returns an empty page, not an error.
-          schema:
-            type: integer
-            minimum: 0
-            default: 0
-        - name: limit
-          in: query
-          description: Effective maximum number of items, not the returned item count. Invalid values are rejected without clamping.
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 50
-      responses:
-        '200':
-          $ref: '#/components/responses/ModuleList'
-        '400':
-          $ref: '#/components/responses/InvalidRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
+    $ref: './core/modularity/contract.yaml#/paths/~1api~1modules'
   /api/modules/{id}:
-    patch:
-      operationId: updateModule
-      summary: Set persistent module enabled state
-      description: >-
-        CORE endpoint, never module-gated. Administrator only (User.admin true).
-        Authenticate and authorize before body validation, lookup or transition.
-        Only AVAILABLE module IDs match; matching is case-sensitive. Enabled is
-        persistent administrative state, not availability, initialization or health.
-        Success returns the complete module after persistence; repeated requests
-        for the current state also succeed. Changes take effect without restart.
-        Every enabled module must have all required dependencies enabled throughout
-        the graph. Reject enable with a disabled dependency or disable with an
-        enabled dependent, including indirect dependencies. No automatic cascades.
-        A conflict is atomic and leaves no partial persisted change. For an admin
-        submitting both invalid body and unknown ID, 400 versus 404 precedence is
-        unspecified. Malformed JSON, non-object bodies, missing/nonboolean enabled
-        and any additional property are invalid. All responses are JSON with
-        Cache-Control no-store; no redirects. Only 401 includes WWW-Authenticate
-        Bearer; all other responses omit it. No internal details are exposed.
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: Stable opaque case-sensitive module identifier; its format must not be interpreted.
-          schema:
-            type: string
-            minLength: 1
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateModuleRequest'
-      responses:
-        '200':
-          $ref: '#/components/responses/UpdatedModule'
-        '400':
-          $ref: '#/components/responses/InvalidRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/ModuleNotFound'
-        '409':
-          $ref: '#/components/responses/ModuleDependencyConflict'
+    $ref: './core/modularity/contract.yaml#/paths/~1api~1modules~1{id}'
   /api/wms/uoms:
-    get:
-      operationId: listWmsUoms
-      summary: List a unit-of-measure window
-      description: >-
-        Administrator only. Authenticate, authorize, then check erbas.wms enabled
-        before validating pagination. COLLECTIONS-001 envelope, fixed code ASC
-        ordinal order before pagination. Only offset and limit are accepted;
-        repeated keys or other query parameters return 400. No filters or sorting.
-        All responses use application/json and Cache-Control no-store. No redirects.
-        Only 401 has WWW-Authenticate Bearer; all other statuses omit that header.
-        Accept-Language never changes codes, properties or stored descriptions.
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/Offset'
-        - $ref: '#/components/parameters/Limit'
-      responses:
-        '200':
-          $ref: '#/components/responses/WmsUomList'
-        '400':
-          $ref: '#/components/responses/InvalidRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '503':
-          $ref: '#/components/responses/WmsDisabled'
-    post:
-      operationId: createWmsUom
-      summary: Create a unit of measure
-      description: >-
-        Administrator only. Authenticate, authorize, then check erbas.wms enabled
-        before parsing or validating the body. Closed object with case-sensitive
-        property names; additional or duplicated properties are invalid. Codes are
-        not trimmed, uppercased or otherwise normalized. Trim description boundary
-        ASCII space, tab, CR and LF before validation and persistence; return the
-        normalized value. Preserve internal whitespace and case. No query parameters accepted.
-        Codes are unique in this WMS catalogue, independently of description.
-        Duplicate creation returns 409 without updating the original or adding a row.
-        IDs are generated by the server, immutable and unique; UUID version is not
-        prescribed. Success commits before returning and is visible to subsequent
-        list requests. All responses use application/json and Cache-Control no-store.
-        No redirects. Only 401 has WWW-Authenticate Bearer. No Location header is
-        required because there is no item GET operation in this increment.
-        Accept-Language never changes technical errors or stored descriptions.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateWmsUom'
-      responses:
-        '201':
-          $ref: '#/components/responses/CreatedWmsUom'
-        '400':
-          $ref: '#/components/responses/InvalidRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/WmsUomCodeConflict'
-        '503':
-          $ref: '#/components/responses/WmsDisabled'
+    $ref: './modules/wms/uoms/contract.yaml#/paths/~1api~1wms~1uoms'
   /api/wms/storage-attributes:
-    get:
-      operationId: listWmsStorageAttributes
-      summary: List a storage-attribute window
-      description: >-
-        Administrator only. Authenticate, authorize, then check erbas.wms enabled
-        before validating pagination. COLLECTIONS-001 envelope, fixed code ASC
-        ordinal order before pagination. Only offset and limit are accepted;
-        repeated keys or other query parameters return 400. No filters or sorting.
-        All responses use application/json and Cache-Control no-store. No redirects.
-        Only 401 has WWW-Authenticate Bearer; all other statuses omit that header.
-        Accept-Language never changes codes, properties or stored names.
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/Offset'
-        - $ref: '#/components/parameters/Limit'
-      responses:
-        '200':
-          $ref: '#/components/responses/WmsStorageAttributeList'
-        '400':
-          $ref: '#/components/responses/InvalidRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '503':
-          $ref: '#/components/responses/WmsDisabled'
-    post:
-      operationId: createWmsStorageAttribute
-      summary: Create a storage attribute
-      description: >-
-        Administrator only. Authenticate, authorize, then check erbas.wms enabled
-        before parsing or validating the body. Closed object with case-sensitive
-        property names; additional or duplicated properties are invalid. Codes are
-        not trimmed, uppercased or otherwise normalized. Trim name boundary
-        ASCII space, tab, CR and LF before validation and persistence; return the
-        normalized value. Preserve internal whitespace and case. No query parameters accepted.
-        Codes are unique in this WMS catalogue, independently of name.
-        Duplicate creation returns 409 without updating the original or adding a row.
-        IDs are generated by the server, immutable and unique; UUID version is not
-        prescribed. Success commits before returning and is visible to subsequent
-        list requests. All responses use application/json and Cache-Control no-store.
-        No redirects. Only 401 has WWW-Authenticate Bearer. No Location header is
-        required because there is no item GET operation in this increment.
-        Accept-Language never changes technical errors or stored names.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateWmsStorageAttribute'
-      responses:
-        '201':
-          $ref: '#/components/responses/CreatedWmsStorageAttribute'
-        '400':
-          $ref: '#/components/responses/InvalidRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/WmsStorageAttributeCodeConflict'
-        '503':
-          $ref: '#/components/responses/WmsDisabled'
+    $ref: './modules/wms/storage-attributes/contract.yaml#/paths/~1api~1wms~1storage-attributes'
   /api/wms/item-families:
-    get:
-      operationId: listWmsItemFamilies
-      summary: List Item Families
-      description: >-
-        Administrator only; erbas.wms enabled. Follow docs/api-conventions.md for HTTP,
-        security/gating precedence, headers and localization. No redirects; Cache-Control no-store;
-        only 401 carries WWW-Authenticate Bearer. See docs/wms-003.md for domain rules.
-        COLLECTIONS-001; only offset/limit, each at most once, strict decimal text, unknown queries
-        rejected. Ordinal code ASC before slicing, total before slicing, huge/beyond-total offset
-        returns empty items with complete metadata. Associations are never embedded in the family
-        catalogue.
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/Offset'
-        - $ref: '#/components/parameters/Limit'
-      responses:
-        '200':
-          $ref: '#/components/responses/WmsItemFamilyList'
-        '400':
-          $ref: '#/components/responses/InvalidRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '503':
-          $ref: '#/components/responses/WmsDisabled'
-    post:
-      operationId: createWmsItemFamily
-      summary: Create an Item Family
-      description: >-
-        Administrator only; erbas.wms enabled. Follow docs/api-conventions.md for HTTP,
-        security/gating precedence, headers and localization. No redirects; Cache-Control no-store;
-        only 401 carries WWW-Authenticate Bearer. See docs/wms-003.md for domain rules. No query
-        parameters. Closed JSON bodies reject duplicate property names and malformed JSON. Exact
-        case-sensitive code uniqueness; persist normalized name. No individual family GET, PATCH or
-        DELETE.
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateWmsItemFamily'
-      responses:
-        '201':
-          $ref: '#/components/responses/CreatedWmsItemFamily'
-        '400':
-          $ref: '#/components/responses/InvalidRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/WmsItemFamilyCodeConflict'
-        '503':
-          $ref: '#/components/responses/WmsDisabled'
+    $ref: './modules/wms/item-families/contract.yaml#/paths/~1api~1wms~1item-families'
   /api/wms/item-families/{familyId}/storage-attributes:
-    get:
-      operationId: listWmsItemFamilyStorageAttributes
-      summary: List associated complete Storage Attributes
-      description: >-
-        Administrator only; erbas.wms enabled. Follow docs/api-conventions.md for HTTP,
-        security/gating precedence, headers and localization. No redirects; Cache-Control no-store;
-        only 401 carries WWW-Authenticate Bearer. See docs/wms-003.md for domain rules.
-        COLLECTIONS-001; only offset/limit, each at most once, strict decimal text, unknown queries
-        rejected. Ordinal code ASC before slicing, total before slicing, huge/beyond-total offset
-        returns empty items with complete metadata. Associations are never embedded in the family
-        catalogue. Malformed IDs return 400. Missing family detail uses wms_item_family_not_found;
-        missing master uses wms_storage_attribute_not_found. Return all safe missing-resource
-        details before any 409. A single missing resource uses its detail code as top-level code;
-        multiple use wms_item_family_storage_attributes_not_found. Context uses resource and
-        resourceId; body locations are JSON Pointers. Deterministic details: family first, then body
-        order (add before remove); repeated references retain their request locations.
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/WmsItemFamilyId'
-        - $ref: '#/components/parameters/Offset'
-        - $ref: '#/components/parameters/Limit'
-      responses:
-        '200':
-          $ref: '#/components/responses/WmsStorageAttributeList'
-        '400':
-          $ref: '#/components/responses/InvalidRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/WmsAssociationNotFound'
-        '503':
-          $ref: '#/components/responses/WmsDisabled'
-    post:
-      operationId: createWmsItemFamilyAssociation
-      summary: Create one unique association
-      description: >-
-        Administrator only; erbas.wms enabled. Follow docs/api-conventions.md for HTTP,
-        security/gating precedence, headers and localization. No redirects; Cache-Control no-store;
-        only 401 carries WWW-Authenticate Bearer. See docs/wms-003.md for domain rules. No query
-        parameters. Closed JSON bodies reject duplicate property names and malformed JSON. Malformed
-        IDs return 400. Missing family detail uses wms_item_family_not_found; missing master uses
-        wms_storage_attribute_not_found. Return all safe missing-resource details before any 409. A
-        single missing resource uses its detail code as top-level code; multiple use
-        wms_item_family_storage_attributes_not_found. Context uses resource and resourceId; body
-        locations are JSON Pointers. Deterministic details: family first, then body order (add
-        before remove); repeated references retain their request locations. Return exact Location
-        for the created pair. Existing pair returns 409 wms_item_family_storage_attribute_conflict
-        with detail wms_item_family_storage_attribute_already_exists. No partial mutation.
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/WmsItemFamilyId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateWmsItemFamilyAssociation'
-      responses:
-        '201':
-          $ref: '#/components/responses/CreatedWmsItemFamilyAssociation'
-        '400':
-          $ref: '#/components/responses/InvalidRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/WmsAssociationNotFound'
-        '409':
-          $ref: '#/components/responses/WmsAssociationConflict'
-        '503':
-          $ref: '#/components/responses/WmsDisabled'
-    put:
-      operationId: replaceWmsItemFamilyAssociations
-      summary: Replace complete association set
-      description: >-
-        Administrator only; erbas.wms enabled. Follow docs/api-conventions.md for HTTP,
-        security/gating precedence, headers and localization. No redirects; Cache-Control no-store;
-        only 401 carries WWW-Authenticate Bearer. See docs/wms-003.md for domain rules. No query
-        parameters. Closed JSON bodies reject duplicate property names and malformed JSON. Malformed
-        IDs return 400. Missing family detail uses wms_item_family_not_found; missing master uses
-        wms_storage_attribute_not_found. Return all safe missing-resource details before any 409. A
-        single missing resource uses its detail code as top-level code; multiple use
-        wms_item_family_storage_attributes_not_found. Context uses resource and resourceId; body
-        locations are JSON Pointers. Deterministic details: family first, then body order (add
-        before remove); repeated references retain their request locations. Replace the complete set
-        atomically and idempotently; empty array removes all. Duplicates return 400. All missing
-        masters return 404 with /storageAttributeIds/N paths. Identical set returns 204.
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/WmsItemFamilyId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReplaceWmsItemFamilyAssociations'
-      responses:
-        '204':
-          $ref: '#/components/responses/WmsAssociationsUpdated'
-        '400':
-          $ref: '#/components/responses/InvalidRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/WmsAssociationNotFound'
-        '503':
-          $ref: '#/components/responses/WmsDisabled'
-    patch:
-      operationId: patchWmsItemFamilyAssociations
-      summary: Strict atomic association patch
-      description: >-
-        Administrator only; erbas.wms enabled. Follow docs/api-conventions.md for HTTP,
-        security/gating precedence, headers and localization. No redirects; Cache-Control no-store;
-        only 401 carries WWW-Authenticate Bearer. See docs/wms-003.md for domain rules. No query
-        parameters. Closed JSON bodies reject duplicate property names and malformed JSON. Malformed
-        IDs return 400. Missing family detail uses wms_item_family_not_found; missing master uses
-        wms_storage_attribute_not_found. Return all safe missing-resource details before any 409. A
-        single missing resource uses its detail code as top-level code; multiple use
-        wms_item_family_storage_attributes_not_found. Context uses resource and resourceId; body
-        locations are JSON Pointers. Deterministic details: family first, then body order (add
-        before remove); repeated references retain their request locations. At least one effective
-        add/remove is required. Duplicates within one array return 400; overlap across arrays is
-        structurally valid. Validate all masters first, then evaluate all operations against
-        original state. Adding existing and removing unassociated conflict. Return all 409 details
-        with top-level wms_item_family_storage_attributes_conflict and detail
-        wms_item_family_storage_attribute_already_exists or
-        wms_item_family_storage_attribute_not_associated; resource wms_storage_attribute, resourceId
-        UUID, path /add/N or /remove/N. Any 404 excludes later 409 details. No partial mutation.
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/WmsItemFamilyId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchWmsItemFamilyAssociations'
-      responses:
-        '204':
-          $ref: '#/components/responses/WmsAssociationsUpdated'
-        '400':
-          $ref: '#/components/responses/InvalidRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/WmsAssociationNotFound'
-        '409':
-          $ref: '#/components/responses/WmsAssociationConflict'
-        '503':
-          $ref: '#/components/responses/WmsDisabled'
+    $ref: './modules/wms/item-families/contract.yaml#/paths/~1api~1wms~1item-families~1{familyId}~1storage-attributes'
   /api/wms/item-families/{familyId}/storage-attributes/{storageAttributeId}:
-    delete:
-      operationId: deleteWmsItemFamilyAssociation
-      summary: Remove one association
-      description: >-
-        Administrator only; erbas.wms enabled. Follow docs/api-conventions.md for HTTP,
-        security/gating precedence, headers and localization. No redirects; Cache-Control no-store;
-        only 401 carries WWW-Authenticate Bearer. See docs/wms-003.md for domain rules. No query
-        parameters. Closed JSON bodies reject duplicate property names and malformed JSON. Malformed
-        IDs return 400. Missing family detail uses wms_item_family_not_found; missing master uses
-        wms_storage_attribute_not_found. Return all safe missing-resource details before any 409. A
-        single missing resource uses its detail code as top-level code; multiple use
-        wms_item_family_storage_attributes_not_found. Context uses resource and resourceId; body
-        locations are JSON Pointers. Deterministic details: family first, then body order (add
-        before remove); repeated references retain their request locations. When both masters exist
-        but pair does not, return 404 wms_item_family_storage_attribute_not_found. Repeated DELETE
-        normally returns 404; final state remains idempotent.
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/WmsItemFamilyId'
-        - $ref: '#/components/parameters/WmsStorageAttributeId'
-      responses:
-        '204':
-          $ref: '#/components/responses/WmsAssociationsUpdated'
-        '400':
-          $ref: '#/components/responses/InvalidRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/WmsAssociationNotFound'
-        '503':
-          $ref: '#/components/responses/WmsDisabled'
+    $ref: './modules/wms/item-families/contract.yaml#/paths/~1api~1wms~1item-families~1{familyId}~1storage-attributes~1{storageAttributeId}'
 components:
   parameters:
     WmsItemFamilyId:
-      name: familyId
-      in: path
-      required: true
-      description: Canonical non-nil lowercase WMS UUID; malformed is 400, absent is 404.
-      schema:
-        $ref: '#/components/schemas/WmsEntityId'
+      $ref: './modules/wms/item-families/contract.yaml#/parameters/WmsItemFamilyId'
     WmsStorageAttributeId:
-      name: storageAttributeId
-      in: path
-      required: true
-      description: Canonical non-nil lowercase WMS UUID; malformed is 400, absent is 404.
-      schema:
-        $ref: '#/components/schemas/WmsEntityId'
+      $ref: './modules/wms/storage-attributes/contract.yaml#/parameters/WmsStorageAttributeId'
     Offset:
-      name: offset
-      in: query
-      required: false
-      description: Nonnegative base-10 integer displacement; exactly one value. No fractional, exponent, empty or whitespace value.
-      schema:
-        type: integer
-        minimum: 0
-        default: 0
+      $ref: './common/pagination.yaml#/parameters/Offset'
     Limit:
-      name: limit
-      in: query
-      required: false
-      description: Window size from 1 through 100; exactly one base-10 integer value.
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 50
+      $ref: './common/pagination.yaml#/parameters/Limit'
   securitySchemes:
     bearerAuth:
-      type: http
-      scheme: bearer
-      description: Opaque client token; no required token encoding or signing format.
+      $ref: './common/security.yaml#/securitySchemes/bearerAuth'
   responses:
     CurrentUser:
-      description: Public user.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/User'
+      $ref: './core/users/contract.yaml#/responses/CurrentUser'
     CreatedUser:
-      description: Created with enabled true.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/User'
+      $ref: './core/users/contract.yaml#/responses/CreatedUser'
     UserList:
-      description: User window after stable id ASC ordering. Empty collections and offsets at or beyond total return 200 with empty items.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UserCollection'
+      $ref: './core/users/contract.yaml#/responses/UserList'
     InvalidRequest:
-      description: Malformed JSON, structurally invalid body or invalid list pagination.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/InvalidLoginRequest'
+      $ref: './common/errors.yaml#/responses/InvalidRequest'
     Unauthorized:
-      description: Missing, invalid, expired or disabled bearer; no external distinction.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-        WWW-Authenticate:
-          required: true
-          schema:
-            type: string
-            const: Bearer
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Unauthorized'
+      $ref: './common/errors.yaml#/responses/Unauthorized'
     Forbidden:
-      description: Authenticated user is not an administrator. WWW-Authenticate must be absent.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Forbidden'
+      $ref: './common/errors.yaml#/responses/Forbidden'
     UserNotFound:
-      description: User does not exist; only after administrator authorization.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UserNotFound'
+      $ref: './core/users/contract.yaml#/responses/UserNotFound'
     EmailConflict:
-      description: Exactly the same email already exists.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/EmailConflict'
+      $ref: './core/users/contract.yaml#/responses/EmailConflict'
     LastAdmin:
-      description: Update would leave zero enabled administrators.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/LastAdmin'
+      $ref: './core/users/contract.yaml#/responses/LastAdmin'
     ModuleList:
-      description: AVAILABLE module window in stable id ASC order. Empty or out-of-range windows return 200 with complete metadata. WWW-Authenticate must be absent.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ModuleCollection'
+      $ref: './core/modularity/contract.yaml#/responses/ModuleList'
     UpdatedModule:
-      description: Complete module after an idempotent persisted transition. WWW-Authenticate must be absent.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Module'
+      $ref: './core/modularity/contract.yaml#/responses/UpdatedModule'
     ModuleNotFound:
-      description: No AVAILABLE module matches the case-sensitive ID. Historical persisted state does not make a module available. WWW-Authenticate must be absent.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ModuleNotFound'
+      $ref: './core/modularity/contract.yaml#/responses/ModuleNotFound'
     ModuleDependencyConflict:
-      description: Transition would violate required dependencies. No cascades or partial persisted change. WWW-Authenticate must be absent.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ModuleDependencyConflict'
+      $ref: './core/modularity/contract.yaml#/responses/ModuleDependencyConflict'
     CreatedWmsUom:
-      description: Created and persisted unit of measure. WWW-Authenticate must be absent.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/WmsUom'
+      $ref: './modules/wms/uoms/contract.yaml#/responses/CreatedWmsUom'
     WmsUomList:
-      description: Unit-of-measure window ordered by code ASC ordinal. WWW-Authenticate must be absent.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/WmsUomCollection'
+      $ref: './modules/wms/uoms/contract.yaml#/responses/WmsUomList'
     WmsUomCodeConflict:
-      description: Code already exists; no mutation. WWW-Authenticate must be absent.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/WmsUomCodeConflict'
+      $ref: './modules/wms/uoms/contract.yaml#/responses/WmsUomCodeConflict'
     CreatedWmsStorageAttribute:
-      description: Created and persisted storage attribute. WWW-Authenticate must be absent.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/WmsStorageAttribute'
+      $ref: './modules/wms/storage-attributes/contract.yaml#/responses/CreatedWmsStorageAttribute'
     WmsStorageAttributeList:
-      description: Storage-attribute window ordered by code ASC ordinal. WWW-Authenticate must be absent.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/WmsStorageAttributeCollection'
+      $ref: './modules/wms/storage-attributes/contract.yaml#/responses/WmsStorageAttributeList'
     WmsStorageAttributeCodeConflict:
-      description: Code already exists; no mutation. WWW-Authenticate must be absent.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/WmsStorageAttributeCodeConflict'
+      $ref: './modules/wms/storage-attributes/contract.yaml#/responses/WmsStorageAttributeCodeConflict'
     WmsDisabled:
-      description: erbas.wms is disabled; checked after authorization, before validation. No Retry-After header. WWW-Authenticate must be absent.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ModuleDisabled'
+      $ref: './modules/wms/shared.yaml#/responses/WmsDisabled'
     CreatedWmsItemFamily:
-      description: Persisted normalized family. WWW-Authenticate must be absent.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/WmsItemFamily'
+      $ref: './modules/wms/item-families/contract.yaml#/responses/CreatedWmsItemFamily'
     WmsItemFamilyList:
-      description: COLLECTIONS-001 code ASC ordinal window. WWW-Authenticate must be absent.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/WmsItemFamilyCollection'
+      $ref: './modules/wms/item-families/contract.yaml#/responses/WmsItemFamilyList'
     WmsItemFamilyCodeConflict:
-      description: Exact family code already exists; no changes. WWW-Authenticate must be absent.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/WmsItemFamilyCodeConflict'
+      $ref: './modules/wms/item-families/contract.yaml#/responses/WmsItemFamilyCodeConflict'
     CreatedWmsItemFamilyAssociation:
-      description: Created unique pair; complete persisted attribute. WWW-Authenticate must be absent.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-        Location:
-          required: true
-          schema:
-            type: string
-            pattern: '^/api/wms/item-families/[0-9a-f-]+/storage-attributes/[0-9a-f-]+$'
-          description: /api/wms/item-families/{familyId}/storage-attributes/{storageAttributeId} with the created pair IDs.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/WmsItemFamilyAssociation'
+      $ref: './modules/wms/item-families/contract.yaml#/responses/CreatedWmsItemFamilyAssociation'
     WmsAssociationsUpdated:
-      description: Atomic mutation succeeded; no body. WWW-Authenticate must be absent.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
+      $ref: './modules/wms/item-families/contract.yaml#/responses/WmsAssociationsUpdated'
     WmsAssociationNotFound:
-      description: Existence stage only; all safely determinable missing resources, no later conflicts. See docs/wms-003.md for operation-specific top-level codes and details. WWW-Authenticate must be absent.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/WmsAssociationNotFound'
+      $ref: './modules/wms/item-families/contract.yaml#/responses/WmsAssociationNotFound'
     WmsAssociationConflict:
-      description: All pre-state conflicts; no changes. POST uses singular top-level conflict; PATCH uses plural. WWW-Authenticate must be absent.
-      headers:
-        Cache-Control:
-          required: true
-          schema:
-            type: string
-            const: no-store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/WmsAssociationConflict'
+      $ref: './modules/wms/item-families/contract.yaml#/responses/WmsAssociationConflict'
   schemas:
     WmsUomCode:
-      type: string
-      minLength: 1
-      maxLength: 10
-      pattern: '^[A-Z][A-Z0-9]{0,9}$'
-      not:
-        pattern: '[\r\n]'
-      description: Local catalogue code, not a standardized SI symbol. Exact uppercase ASCII, no normalization.
+      $ref: './modules/wms/uoms/contract.yaml#/schemas/WmsUomCode'
     WmsUomDescription:
-      type: string
-      minLength: 1
-      maxLength: 255
-      pattern: '[^ \t\r\n]'
-      not:
-        pattern: '\u0000'
-      description: >-
-        Normalized user-supplied label; never translated. Remove all consecutive
-        ASCII space (U+0020), tab (U+0009), CR (U+000D) and LF (U+000A) at each
-        boundary before validation and persistence. Length after trimming is
-        1..255 Unicode scalar values. Empty and whitespace-only values are invalid.
-        Preserve case, internal whitespace and all other characters. NUL and
-        unpaired surrogates are invalid. Responses contain the persisted normalized value.
+      $ref: './modules/wms/uoms/contract.yaml#/schemas/WmsUomDescription'
     WmsUomDescriptionInput:
-      type: string
-      minLength: 1
-      pattern: '[^ \t\r\n]'
-      not:
-        pattern: '\u0000'
-      description: >-
-        Required user content. Apply the boundary trimming defined by
-        WmsUomDescription before validating its 1..255 Unicode scalar-value length
-        and persisting. Padding does not count toward this limit, so maxLength is
-        deliberately not imposed on the raw input. NUL and unpaired surrogates
-        are invalid. No translation or internal-space normalization.
+      $ref: './modules/wms/uoms/contract.yaml#/schemas/WmsUomDescriptionInput'
     CreateWmsUom:
-      type: object
-      additionalProperties: false
-      required: [code, description]
-      properties:
-        code:
-          $ref: '#/components/schemas/WmsUomCode'
-        description:
-          $ref: '#/components/schemas/WmsUomDescriptionInput'
+      $ref: './modules/wms/uoms/contract.yaml#/schemas/CreateWmsUom'
     WmsUom:
-      type: object
-      additionalProperties: false
-      required: [id, code, description]
-      properties:
-        id:
-          $ref: '#/components/schemas/WmsEntityId'
-        code:
-          $ref: '#/components/schemas/WmsUomCode'
-        description:
-          $ref: '#/components/schemas/WmsUomDescription'
+      $ref: './modules/wms/uoms/contract.yaml#/schemas/WmsUom'
     WmsUomCollection:
-      type: object
-      additionalProperties: false
-      required: [items, offset, limit, total, order]
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/WmsUom'
-        offset:
-          type: integer
-          minimum: 0
-        limit:
-          type: integer
-          minimum: 1
-          maximum: 100
-        total:
-          type: integer
-          minimum: 0
-        order:
-          type: array
-          minItems: 1
-          maxItems: 1
-          items:
-            $ref: '#/components/schemas/Order'
-          const: [{field: code, direction: asc}]
+      $ref: './modules/wms/uoms/contract.yaml#/schemas/WmsUomCollection'
     WmsUomCodeConflict:
-      allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
-        - properties:
-            code:
-              const: wms_uom_code_conflict
-            errors:
-              minItems: 1
-              maxItems: 1
-              items:
-                allOf:
-                  - $ref: '#/components/schemas/ErrorDetail'
-                  - properties:
-                      code:
-                        const: wms_uom_code_conflict
+      $ref: './modules/wms/uoms/contract.yaml#/schemas/WmsUomCodeConflict'
     WmsEntityId:
-      type: string
-      format: uuid
-      pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
-      not:
-        const: 00000000-0000-0000-0000-000000000000
-      description: Server-generated non-nil UUID, canonical lowercase text; version unspecified. Clients treat it as opaque.
+      $ref: './modules/wms/shared.yaml#/schemas/WmsEntityId'
     WmsStorageAttributeCode:
-      $ref: '#/components/schemas/WmsCatalogueCode'
+      $ref: './modules/wms/storage-attributes/contract.yaml#/schemas/WmsStorageAttributeCode'
     WmsCatalogueCode:
-      type: string
-      minLength: 1
-      maxLength: 30
-      pattern: '^[A-Z][A-Z0-9_]{0,29}$'
-      not:
-        pattern: '[\r\n]'
-      description: Unique code in the WMS Storage Attribute catalogue. 1..30 ASCII characters, exact case, no normalization. IS_* codes are permitted.
+      $ref: './modules/wms/shared.yaml#/schemas/WmsCatalogueCode'
     WmsStorageAttributeName:
-      $ref: '#/components/schemas/WmsCatalogueName'
+      $ref: './modules/wms/storage-attributes/contract.yaml#/schemas/WmsStorageAttributeName'
     WmsCatalogueName:
-      type: string
-      minLength: 1
-      maxLength: 255
-      pattern: '[^ \t\r\n]'
-      not:
-        pattern: '\u0000'
-      description: >-
-        Normalized user-supplied label; never translated. Remove all consecutive
-        ASCII space (U+0020), tab (U+0009), CR (U+000D) and LF (U+000A) at each
-        boundary before validation and persistence. Length after trimming is
-        1..255 Unicode scalar values. Empty and whitespace-only values are invalid.
-        Preserve case, internal whitespace and all other characters. NUL and
-        unpaired surrogates are invalid. Responses contain the persisted normalized value.
+      $ref: './modules/wms/shared.yaml#/schemas/WmsCatalogueName'
     WmsStorageAttributeNameInput:
-      $ref: '#/components/schemas/WmsCatalogueNameInput'
+      $ref: './modules/wms/storage-attributes/contract.yaml#/schemas/WmsStorageAttributeNameInput'
     WmsCatalogueNameInput:
-      type: string
-      minLength: 1
-      pattern: '[^ \t\r\n]'
-      not:
-        pattern: '\u0000'
-      description: >-
-        Required user content. Apply the boundary trimming defined by
-        WmsStorageAttributeName before validating its 1..255 Unicode scalar-value length
-        and persisting. Padding does not count toward this limit, so maxLength is
-        deliberately not imposed on the raw input. NUL and unpaired surrogates
-        are invalid. No translation or internal-space normalization.
+      $ref: './modules/wms/shared.yaml#/schemas/WmsCatalogueNameInput'
     CreateWmsStorageAttribute:
-      type: object
-      additionalProperties: false
-      required: [code, name]
-      properties:
-        code:
-          $ref: '#/components/schemas/WmsStorageAttributeCode'
-        name:
-          $ref: '#/components/schemas/WmsStorageAttributeNameInput'
+      $ref: './modules/wms/storage-attributes/contract.yaml#/schemas/CreateWmsStorageAttribute'
     WmsStorageAttribute:
-      type: object
-      additionalProperties: false
-      required: [id, code, name]
-      properties:
-        id:
-          $ref: '#/components/schemas/WmsEntityId'
-        code:
-          $ref: '#/components/schemas/WmsStorageAttributeCode'
-        name:
-          $ref: '#/components/schemas/WmsStorageAttributeName'
+      $ref: './modules/wms/storage-attributes/contract.yaml#/schemas/WmsStorageAttribute'
     WmsStorageAttributeCollection:
-      type: object
-      additionalProperties: false
-      required: [items, offset, limit, total, order]
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/WmsStorageAttribute'
-        offset:
-          type: integer
-          minimum: 0
-        limit:
-          type: integer
-          minimum: 1
-          maximum: 100
-        total:
-          type: integer
-          minimum: 0
-        order:
-          type: array
-          minItems: 1
-          maxItems: 1
-          items:
-            $ref: '#/components/schemas/Order'
-          const: [{field: code, direction: asc}]
+      $ref: './modules/wms/storage-attributes/contract.yaml#/schemas/WmsStorageAttributeCollection'
     WmsStorageAttributeCodeConflict:
-      allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
-        - properties:
-            code:
-              const: wms_storage_attribute_code_conflict
-            errors:
-              minItems: 1
-              maxItems: 1
-              items:
-                allOf:
-                  - $ref: '#/components/schemas/ErrorDetail'
-                  - properties:
-                      code:
-                        const: wms_storage_attribute_code_conflict
+      $ref: './modules/wms/storage-attributes/contract.yaml#/schemas/WmsStorageAttributeCodeConflict'
     ModuleDisabled:
-      allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
-        - properties:
-            code:
-              const: module_disabled
-            errors:
-              minItems: 1
-              maxItems: 1
-              items:
-                allOf:
-                  - $ref: '#/components/schemas/ErrorDetail'
-                  - properties:
-                      code:
-                        const: module_disabled
+      $ref: './common/errors.yaml#/schemas/ModuleDisabled'
     LoginRequest:
-      type: object
-      additionalProperties: false
-      required: [email, password]
-      properties:
-        email:
-          type: string
-          minLength: 1
-        password:
-          type: string
-          minLength: 1
+      $ref: './core/auth/contract.yaml#/schemas/LoginRequest'
     LoginResponse:
-      type: object
-      additionalProperties: false
-      required: [accessToken]
-      properties:
-        accessToken:
-          type: string
-          minLength: 1
-          pattern: '^[A-Za-z0-9._~+/-]+=*(?![\s\S])'
-          description: Bearer header-compatible opaque token (RFC 6750 section 2.1).
+      $ref: './core/auth/contract.yaml#/schemas/LoginResponse'
     InvalidLoginRequest:
-      allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
-        - properties:
-            code:
-              const: invalid_request
-            errors:
-              minItems: 1
-              maxItems: 1
-              items:
-                allOf:
-                  - $ref: '#/components/schemas/ErrorDetail'
-                  - properties:
-                      code:
-                        const: invalid_request
+      $ref: './common/errors.yaml#/schemas/InvalidLoginRequest'
     InvalidCredentials:
-      allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
-        - properties:
-            code:
-              const: invalid_credentials
-            errors:
-              minItems: 1
-              maxItems: 1
-              items:
-                allOf:
-                  - $ref: '#/components/schemas/ErrorDetail'
-                  - properties:
-                      code:
-                        const: invalid_credentials
+      $ref: './core/auth/contract.yaml#/schemas/InvalidCredentials'
     HealthResponse:
-      type: object
-      additionalProperties: false
-      required:
-        - status
-      properties:
-        status:
-          type: string
-          const: ok
+      $ref: './core/health/contract.yaml#/schemas/HealthResponse'
     User:
-      type: object
-      additionalProperties: false
-      required: [id, email, enabled, admin]
-      properties:
-        id:
-          type: string
-          minLength: 1
-          description: Opaque identifier, without a required internal representation.
-        email:
-          type: string
-          minLength: 1
-        enabled:
-          type: boolean
-        admin:
-          type: boolean
-          description: Temporary administrator flag, not RBAC.
+      $ref: './core/users/contract.yaml#/schemas/User'
     Order:
-      type: object
-      additionalProperties: false
-      required: [field, direction]
-      properties:
-        field:
-          type: string
-          minLength: 1
-        direction:
-          type: string
-          enum: [asc, desc]
+      $ref: './common/pagination.yaml#/schemas/Order'
     UserCollection:
-      type: object
-      additionalProperties: false
-      required: [items, offset, limit, total, order]
-      properties:
-        items:
-          type: array
-          description: Exactly the requested window; never null. Empty windows use an empty array.
-          items:
-            $ref: '#/components/schemas/User'
-        offset:
-          type: integer
-          minimum: 0
-          description: Applied displacement, including when greater than total.
-        limit:
-          type: integer
-          minimum: 1
-          maximum: 100
-          description: Effective requested limit; never replaced by items length.
-        total:
-          type: integer
-          minimum: 0
-          description: Total matching resources before offset and limit; future filters must affect this total.
-        order:
-          type: array
-          minItems: 1
-          maxItems: 1
-          description: Fixed effective id ASC criterion. The ID comparison belongs to the server; IDs remain opaque.
-          items:
-            $ref: '#/components/schemas/Order'
-          const: [{field: id, direction: asc}]
-      example:
-        items: []
-        offset: 0
-        limit: 50
-        total: 0
-        order: [{field: id, direction: asc}]
+      $ref: './core/users/contract.yaml#/schemas/UserCollection'
     CreateUserRequest:
-      type: object
-      additionalProperties: false
-      required: [email, password, admin]
-      properties:
-        email:
-          type: string
-          minLength: 1
-          description: No new trimming, normalization, case folding or syntax policy.
-        password:
-          type: string
-          minLength: 12
-          maxLength: 256
-          description: Unicode allowed; length in Unicode code points. No trimming or composition rules. Credentials are never part of User.
-        admin:
-          type: boolean
+      $ref: './core/users/contract.yaml#/schemas/CreateUserRequest'
     UpdateUserRequest:
-      type: object
-      additionalProperties: false
-      minProperties: 1
-      properties:
-        enabled:
-          type: boolean
-        admin:
-          type: boolean
+      $ref: './core/users/contract.yaml#/schemas/UpdateUserRequest'
     Unauthorized:
-      allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
-        - properties:
-            code:
-              const: unauthorized
-            errors:
-              minItems: 1
-              maxItems: 1
-              items:
-                allOf:
-                  - $ref: '#/components/schemas/ErrorDetail'
-                  - properties:
-                      code:
-                        const: unauthorized
+      $ref: './common/errors.yaml#/schemas/Unauthorized'
     Forbidden:
-      allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
-        - properties:
-            code:
-              const: forbidden
-            errors:
-              minItems: 1
-              maxItems: 1
-              items:
-                allOf:
-                  - $ref: '#/components/schemas/ErrorDetail'
-                  - properties:
-                      code:
-                        const: forbidden
+      $ref: './common/errors.yaml#/schemas/Forbidden'
     UserNotFound:
-      allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
-        - properties:
-            code:
-              const: user_not_found
-            errors:
-              minItems: 1
-              maxItems: 1
-              items:
-                allOf:
-                  - $ref: '#/components/schemas/ErrorDetail'
-                  - properties:
-                      code:
-                        const: user_not_found
+      $ref: './core/users/contract.yaml#/schemas/UserNotFound'
     EmailConflict:
-      allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
-        - properties:
-            code:
-              const: email_conflict
-            errors:
-              minItems: 1
-              maxItems: 1
-              items:
-                allOf:
-                  - $ref: '#/components/schemas/ErrorDetail'
-                  - properties:
-                      code:
-                        const: email_conflict
+      $ref: './core/users/contract.yaml#/schemas/EmailConflict'
     LastAdmin:
-      allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
-        - properties:
-            code:
-              const: last_admin
-            errors:
-              minItems: 1
-              maxItems: 1
-              items:
-                allOf:
-                  - $ref: '#/components/schemas/ErrorDetail'
-                  - properties:
-                      code:
-                        const: last_admin
+      $ref: './core/users/contract.yaml#/schemas/LastAdmin'
     Module:
-      type: object
-      additionalProperties: false
-      required: [id, moduleApiVersion, dependencies, enabled]
-      properties:
-        id:
-          type: string
-          minLength: 1
-          description: Stable opaque case-sensitive ID, independent of class, package, assembly or file names.
-        moduleApiVersion:
-          type: integer
-          minimum: 1
-          description: Compatible modular API version, not package, product or HTTP contract version.
-        dependencies:
-          type: array
-          uniqueItems: true
-          description: Required module IDs in stable server-side id ASC order; never null.
-          items:
-            type: string
-            minLength: 1
-        enabled:
-          type: boolean
-          description: Current persistent administrative state, independent of availability, initialization and health.
+      $ref: './core/modularity/contract.yaml#/schemas/Module'
     UpdateModuleRequest:
-      type: object
-      additionalProperties: false
-      required: [enabled]
-      properties:
-        enabled:
-          type: boolean
+      $ref: './core/modularity/contract.yaml#/schemas/UpdateModuleRequest'
     ModuleCollection:
-      type: object
-      additionalProperties: false
-      required: [items, offset, limit, total, order]
-      properties:
-        items:
-          type: array
-          description: Exactly the requested window; never null. Empty windows use an empty array.
-          items:
-            $ref: '#/components/schemas/Module'
-        offset:
-          type: integer
-          minimum: 0
-          description: Applied displacement, including when greater than total.
-        limit:
-          type: integer
-          minimum: 1
-          maximum: 100
-          description: Effective requested limit; never replaced by items length.
-        total:
-          type: integer
-          minimum: 0
-          description: Total AVAILABLE modules before offset and limit.
-        order:
-          type: array
-          minItems: 1
-          maxItems: 1
-          description: Fixed effective id ASC criterion. The ID comparison belongs to the server; IDs remain opaque.
-          items:
-            $ref: '#/components/schemas/Order'
-          const: [{field: id, direction: asc}]
-      example:
-        items: []
-        offset: 0
-        limit: 50
-        total: 0
-        order: [{field: id, direction: asc}]
+      $ref: './core/modularity/contract.yaml#/schemas/ModuleCollection'
     ModuleNotFound:
-      allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
-        - properties:
-            code:
-              const: module_not_found
-            errors:
-              minItems: 1
-              maxItems: 1
-              items:
-                allOf:
-                  - $ref: '#/components/schemas/ErrorDetail'
-                  - properties:
-                      code:
-                        const: module_not_found
+      $ref: './core/modularity/contract.yaml#/schemas/ModuleNotFound'
     ModuleDependencyConflict:
-      allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
-        - properties:
-            code:
-              const: module_dependency_conflict
-            errors:
-              minItems: 1
-              maxItems: 1
-              items:
-                allOf:
-                  - $ref: '#/components/schemas/ErrorDetail'
-                  - properties:
-                      code:
-                        const: module_dependency_conflict
+      $ref: './core/modularity/contract.yaml#/schemas/ModuleDependencyConflict'
     ErrorDetail:
-      type: object
-      additionalProperties: false
-      required: [code]
-      properties:
-        code:
-          type: string
-          description: Stable non-localized technical code.
-        resource:
-          type: string
-          description: Stable technical resource name, never a persistence name.
-        resourceId:
-          type: string
-          description: Opaque resource identity.
-        path:
-          type: string
-          description: Request location when useful; JSON body locations use RFC 6901 JSON Pointer.
+      $ref: './common/errors.yaml#/schemas/ErrorDetail'
     ErrorResponse:
-      type: object
-      additionalProperties: false
-      required: [code, errors]
-      properties:
-        code:
-          type: string
-          description: Required in v0.8.x. Intended to remain supported but deprecated from v1.0; no removal in v1.x, removal no earlier than v2.0.
-        errors:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      description: HTTP status is authoritative. No localized messages, status duplication or implementation details. See docs/api-conventions.md.
+      $ref: './common/errors.yaml#/schemas/ErrorResponse'
     CreateWmsItemFamily:
-      type: object
-      additionalProperties: false
-      required: [code, name]
-      properties:
-        code:
-          $ref: '#/components/schemas/WmsCatalogueCode'
-        name:
-          $ref: '#/components/schemas/WmsCatalogueNameInput'
+      $ref: './modules/wms/item-families/contract.yaml#/schemas/CreateWmsItemFamily'
     WmsItemFamily:
-      type: object
-      additionalProperties: false
-      required: [id, code, name]
-      properties:
-        id:
-          $ref: '#/components/schemas/WmsEntityId'
-        code:
-          $ref: '#/components/schemas/WmsCatalogueCode'
-        name:
-          $ref: '#/components/schemas/WmsCatalogueName'
+      $ref: './modules/wms/item-families/contract.yaml#/schemas/WmsItemFamily'
     WmsItemFamilyCollection:
-      type: object
-      additionalProperties: false
-      required: [items, offset, limit, total, order]
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/WmsItemFamily'
-        offset:
-          type: integer
-          minimum: 0
-        limit:
-          type: integer
-          minimum: 1
-          maximum: 100
-        total:
-          type: integer
-          minimum: 0
-        order:
-          type: array
-          minItems: 1
-          maxItems: 1
-          items:
-            $ref: '#/components/schemas/Order'
-          const: [{field: code, direction: asc}]
+      $ref: './modules/wms/item-families/contract.yaml#/schemas/WmsItemFamilyCollection'
     CreateWmsItemFamilyAssociation:
-      type: object
-      additionalProperties: false
-      required: [storageAttributeId]
-      properties:
-        storageAttributeId:
-          $ref: '#/components/schemas/WmsEntityId'
+      $ref: './modules/wms/item-families/contract.yaml#/schemas/CreateWmsItemFamilyAssociation'
     WmsItemFamilyAssociation:
-      type: object
-      additionalProperties: false
-      required: [itemFamilyId, storageAttribute]
-      properties:
-        itemFamilyId:
-          $ref: '#/components/schemas/WmsEntityId'
-        storageAttribute:
-          $ref: '#/components/schemas/WmsStorageAttribute'
+      $ref: './modules/wms/item-families/contract.yaml#/schemas/WmsItemFamilyAssociation'
     WmsStorageAttributeIds:
-      type: array
-      uniqueItems: true
-      items:
-        $ref: '#/components/schemas/WmsEntityId'
+      $ref: './modules/wms/shared.yaml#/schemas/WmsStorageAttributeIds'
     ReplaceWmsItemFamilyAssociations:
-      type: object
-      additionalProperties: false
-      required: [storageAttributeIds]
-      properties:
-        storageAttributeIds:
-          $ref: '#/components/schemas/WmsStorageAttributeIds'
+      $ref: './modules/wms/item-families/contract.yaml#/schemas/ReplaceWmsItemFamilyAssociations'
     PatchWmsItemFamilyAssociations:
-      type: object
-      additionalProperties: false
-      properties:
-        add:
-          $ref: '#/components/schemas/WmsStorageAttributeIds'
-        remove:
-          $ref: '#/components/schemas/WmsStorageAttributeIds'
-      anyOf:
-        - required: [add]
-          properties:
-            add:
-              minItems: 1
-        - required: [remove]
-          properties:
-            remove:
-              minItems: 1
-      description: Evaluate both arrays against pre-operation state. Overlap is structurally valid; duplicates within either array are invalid. Atomic; existence validation precedes relation conflicts.
+      $ref: './modules/wms/item-families/contract.yaml#/schemas/PatchWmsItemFamilyAssociations'
     WmsItemFamilyCodeConflict:
-      allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
-        - properties:
-            code:
-              enum: [wms_item_family_code_conflict]
-            errors:
-              items:
-                allOf:
-                  - $ref: '#/components/schemas/ErrorDetail'
-                  - properties:
-                      code:
-                        enum: [wms_item_family_code_conflict]
-                      resource:
-                        enum: [wms_item_family, wms_storage_attribute, wms_item_family_storage_attribute]
+      $ref: './modules/wms/item-families/contract.yaml#/schemas/WmsItemFamilyCodeConflict'
     WmsAssociationNotFound:
-      allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
-        - properties:
-            code:
-              enum: [wms_item_family_not_found, wms_storage_attribute_not_found, wms_item_family_storage_attribute_not_found, wms_item_family_storage_attributes_not_found]
-            errors:
-              items:
-                allOf:
-                  - $ref: '#/components/schemas/ErrorDetail'
-                  - properties:
-                      code:
-                        enum: [wms_item_family_not_found, wms_storage_attribute_not_found, wms_item_family_storage_attribute_not_found]
-                      resource:
-                        enum: [wms_item_family, wms_storage_attribute, wms_item_family_storage_attribute]
+      $ref: './modules/wms/item-families/contract.yaml#/schemas/WmsAssociationNotFound'
     WmsAssociationConflict:
-      allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
-        - properties:
-            code:
-              enum: [wms_item_family_storage_attribute_conflict, wms_item_family_storage_attributes_conflict]
-            errors:
-              items:
-                allOf:
-                  - $ref: '#/components/schemas/ErrorDetail'
-                  - properties:
-                      code:
-                        enum: [wms_item_family_storage_attribute_already_exists, wms_item_family_storage_attribute_not_associated]
-                      resource:
-                        enum: [wms_item_family, wms_storage_attribute, wms_item_family_storage_attribute]
+      $ref: './modules/wms/item-families/contract.yaml#/schemas/WmsAssociationConflict'

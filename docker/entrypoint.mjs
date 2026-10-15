@@ -1,3 +1,4 @@
+import { readdir } from 'node:fs/promises';
 import { validateOpenApi } from './scripts/validate.mjs';
 import { normalizeBaseUrl, runBruno, requireCredentials } from './scripts/conformance.mjs';
 import { runProcess } from './scripts/process.mjs';
@@ -19,7 +20,8 @@ async function main() {
     if (result.code === 124) console.error('Conformance runner exceeded its deadline.');
     return result.code;
   }
-  const result = await runProcess(process.execPath, ['--test', '/runner/tests/runner.test.mjs'], { timeoutMs: repositoryTestTimeoutMs });
+  const testFiles = (await readdir('/runner/tests', { recursive: true })).filter(file => file.endsWith('.test.mjs')).sort().map(file => '/runner/tests/' + file);
+  const result = await runProcess(process.execPath, ['--test', '--test-concurrency=1', ...testFiles], { timeoutMs: repositoryTestTimeoutMs });
   if (result.code === 0) console.log('Repository verification passed; no external backend was examined.');
   return result.code;
 }

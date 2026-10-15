@@ -1,0 +1,311 @@
+paths:
+  /api/users:
+    get:
+      operationId: listUsers
+      summary: List a user window
+      description: Administrator only. Offset/limit pagination after stable server-side id ASC ordering. IDs remain opaque; clients need not reproduce the comparison. No custom ordering, filters or search. All responses use Cache-Control no-store. No redirects.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: offset
+          in: query
+          description: Nonnegative integer displacement before taking items. Beyond total returns an empty page, not an error.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: limit
+          in: query
+          description: Effective maximum number of items, not the returned item count. Invalid values are rejected without clamping.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          $ref: '#/responses/UserList'
+        '400':
+          $ref: '../../common/errors.yaml#/responses/InvalidRequest'
+        '401':
+          $ref: '../../common/errors.yaml#/responses/Unauthorized'
+        '403':
+          $ref: '../../common/errors.yaml#/responses/Forbidden'
+    post:
+      operationId: createUser
+      summary: Create an enabled user
+      description: Administrator only. Exact duplicate email conflicts. Password is never returned. All responses use Cache-Control no-store. No redirects.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/schemas/CreateUserRequest'
+      responses:
+        '201':
+          $ref: '#/responses/CreatedUser'
+        '400':
+          $ref: '../../common/errors.yaml#/responses/InvalidRequest'
+        '401':
+          $ref: '../../common/errors.yaml#/responses/Unauthorized'
+        '403':
+          $ref: '../../common/errors.yaml#/responses/Forbidden'
+        '409':
+          $ref: '#/responses/EmailConflict'
+  /api/users/{id}:
+    get:
+      operationId: getUser
+      summary: Get a user
+      description: Administrator only. Authenticate and authorize before lookup. All responses use Cache-Control no-store. No redirects.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Opaque user identifier; consumers must not interpret its format.
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          $ref: '#/responses/CurrentUser'
+        '401':
+          $ref: '../../common/errors.yaml#/responses/Unauthorized'
+        '403':
+          $ref: '../../common/errors.yaml#/responses/Forbidden'
+        '404':
+          $ref: '#/responses/UserNotFound'
+    patch:
+      operationId: updateUser
+      summary: Update enabled or admin
+      description: Administrator only. Authenticate and authorize before lookup. Atomically reject updates leaving no enabled administrator, including self-disable or self-demotion. Email and password cannot be edited. All responses use Cache-Control no-store. No redirects.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Opaque user identifier; consumers must not interpret its format.
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          $ref: '#/responses/CurrentUser'
+        '400':
+          $ref: '../../common/errors.yaml#/responses/InvalidRequest'
+        '401':
+          $ref: '../../common/errors.yaml#/responses/Unauthorized'
+        '403':
+          $ref: '../../common/errors.yaml#/responses/Forbidden'
+        '404':
+          $ref: '#/responses/UserNotFound'
+        '409':
+          $ref: '#/responses/LastAdmin'
+responses:
+  CurrentUser:
+    description: Public user.
+    headers:
+      Cache-Control:
+        required: true
+        schema:
+          type: string
+          const: no-store
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/User'
+  CreatedUser:
+    description: Created with enabled true.
+    headers:
+      Cache-Control:
+        required: true
+        schema:
+          type: string
+          const: no-store
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/User'
+  UserList:
+    description: User window after stable id ASC ordering. Empty collections and offsets at or beyond total return 200 with empty items.
+    headers:
+      Cache-Control:
+        required: true
+        schema:
+          type: string
+          const: no-store
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/UserCollection'
+  UserNotFound:
+    description: User does not exist; only after administrator authorization.
+    headers:
+      Cache-Control:
+        required: true
+        schema:
+          type: string
+          const: no-store
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/UserNotFound'
+  EmailConflict:
+    description: Exactly the same email already exists.
+    headers:
+      Cache-Control:
+        required: true
+        schema:
+          type: string
+          const: no-store
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/EmailConflict'
+  LastAdmin:
+    description: Update would leave zero enabled administrators.
+    headers:
+      Cache-Control:
+        required: true
+        schema:
+          type: string
+          const: no-store
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/LastAdmin'
+schemas:
+  User:
+    type: object
+    additionalProperties: false
+    required: [id, email, enabled, admin]
+    properties:
+      id:
+        type: string
+        minLength: 1
+        description: Opaque identifier, without a required internal representation.
+      email:
+        type: string
+        minLength: 1
+      enabled:
+        type: boolean
+      admin:
+        type: boolean
+        description: Temporary administrator flag, not RBAC.
+  UserCollection:
+    type: object
+    additionalProperties: false
+    required: [items, offset, limit, total, order]
+    properties:
+      items:
+        type: array
+        description: Exactly the requested window; never null. Empty windows use an empty array.
+        items:
+          $ref: '#/schemas/User'
+      offset:
+        type: integer
+        minimum: 0
+        description: Applied displacement, including when greater than total.
+      limit:
+        type: integer
+        minimum: 1
+        maximum: 100
+        description: Effective requested limit; never replaced by items length.
+      total:
+        type: integer
+        minimum: 0
+        description: Total matching resources before offset and limit; future filters must affect this total.
+      order:
+        type: array
+        minItems: 1
+        maxItems: 1
+        description: Fixed effective id ASC criterion. The ID comparison belongs to the server; IDs remain opaque.
+        items:
+          $ref: '../../common/pagination.yaml#/schemas/Order'
+        const: [{field: id, direction: asc}]
+    example:
+      items: []
+      offset: 0
+      limit: 50
+      total: 0
+      order: [{field: id, direction: asc}]
+  CreateUserRequest:
+    type: object
+    additionalProperties: false
+    required: [email, password, admin]
+    properties:
+      email:
+        type: string
+        minLength: 1
+        description: No new trimming, normalization, case folding or syntax policy.
+      password:
+        type: string
+        minLength: 12
+        maxLength: 256
+        description: Unicode allowed; length in Unicode code points. No trimming or composition rules. Credentials are never part of User.
+      admin:
+        type: boolean
+  UpdateUserRequest:
+    type: object
+    additionalProperties: false
+    minProperties: 1
+    properties:
+      enabled:
+        type: boolean
+      admin:
+        type: boolean
+  UserNotFound:
+    allOf:
+      - $ref: '../../common/errors.yaml#/schemas/ErrorResponse'
+      - properties:
+          code:
+            const: user_not_found
+          errors:
+            minItems: 1
+            maxItems: 1
+            items:
+              allOf:
+                - $ref: '../../common/errors.yaml#/schemas/ErrorDetail'
+                - properties:
+                    code:
+                      const: user_not_found
+  EmailConflict:
+    allOf:
+      - $ref: '../../common/errors.yaml#/schemas/ErrorResponse'
+      - properties:
+          code:
+            const: email_conflict
+          errors:
+            minItems: 1
+            maxItems: 1
+            items:
+              allOf:
+                - $ref: '../../common/errors.yaml#/schemas/ErrorDetail'
+                - properties:
+                    code:
+                      const: email_conflict
+  LastAdmin:
+    allOf:
+      - $ref: '../../common/errors.yaml#/schemas/ErrorResponse'
+      - properties:
+          code:
+            const: last_admin
+          errors:
+            minItems: 1
+            maxItems: 1
+            items:
+              allOf:
+                - $ref: '../../common/errors.yaml#/schemas/ErrorDetail'
+                - properties:
+                    code:
+                      const: last_admin
