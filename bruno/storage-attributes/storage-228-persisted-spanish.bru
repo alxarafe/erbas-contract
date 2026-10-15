@@ -1,0 +1,29 @@
+meta {
+  name: Storage Attributes persisted-spanish
+  type: http
+  seq: 228
+}
+
+get {
+  url: {{baseUrl}}{{storageAttributesPath}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Accept-Language: es-ES
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  responseKind: collection
+  expectedOffset: 0
+  expectedLimit: 50
+}

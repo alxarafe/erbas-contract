@@ -19,7 +19,7 @@ export function requireCredentials(env = process.env) {
 // Scope names are the only selection API; callers never assemble CLI paths.
 export const conformanceScopes = Object.freeze({
   full: 'full', health: 'health', auth: 'auth', users: 'users',
-  collections: 'collections', modules: 'modules', wms: 'wms'
+  collections: 'collections', modules: 'modules', wms: 'wms', storageAttributes: 'storage-attributes'
 });
 const collectionDirectory = '/runner/bruno';
 const scopedConformanceTimeoutMs = 30000;
@@ -32,10 +32,12 @@ const passwordBoundaryRequests = ['users-66-password-boundary-12.bru', 'users-67
 
 async function scopePaths(scope) {
   switch (scope) {
-    case conformanceScopes.full: return ['.', conformanceScopes.modules, conformanceScopes.wms];
+    case conformanceScopes.full: return ['.', conformanceScopes.modules, conformanceScopes.wms, conformanceScopes.storageAttributes];
     case conformanceScopes.health: return ['health.bru'];
     case conformanceScopes.modules:
       return [administratorLogin, createNormalUser, normalUserLogin, conformanceScopes.modules];
+    case conformanceScopes.storageAttributes:
+      return [administratorLogin, createNormalUser, normalUserLogin, conformanceScopes.storageAttributes];
     case conformanceScopes.wms:
       return [administratorLogin, createNormalUser, normalUserLogin, conformanceScopes.wms];
     case conformanceScopes.auth:

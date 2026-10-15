@@ -1,0 +1,32 @@
+meta {
+  name: Storage Attributes offset-equals-total
+  type: http
+  seq: 264
+}
+
+get {
+  url: {{baseUrl}}{{storageAttributesPath}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+script:pre-request {
+  req.setUrl(req.getUrl() + "?offset=" + (bru.getVar("wmsStorageAttributes") || []).length);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  responseKind: collection
+  expectedOffset: total
+  expectedLimit: 50
+}

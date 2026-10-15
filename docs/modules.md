@@ -1,10 +1,10 @@
 # Module administration (CONTRACT-003)
 
-Published HTTP contract **v0.5.0** includes minimal CORE/platform administration
+Published HTTP contract **v0.6.0** includes minimal CORE/platform administration
 of modules through CONTRACT-003 and canonical development/conformance modules
 through CONTRACT-003A. OpenAPI is authoritative; the sole shared Bruno collection
 is backend-neutral. See [release identity](versioning.md). Java and .NET now pin
-v0.5.0 and own their separate conformance verification.
+v0.6.0 and own their separate conformance verification.
 
 The cross-stack design uses concepts both Java and .NET can expose: registry
 availability, a public descriptor, persistent enabled state and dependency-safe
@@ -14,8 +14,9 @@ conformance therefore uses canonical development modules shared by both stacks.
 This specifies observable HTTP behavior without requiring shared discovery or
 persistence internals.
 The existing published operations remain unchanged, making this a compatible
-minor addition. The unpublished [WMS-001 preparation](wms-001.md) adds a business
-descriptor and functional gated routes without changing CORE administration.
+minor addition. Published [WMS-001](wms-001.md) adds the `erbas.wms` business descriptor and gated
+UoM routes without changing CORE administration. Unpublished [WMS-002](wms-002.md)
+prepares Storage Attributes under that same gate, with no new module.
 
 ## Public representation
 
@@ -163,18 +164,19 @@ Case-sensitive matching remains specified in OpenAPI and checked by synthetic
 runner tests. The unknown-ID case uses a newly generated ID. No production
 business module is assumed by the suite.
 
-The published v0.5.0 collection has **130 request definitions / 506 named checks** for the
+The historical published v0.5.0 collection has **130 request definitions / 506 named checks** for the
 two-module synthetic fixture: 48 module requests, including the paginated GET
 descriptor discovery, follow the unchanged sequence 1–82. Four shared folder
 assertions run for each module request; discovery adds one named check. Each
-additional discovery page executes those five checks again. There are 318 test
-declarations. The synthetic suite has 96 tests and 24 deliberate module faults.
-These include absent Math/Statistics, missing/incorrect Statistics dependency,
+additional discovery page executes those five checks again. There were 318 test
+declarations. That synthetic suite had 96 tests and 24 deliberate module faults.
+These included absent Math/Statistics, missing/incorrect Statistics dependency,
 accepted disable/enable conflicts, partial changes despite 409, malformed
 representations, pagination, security, errors, caching and bearer headers.
 A positive fixture places both canonical modules beyond the first 100 entries.
 `bin/check` validates the runner, not any real backend. Earlier dated reports
-retain their historical counts.
+retain their historical counts. Current full collection counts are in
+[WMS-002](wms-002.md#conformance-and-limits).
 
 ## Future fixture capabilities
 

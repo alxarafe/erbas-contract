@@ -16,42 +16,35 @@ the published tag. Current backend adoption is documented in the
 [documentation index](README.md#verification-badges).
 Demo defaults remain outside the HTTP contract.
 
-## Current published immutable release: v0.5.0
+## Current published immutable release: v0.6.0
 
-**v0.5.0 is the current published immutable ERBAS Contract release.** Its
-annotated tag records the following verified identity:
+**v0.6.0 is the current published immutable ERBAS Contract release.**
 
-- Tag: `v0.5.0`.
-- Annotated tag object: `408f44d56f4ba0554d0bc08de23d397269dae9af`.
-- Target commit: `35be07fe002c364f758ae50419d0ecb86d1f0c43`.
+- Tag: `v0.6.0`.
+- Annotated tag object: `73740c956402a7405b667498507ede66fc19a66c`.
+- Target commit: `92d1282154f340aadcfdf93f52a82a1f3472b335`.
 
-It was published after validating that exact `main` commit resulting from the
-CONTRACT-004 release-preparation merge. Publication occurred separately from
-CONTRACT-005, which only records it; the tag must never be moved or recreated.
+This compatible additive MINOR release adds WMS-001 UoM creation and listing to
+Health, AUTH-001, USERS-001, COLLECTIONS-001 and CORE module administration.
+Java and .NET adopted v0.6.0. Their validation remains separate from this runner;
+contract publication, backend conformance and client consumption are distinct.
+See the [release notes](releases/v0.6.0.md) and [WMS-001](wms-001.md).
+Dated verification reports retain their historical context.
 
-This is a compatible additive MINOR release incorporating CONTRACT-003 (CORE
-module administration) and CONTRACT-003A (canonical development/conformance
-modules). OpenAPI remains **0.5.0**. Existing Health, AUTH-001, USERS-001 and
-COLLECTIONS-001 operations, closed User/UserCollection schemas, status codes,
-headers and security remain unchanged. See [release notes](releases/v0.5.0.md).
+v0.5.0 remains an immutable previous release, tag object
+`408f44d56f4ba0554d0bc08de23d397269dae9af`, target
+`35be07fe002c364f758ae50419d0ecb86d1f0c43`. See its [release notes](releases/v0.5.0.md).
+v0.4.0 remains the first formal published release, with its identity recorded above.
+Existing release tags must never be moved or recreated.
 
-**v0.4.0 is the previous published immutable release and remains the first formal
-release**, with its original tag/SHA and historical evidence preserved above.
-Consumers explicitly adopt published releases through a separately approved task
-per consumer, including shared conformance against that exact release. Java and
-.NET now pin v0.5.0; their backend verification remains separate from this runner.
-Angular has not yet adopted module administration. Contract publication does not establish backend
-conformance or client consumption. GitHub Release and package publication remain
-separately authorized operations.
+## Next revision preparation: v0.7.0
 
-## Next revision preparation: v0.6.0
-
-OpenAPI on this development branch is 0.6.0, adding the first WMS business vertical:
-unit-of-measure creation and listing. This is an unpublished compatible MINOR
-preparation, not a moved v0.5.0 tag or a backend adoption. See
-[WMS-001 design](wms-001.md) and [draft release notes](releases/v0.6.0.md).
-Existing consumers must continue pinning their published release until separately
-authorized publication and adaptation. No tag or release is created by this task.
+OpenAPI on this branch is **0.7.0**, a **compatible additive MINOR** preparation:
+[WMS-002](wms-002.md) adds Storage Attribute create/list to `erbas.wms` and
+preserves all v0.6.0 operations, including UoM semantics. See
+[draft release notes](releases/v0.7.0.md). v0.7.0 is local preparation only;
+there is no publication or backend conformance claim. Consumers continue to pin
+an explicit published release. This task creates no tag, push or release.
 
 ## Compatibility and consumption policy
 

@@ -1,0 +1,33 @@
+meta {
+  name: Storage Attributes duplicate
+  type: http
+  seq: 197
+}
+
+post {
+  url: {{baseUrl}}{{storageAttributesPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+  Accept-Language: en
+}
+
+body:json {
+  {"code": "M", "name": "Changed label"}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 409
+  responseKind: error
+  expectedCode: wms_storage_attribute_code_conflict
+}

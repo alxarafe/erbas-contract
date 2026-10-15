@@ -1,0 +1,27 @@
+meta {
+  name: Storage Attributes non-admin-query
+  type: http
+  seq: 185
+}
+
+get {
+  url: {{baseUrl}}{{storageAttributesPath}}?offset=bad
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{userToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 403
+  responseKind: error
+  expectedCode: forbidden
+}

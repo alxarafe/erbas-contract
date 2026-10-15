@@ -1,0 +1,35 @@
+meta {
+  name: Storage Attributes underscore
+  type: http
+  seq: 235
+}
+
+post {
+  url: {{baseUrl}}{{storageAttributesPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"code": "COLD_CHAIN", "name": "Cold storage"}
+}
+
+script:pre-request {
+  const input = {"code": "COLD_CHAIN", "name": "Cold storage"}; bru.setVar("storageAttributeInput", input); req.setBody(input);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 201
+  responseKind: attribute
+}

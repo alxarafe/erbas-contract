@@ -1,0 +1,32 @@
+meta {
+  name: Storage Attributes unpaired-low-surrogate
+  type: http
+  seq: 240
+}
+
+post {
+  url: {{baseUrl}}{{storageAttributesPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"code": "BAD_LOW", "name": "\udfff"}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  responseKind: error
+  expectedCode: invalid_request
+}

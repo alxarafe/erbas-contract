@@ -1,0 +1,35 @@
+meta {
+  name: Storage Attributes historic-is-code
+  type: http
+  seq: 236
+}
+
+post {
+  url: {{baseUrl}}{{storageAttributesPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"code": "IS_FOOD", "name": "Food"}
+}
+
+script:pre-request {
+  const input = {"code": "IS_FOOD", "name": "Food"}; bru.setVar("storageAttributeInput", input); req.setBody(input);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 201
+  responseKind: attribute
+}
