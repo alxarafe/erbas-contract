@@ -1,0 +1,32 @@
+meta {
+  name: Item Families name-number
+  type: http
+  seq: 326
+}
+
+post {
+  url: {{baseUrl}}{{itemFamiliesPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"code": "BAD_TYPE", "name": 42}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  responseKind: error
+  expectedCode: invalid_request
+}

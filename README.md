@@ -8,7 +8,7 @@
 [![.NET backend CI / shared conformance](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml)
 [![Angular client CI](https://github.com/alxarafe/erbas-client/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alxarafe/erbas-client/actions/workflows/ci.yml)
 
-[![Published v0.6.0](https://img.shields.io/badge/contract-v0.6.0-blue)](https://github.com/alxarafe/erbas-contract/tree/v0.6.0)
+[![Published v0.7.0](https://img.shields.io/badge/contract-v0.7.0-blue)](https://github.com/alxarafe/erbas-contract/tree/v0.7.0)
 [![OpenAPI 3.1](https://img.shields.io/badge/OpenAPI-3.1-6BA539)](openapi/erbas.yaml)
 [![Bruno CLI 4.2.0](https://img.shields.io/badge/Bruno_CLI-4.2.0-F4AA41)](bruno/)
 [![Docker-based validation](https://img.shields.io/badge/validation-Docker--based-2496ED)](docs/usage.md)
@@ -29,7 +29,7 @@ flowchart LR
 
 | Repository | Responsibility | Current status |
 | --- | --- | --- |
-| [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Current published immutable v0.6.0 with CORE module administration and WMS UoMs |
+| [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Published immutable v0.7.0; unpublished v0.8.0 preparation |
 | [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 | Adopted v0.6.0; authoritative `./bin/check` requires shared conformance locally and in CI |
 | [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 plus platform modules | Adopted v0.6.0; authoritative `./bin/check` requires shared conformance locally and in CI |
 | [erbas-client](https://github.com/alxarafe/erbas-client) | Angular 22 client consuming Health, AUTH-001, USERS-001 basic user administration and COLLECTIONS-001 pagination from either backend | Shared client for both backends; real Java/.NET interoperability verified |
@@ -57,17 +57,16 @@ Both run through Docker; see [usage and networking](docs/usage.md).
 
 See [development ports](docs/development-ports.md) for local infrastructure conventions.
 
-This branch prepares **unpublished v0.7.0** Storage Attributes in the existing WMS
-module. See [WMS-002](docs/wms-002.md). Java and .NET adopted published v0.6.0;
-no backend v0.7.0 conformance is claimed.
+This branch prepares **unpublished v0.8.0** Item Families, Storage Attribute
+associations and the standard error envelope. See [WMS-003](docs/wms-003.md).
+No backend or client v0.8.0 adoption or conformance is claimed.
 
 ## Current contractual coverage
 
-**v0.6.0 is the current published immutable release**, including administrator-only
-CORE module administration and [WMS UoMs](docs/wms-001.md). See [release notes](docs/releases/v0.6.0.md) and
-[module administration](docs/modules.md). Java and .NET adopt **v0.6.0**;
-Angular does not yet consume module administration. Contract publication,
-backend adoption, shared conformance and client consumption are separate facts.
+**v0.7.0 is the current published immutable release**, including CORE module
+administration, WMS UoMs and Storage Attributes. See [versioning](docs/versioning.md)
+and [WMS-002](docs/wms-002.md). Backend adoption, shared conformance and client
+consumption are separate facts; the recorded Java/.NET adoption remains v0.6.0.
 
 ```text
 GET /health

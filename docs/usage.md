@@ -18,9 +18,9 @@ inside its container. It does not establish external backend conformance.
 After the image has been built, the check container has no external network
 access; loopback is sufficient for its fixtures.
 
-The synthetic battery keeps one full positive run of all 266 requests,
-including all 182 unchanged v0.6.0 definitions / 714 named checks.
-Health cases and AUTH, Users, Collections, Modules, UoM and Storage Attribute faults select existing
+The synthetic battery keeps one full positive run of all 494 requests / 2190 named checks. Existing successful behavior is preserved;
+legacy errors now require the v0.8.0 envelope.
+Health cases and AUTH, Users, Collections, Modules, UoM, Storage Attribute and ItemFamily faults select existing
 requests through internal scopes, with contractual HTTP bootstrap where needed.
 Every negative case must reach its configured defect; scope selection does not
 change request assertions, fault coverage or the shared HTTP contract. Each run
@@ -50,14 +50,14 @@ enabled administrator in an isolated validation environment before invoking
 usage error, never a skipped login check. USERS-001 creates and modifies users;
 never run the suite against production. Unique test users remain until the
 backend disposes of its environment. See [USERS-001](users-001.md) for required
-account state and mutations; current suite counters are in [WMS-002](wms-002.md). COLLECTIONS-001
+account state and mutations; current suite counters are in [WMS-003](releases/v0.8.0.md). COLLECTIONS-001
 checks paged user windows and totals; use an environment without concurrent
 external mutations during the run. See [collections](collections.md).
 See
 [AUTH-001](auth-001.md) for
 negative fixture prerequisites, safe injection, scenarios and logging rules.
 
-Full published v0.6.0 conformance requires the backend to register the canonical
+Full conformance requires the backend to register the canonical
 AVAILABLE development modules `erbas.dev.math` (no dependencies) and
 `erbas.dev.statistics` (depends exactly on Math). They are reserved ERBAS
 development/conformance infrastructure, not required production business modules;
@@ -72,11 +72,13 @@ disposable environment without concurrent administrators or functional use; neve
 run the suite against production. Success leaves both enabled; after failure,
 discard the environment. Java/.NET consume published v0.6.0. Published conformance
 requires enabled AVAILABLE `erbas.wms` and an initially empty UoM catalogue.
-This checkout prepares unpublished v0.7.0 and additionally requires an initially
-empty Storage Attribute catalogue. Use it against a backend only after separately
-approved adoption. WMS mutations persist catalogue rows and restore the module
-enabled; dispose of the environment. See [WMS-001](wms-001.md) and
-[WMS-002](wms-002.md). This repository does not claim v0.7.0 backend conformance.
+Published v0.7.0 additionally requires an empty Storage Attribute catalogue.
+This checkout prepares unpublished v0.8.0 and additionally requires an initially
+empty ItemFamily catalogue, association support and the standard error envelope.
+Use it against a backend only after separately approved adoption. WMS mutations
+persist catalogue rows and associations and restore the module enabled; dispose
+of the environment. See [WMS-003](wms-003.md). No backend/client v0.8.0 adoption
+or conformance is claimed.
 
 | URL rule | Behavior |
 | --- | --- |
@@ -134,18 +136,18 @@ for platform support and limitations.
 | Operation | Limit |
 | --- | --- |
 | HTTP request | 2 seconds |
-| Bruno process watchdog (full conformance) | 45 seconds |
-| Bruno process watchdog (scoped conformance) | 30 seconds |
+| Bruno process watchdog (full conformance) | 120 seconds |
+| Bruno process watchdog (scoped conformance) | 30 seconds; ItemFamily scope 90 seconds |
 | OpenAPI lint | 30 seconds |
-| Synthetic test suite | 600 seconds |
+| Synthetic test suite | 900 seconds |
 
 Within the synthetic suite, full Bruno runs and late pagination-fault tests have
-a 50-second outer test budget so the 45-second full-conformance watchdog and fixture
+a 130-second outer test budget so the 120-second full-conformance watchdog and fixture
 cleanup can finish on slower hosted runners. Shorter Bruno tests retain their
 15-second budgets; HTTP timeout and stuck-subprocess assertions remain bounded
 independently.
 
-The expanded CONTRACT-003 fault battery uses a bounded 600-second suite budget;
+The expanded WMS-003 fault battery uses a bounded 900-second suite budget;
 individual HTTP requests retain their 2-second limit.
 
 These limits bound tool execution, not image downloads or Docker builds.

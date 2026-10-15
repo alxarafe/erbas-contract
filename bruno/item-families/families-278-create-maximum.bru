@@ -1,0 +1,35 @@
+meta {
+  name: Item Families create-maximum
+  type: http
+  seq: 278
+}
+
+post {
+  url: {{baseUrl}}{{itemFamiliesPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  const input = {code: "ZYXWVUTSRQPONMLKJIHGFEDCBA1234", name: " \t" + "📦".repeat(Number(bru.getFolderVar("nameMaximum"))) + "\r\n "}; bru.setVar("itemFamilyInput", input); req.setBody(input);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 201
+  responseKind: attribute
+}

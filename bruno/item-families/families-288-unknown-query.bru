@@ -1,0 +1,27 @@
+meta {
+  name: Item Families unknown-query
+  type: http
+  seq: 288
+}
+
+get {
+  url: {{baseUrl}}{{itemFamiliesPath}}?sort=code
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  responseKind: error
+  expectedCode: invalid_request
+}

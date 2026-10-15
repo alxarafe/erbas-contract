@@ -46,6 +46,6 @@ tests {
   });
 
   test("Closed response and expected state", function () {
-    expect(res.getBody()).to.deep.equal({ code: "user_not_found" });
+    expect(res.getBody()).to.deep.equal({code: "user_not_found", errors: [{code: "user_not_found"}]});
   });
 }

@@ -1,0 +1,36 @@
+meta {
+  name: Item Families long-name
+  type: http
+  seq: 307
+}
+
+post {
+  url: {{baseUrl}}{{itemFamiliesPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  req.setBody({code: "KG", name: " " + "📦".repeat(Number(bru.getFolderVar("nameMaximum")) + 1) + " "});
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  responseKind: error
+  expectedCode: invalid_request
+}

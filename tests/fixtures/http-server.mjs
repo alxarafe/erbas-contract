@@ -1,3 +1,4 @@
+import { associationFixture, itemFamiliesPath, envelope } from './wms-003.mjs';
 import { createServer } from 'node:http';
 import { randomUUID } from 'node:crypto';
 
@@ -40,7 +41,7 @@ export function userCollection(users, offset = 0, limit = defaultCollectionLimit
     order: [{ field: 'id', direction: 'asc' }] };
 }
 
-export async function startFixture({ status = 200, contentType = 'application/json', body = '{"status":"ok"}', redirect = false, hang = false, auth = {}, users = {}, acceptDisabledTokens = false, collectionFault, modules = {}, moduleFault, wmsFault, storageAttributeFault, availableModules = fixtureModules() } = {}) {
+export async function startFixture({ status = 200, contentType = 'application/json', body = '{"status":"ok"}', redirect = false, hang = false, auth = {}, users = {}, acceptDisabledTokens = false, collectionFault, modules = {}, moduleFault, wmsFault, storageAttributeFault, itemFamilyFault, associationFault, errorFault, availableModules = fixtureModules() } = {}) {
   const requests = [];
   const faultsReached = [];
   // Record fault application, never secrets or response bodies. A reduced bootstrap
@@ -56,18 +57,34 @@ export async function startFixture({ status = 200, contentType = 'application/js
   const registry = new Map(availableModules.map(module => [module.id, structuredClone(module)]));
   const uoms = [];
   const storageAttributes = [];
+  const itemFamilies = [];
+  const associations = associationFixture({ families: itemFamilies, attributes: storageAttributes,
+    actorFor: request => accounts.get(tokens.get((request.headers.authorization ?? '').replace(/^Bearer /, ''))),
+    disabled: () => registry.get(WMS_ID)?.enabled === false, requests, fault: associationFault, hasFault, defaultLimit: defaultCollectionLimit, maximumLimit: maximumCollectionLimit });
+  const serialize = value => {
+    const result = envelope(value);
+    if (result?.errors && errorFault) {
+      hasFault(errorFault, errorFault);
+      if (errorFault === 'missing-errors') delete result.errors;
+      if (errorFault === 'empty-errors') result.errors = [];
+      if (errorFault === 'malformed-detail') result.errors = [{ resourceId: 'fixture' }];
+    }
+    return JSON.stringify(result);
+  };
   const publicUser = ({ id, email, enabled, admin }) => ({ id, email, enabled, admin });
   let nextId = 1;
   const server = createServer(async (request, response) => {
     const url = new URL(request.url, 'http://fixture.test');
     const path = url.pathname;
-    if (path === uomsPath || path === storageAttributesPath) {
-      const isStorageAttribute = path === storageAttributesPath;
-      const catalogue = isStorageAttribute ? storageAttributes : uoms;
+    if (await associations(request, response, url)) return;
+    if (path === uomsPath || path === storageAttributesPath || path === itemFamiliesPath) {
+      const isFamily = path === itemFamiliesPath;
+      const isStorageAttribute = path === storageAttributesPath || isFamily;
+      const catalogue = isFamily ? itemFamilies : isStorageAttribute ? storageAttributes : uoms;
       const labelField = isStorageAttribute ? 'name' : 'description';
       const codePattern = isStorageAttribute ? storageAttributeCodePattern : uomCodePattern;
-      const codeConflict = isStorageAttribute ? storageAttributeCodeConflict : uomCodeConflict;
-      const fault = isStorageAttribute ? storageAttributeFault : wmsFault;
+      const codeConflict = isFamily ? 'wms_item_family_code_conflict' : isStorageAttribute ? storageAttributeCodeConflict : uomCodeConflict;
+      const fault = isFamily ? itemFamilyFault : isStorageAttribute ? storageAttributeFault : wmsFault;
       const actor = accounts.get(tokens.get((request.headers.authorization ?? '').replace(/^Bearer /, '')));
       const disabled = registry.get(WMS_ID)?.enabled === false;
       let expected;
@@ -137,7 +154,7 @@ export async function startFixture({ status = 200, contentType = 'application/js
       requests.push({ method: request.method, path: request.url, accept: request.headers.accept, expected });
       response.writeHead(expected, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store',
         ...(expected === 401 ? { 'WWW-Authenticate': 'Bearer' } : {}) });
-      response.end(JSON.stringify(result));
+      response.end(serialize(result));
       return;
     }
     if (path === modulesPath || path.startsWith(`${modulesPath}/`)) {
@@ -211,7 +228,7 @@ export async function startFixture({ status = 200, contentType = 'application/js
         'Content-Type': override.contentType ?? 'application/json', 'Cache-Control': 'no-store',
         ...(expected === 401 ? { 'WWW-Authenticate': 'Bearer' } : {}), ...override.headers
       });
-      response.end(override.body ?? JSON.stringify(result));
+      response.end(override.body ?? serialize(result));
       return;
     }
     if (request.url === '/api/auth/login') {
@@ -240,7 +257,7 @@ export async function startFixture({ status = 200, contentType = 'application/js
         ...(expected === 401 ? { 'WWW-Authenticate': 'Bearer' } : {}),
         ...override.headers
       });
-      response.end(override.body ?? JSON.stringify(expected === 200 ? { accessToken: token }
+      response.end(override.body ?? serialize(expected === 200 ? { accessToken: token }
         : { code: expected === 400 ? 'invalid_request' : 'invalid_credentials' }));
       return;
     }
@@ -324,7 +341,7 @@ export async function startFixture({ status = 200, contentType = 'application/js
         'Content-Type': override.contentType ?? 'application/json', 'Cache-Control': 'no-store',
         ...(expected === 401 ? { 'WWW-Authenticate': 'Bearer' } : {}), ...override.headers
       });
-      response.end(override.body ?? JSON.stringify(result));
+      response.end(override.body ?? serialize(result));
       return;
     }
     requests.push({ method: request.method, path: request.url, accept: request.headers.accept });

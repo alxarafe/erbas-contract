@@ -1,0 +1,32 @@
+meta {
+  name: WMS-003 get-anonymous
+  type: http
+  seq: 356
+}
+
+get {
+  url: {{baseUrl}}{{itemFamiliesPath}}/bad/{{associationSegment}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+script:pre-request {
+  const family = bru.getVar("wmsItemFamilies")[0];
+  bru.setVar("wms003FamilyId", family.id);
+
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 401
+  responseKind: error
+  expectedCode: unauthorized
+}

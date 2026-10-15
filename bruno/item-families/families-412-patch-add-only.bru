@@ -1,0 +1,40 @@
+meta {
+  name: WMS-003 patch-add-only
+  type: http
+  seq: 412
+}
+
+patch {
+  url: {{baseUrl}}{{itemFamiliesPath}}/{{wms003FamilyId}}/{{associationSegment}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  const masters = bru.getVar("wms003Masters") || [];
+  const family = bru.getVar("wmsItemFamilies")[0];
+  const state = bru.getVar("wms003Relation") || [];
+  bru.setVar("wms003FamilyId", family.id);
+  bru.setVar("wms003NextRelation",[...state,masters[0]]);
+  req.setBody({add:[masters[0].id]});
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 204
+  responseKind: empty
+}

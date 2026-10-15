@@ -1,0 +1,28 @@
+meta {
+  name: Item Families final-persisted-order
+  type: http
+  seq: 350
+}
+
+get {
+  url: {{baseUrl}}{{itemFamiliesPath}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  responseKind: collection
+  expectedOffset: 0
+  expectedLimit: 50
+}

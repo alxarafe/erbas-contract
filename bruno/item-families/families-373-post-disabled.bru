@@ -1,0 +1,39 @@
+meta {
+  name: WMS-003 post-disabled
+  type: http
+  seq: 373
+}
+
+post {
+  url: {{baseUrl}}{{itemFamiliesPath}}/bad/{{associationSegment}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  const family = bru.getVar("wmsItemFamilies")[0];
+  bru.setVar("wms003FamilyId", family.id);
+
+  req.setBody({});
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 503
+  responseKind: error
+  expectedCode: module_disabled
+}

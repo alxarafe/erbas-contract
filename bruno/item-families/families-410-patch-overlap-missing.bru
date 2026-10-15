@@ -1,0 +1,42 @@
+meta {
+  name: WMS-003 patch-overlap-missing
+  type: http
+  seq: 410
+}
+
+patch {
+  url: {{baseUrl}}{{itemFamiliesPath}}/{{wms003FamilyId}}/{{associationSegment}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  const family = bru.getVar("wmsItemFamilies")[0];
+  const value = key => bru.getFolderVar(key);
+  const absent = value("absentAttribute");
+  const detail = (code, resource, resourceId, path) => ({code: value(code), resource: value(resource), resourceId, ...(path ? {path} : {})});
+  const error = (code, details) => bru.setVar("wms003ExpectedError", {code: value(code), errors: details});
+  bru.setVar("wms003FamilyId", family.id);
+  error("resourcesMissing",[detail("attributeMissing","attributeResource",absent,"/add/0"),detail("attributeMissing","attributeResource",absent,"/remove/0")]);
+  req.setBody({add:[absent],remove:[absent]});
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 404
+  responseKind: error
+}

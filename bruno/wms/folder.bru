@@ -34,7 +34,7 @@ tests {
     const result = res.getBody();
     const kind = bru.getRequestVar("responseKind");
     if (kind === "error") {
-      expect(result).to.deep.equal({code: bru.getRequestVar("expectedCode")});
+      expect(result).to.deep.equal({code: bru.getRequestVar("expectedCode"), errors: [{code: bru.getRequestVar("expectedCode")}]});
     } else if (kind === "module") {
       expect(Object.keys(result).sort()).to.deep.equal(["dependencies", "enabled", "id", "moduleApiVersion"]);
       expect(result.id).to.equal(bru.getFolderVar("WMS_ID"));

@@ -37,6 +37,6 @@ tests {
   });
 
   test("Closed response and expected state", function () {
-    expect(res.getBody()).to.deep.equal({code: "invalid_request"});
+    expect(res.getBody()).to.deep.equal({code: "invalid_request", errors: [{code: "invalid_request"}]});
   });
 }

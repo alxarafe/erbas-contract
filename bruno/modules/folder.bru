@@ -63,7 +63,7 @@ tests {
     if (kind === "error") {
       const codes = {400: "invalid_request", 401: "unauthorized", 403: "forbidden",
         404: "module_not_found", 409: "module_dependency_conflict"};
-      expect(result).to.deep.equal({code: codes[Number(bru.getRequestVar("expectedStatus"))]});
+      expect(result).to.deep.equal({code: codes[Number(bru.getRequestVar("expectedStatus"))], errors: [{code: codes[Number(bru.getRequestVar("expectedStatus"))]}]});
     } else if (kind === "module") {
       validateModule(result);
       const math = bru.getFolderVar("MATH_ID");

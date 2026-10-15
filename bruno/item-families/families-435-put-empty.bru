@@ -1,0 +1,38 @@
+meta {
+  name: WMS-003 put-empty
+  type: http
+  seq: 435
+}
+
+put {
+  url: {{baseUrl}}{{itemFamiliesPath}}/{{wms003FamilyId}}/{{associationSegment}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  const family = bru.getVar("wmsItemFamilies")[0];
+  bru.setVar("wms003FamilyId", family.id);
+  bru.setVar("wms003NextRelation",[]);
+  req.setBody({storageAttributeIds:[]});
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 204
+  responseKind: empty
+}

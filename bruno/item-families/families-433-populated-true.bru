@@ -1,0 +1,39 @@
+meta {
+  name: WMS-003 populated-true
+  type: http
+  seq: 433
+}
+
+patch {
+  url: {{baseUrl}}{{wmsModulesPath}}/{{WMS_ID}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  const family = bru.getVar("wmsItemFamilies")[0];
+  bru.setVar("wms003FamilyId", family.id);
+
+  req.setBody({enabled:true});
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  responseKind: module
+  expectedEnabled: true
+}

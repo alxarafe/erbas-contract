@@ -46,6 +46,6 @@ tests {
   });
 
   test("Closed response and expected state", function () {
-    expect(res.getBody()).to.deep.equal({ code: "email_conflict" });
+    expect(res.getBody()).to.deep.equal({code: "email_conflict", errors: [{code: "email_conflict"}]});
   });
 }

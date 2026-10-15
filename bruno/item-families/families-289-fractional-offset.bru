@@ -1,0 +1,27 @@
+meta {
+  name: Item Families fractional-offset
+  type: http
+  seq: 289
+}
+
+get {
+  url: {{baseUrl}}{{itemFamiliesPath}}?offset=0.5
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  responseKind: error
+  expectedCode: invalid_request
+}

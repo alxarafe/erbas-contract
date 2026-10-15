@@ -47,6 +47,6 @@ tests {
   });
 
   test("Closed response and expected state", function () {
-    expect(res.getBody()).to.deep.equal({ code: "forbidden" });
+    expect(res.getBody()).to.deep.equal({code: "forbidden", errors: [{code: "forbidden"}]});
   });
 }

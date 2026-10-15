@@ -1,5 +1,10 @@
 # COLLECTIONS-001: standard paged collections
 
+Current v0.8.0 preparation follows [API conventions](api-conventions.md), including
+the required `code` + nonempty `errors` error envelope. Statuses and technical
+codes below retain their meaning. Published immutable baseline is v0.7.0.
+No v0.8.0 consumer adoption or conformance is claimed.
+
 Version `0.4.0` establishes ERBAS's base convention for future paged collections.
 USERS-001's `GET /api/users` (`UserCollection`) is its first application. Published
 `v0.5.0` adds `GET /api/modules` (`ModuleCollection`) as its second, using the
@@ -7,7 +12,7 @@ same envelope, pagination limits and fixed id ASC order. OpenAPI is authoritativ
 the sole Bruno collection verifies this behavior independently of backend stack.
 See [versioning](versioning.md) for first-release preparation and publication.
 
-Unpublished v0.6.0 preparation adds WMS UoM listing with the same closed envelope
+Published v0.6.0 adds WMS UoM listing with the same closed envelope
 and pagination limits, but a fixed **code ASC ordinal** criterion. No existing
 user/module ordering changes. See [WMS-001](wms-001.md).
 
@@ -59,7 +64,7 @@ accidental row/insertion order. Repeated windows for unchanged data are stable.
 No ordering, filter, search, page or cursor input is introduced.
 
 Invalid pagination returns HTTP 400, `Content-Type: application/json`,
-`Cache-Control: no-store` and exactly `{"code":"invalid_request"}`. Negative
+`Cache-Control: no-store` and exactly `{"code":"invalid_request","errors":[{"code":"invalid_request"}]}`. Negative
 offsets, limits below 1 or above 100, and non-integer values are invalid. There
 is no silent clamping. Authentication and administrator authorization precede
 query validation, just as they precede resource lookup.
@@ -111,7 +116,7 @@ and the User/UserCollection representation remain unchanged.
 ## Historical COLLECTIONS-001 conformance and compatibility
 
 The counts and verification below record the original COLLECTIONS-001 scope.
-Current suite coverage is documented in [modules](modules.md).
+Current suite coverage is documented in [v0.8.0 preparation](releases/v0.8.0.md).
 
 At that milestone, the sole collection had **82 requests and 313 named checks**. COLLECTIONS-001
 modifies the existing list assertion and adds 15 requests / 60 named checks:

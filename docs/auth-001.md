@@ -1,5 +1,10 @@
 # AUTH-001: minimal login
 
+Current v0.8.0 preparation follows [API conventions](api-conventions.md), including
+the required `code` + nonempty `errors` error envelope. Statuses and technical
+codes below retain their meaning. Published immutable baseline is v0.7.0.
+No v0.8.0 consumer adoption or conformance is claimed.
+
 AUTH-001 defines `POST /api/auth/login` within ERBAS Contract 0.4.0. OpenAPI 3.1 is the
 formal authority; the sole Bruno collection supplies shared conformance checks.
 Health remains public and unchanged. There is no backend-specific branch.
@@ -28,8 +33,8 @@ outside this task's specified JSON exchange.
 | Result | Status | `application/json` body | Required header |
 | --- | --- | --- | --- |
 | Authentication succeeds | 200 | `{"accessToken":"..."}` | `Cache-Control: no-store` |
-| Request is invalid | 400 | `{"code":"invalid_request"}` | None |
-| Credential check fails | 401 | `{"code":"invalid_credentials"}` | `WWW-Authenticate: Bearer` |
+| Request is invalid | 400 | `{"code":"invalid_request","errors":[{"code":"invalid_request"}]}` | None |
+| Credential check fails | 401 | `{"code":"invalid_credentials","errors":[{"code":"invalid_credentials"}]}` | `WWW-Authenticate: Bearer` |
 
 All response objects are closed. Media type case and syntactically valid
 parameters are accepted. JSON whitespace and property order are insignificant.

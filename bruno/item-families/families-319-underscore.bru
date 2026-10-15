@@ -1,0 +1,35 @@
+meta {
+  name: Item Families underscore
+  type: http
+  seq: 319
+}
+
+post {
+  url: {{baseUrl}}{{itemFamiliesPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"code": "COLD_CHAIN", "name": "Cold storage"}
+}
+
+script:pre-request {
+  const input = {"code": "COLD_CHAIN", "name": "Cold storage"}; bru.setVar("itemFamilyInput", input); req.setBody(input);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 201
+  responseKind: attribute
+}

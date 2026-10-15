@@ -1,5 +1,10 @@
 # USERS-001: basic CORE user administration
 
+Current v0.8.0 preparation follows [API conventions](api-conventions.md), including
+the required `code` + nonempty `errors` error envelope. Statuses and technical
+codes below retain their meaning. Published immutable baseline is v0.7.0.
+No v0.8.0 consumer adoption or conformance is claimed.
+
 USERS-001 introduced user administration and a protected current-user endpoint
 in draft `0.3.0`. Version `0.4.0` applies the
 [COLLECTIONS-001 pagination convention](collections.md) to its list operation.
@@ -59,12 +64,12 @@ lengths produce the generic structural error. No validation internals are expose
 
 | Status | Exact JSON body | Additional behavior |
 | --- | --- | --- |
-| 400 | `{"code":"invalid_request"}` | Structurally invalid create/update request or invalid list pagination. |
-| 401 | `{"code":"unauthorized"}` | Missing, invalid, expired or disabled bearer; `WWW-Authenticate: Bearer`. |
-| 403 | `{"code":"forbidden"}` | Authenticated non-admin; no `WWW-Authenticate`. |
-| 404 | `{"code":"user_not_found"}` | Unknown ID, only after administrator authorization. |
-| 409 | `{"code":"email_conflict"}` | Exactly duplicate email at creation. |
-| 409 | `{"code":"last_admin"}` | Update would remove the last enabled administrator. |
+| 400 | `{"code":"invalid_request","errors":[{"code":"invalid_request"}]}` | Structurally invalid create/update request or invalid list pagination. |
+| 401 | `{"code":"unauthorized","errors":[{"code":"unauthorized"}]}` | Missing, invalid, expired or disabled bearer; `WWW-Authenticate: Bearer`. |
+| 403 | `{"code":"forbidden","errors":[{"code":"forbidden"}]}` | Authenticated non-admin; no `WWW-Authenticate`. |
+| 404 | `{"code":"user_not_found","errors":[{"code":"user_not_found"}]}` | Unknown ID, only after administrator authorization. |
+| 409 | `{"code":"email_conflict","errors":[{"code":"email_conflict"}]}` | Exactly duplicate email at creation. |
+| 409 | `{"code":"last_admin","errors":[{"code":"last_admin"}]}` | Update would remove the last enabled administrator. |
 
 All these responses use JSON and no-store. Authenticate and authorize before
 lookup: non-admin requests for nonexistent IDs return 403, preventing enumeration.
@@ -147,4 +152,4 @@ at 300 seconds. Per-request and Bruno watchdogs remain 2 and 30 seconds.
 `git diff --check`, shell syntax checks and sequence/count inspection passed.
 No external service was tested; no backend or client repository was changed.
 
-Current suite counters and additional modular coverage are in [modules](modules.md).
+Current suite counters are in [v0.8.0 preparation](releases/v0.8.0.md).

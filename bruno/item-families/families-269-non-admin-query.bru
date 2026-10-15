@@ -1,0 +1,27 @@
+meta {
+  name: Item Families non-admin-query
+  type: http
+  seq: 269
+}
+
+get {
+  url: {{baseUrl}}{{itemFamiliesPath}}?offset=bad
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{userToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 403
+  responseKind: error
+  expectedCode: forbidden
+}
