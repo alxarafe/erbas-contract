@@ -1,0 +1,32 @@
+meta {
+  name: Storage Attributes disabled-body
+  type: http
+  seq: 190
+}
+
+post {
+  url: {{baseUrl}}{{storageAttributesPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 503
+  responseKind: error
+  expectedCode: module_disabled
+}

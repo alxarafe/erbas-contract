@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
 import { mkdtemp, writeFile, rm, readdir, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -7,12 +8,15 @@ import { startFixture, fixtureEnv, disabledTokenFault, userCollection, fixtureMo
 import { runBruno, conformanceScopes, normalizeBaseUrl, requireCredentials } from '../scripts/conformance.mjs';
 import { validateOpenApi } from '../scripts/validate.mjs';
 import { runProcess } from '../scripts/process.mjs';
-import { WMS_ID, uomsPath } from './fixtures/http-server.mjs';
+import { WMS_ID, uomsPath, storageAttributesPath, storageAttributeCodePattern, storageAttributeCodeConflict } from './fixtures/http-server.mjs';
 
 const publishedRequestCount = 130;
 const wmsRequestCount = 52;
-const fullRequestCount = publishedRequestCount + wmsRequestCount;
-const fullNamedCheckCount = 714;
+const storageAttributeRequestCount = 84;
+const v060RequestCount = publishedRequestCount + wmsRequestCount;
+const fullRequestCount = v060RequestCount + storageAttributeRequestCount;
+const v060NamedCheckCount = 714;
+const fullNamedCheckCount = v060NamedCheckCount + storageAttributeRequestCount * 4;
 
 // Allow the 45-second full-suite Bruno watchdog plus cleanup time on slower
 // hosted runners. Short runs keep their existing test budgets.
@@ -78,12 +82,14 @@ test('full suite exercises published operations and CONTRACT-003', { timeout: fu
     assert.ok(modules.every(r => r.path.startsWith(modulesPath)));
     assert.equal(modules.filter(r => r.expected === 409).length, 2);
     assert.equal(modules.filter(r => r.expected === 404).length, 1);
-    const wms = fixture.requests.slice(publishedRequestCount);
+    const wms = fixture.requests.slice(publishedRequestCount, v060RequestCount);
     assert.equal(wms.length, wmsRequestCount);
     assert.ok(wms.every(r => r.path.startsWith(uomsPath) || r.path === `${modulesPath}/${WMS_ID}`));
     assert.equal(wms.filter(r => r.expected === 201).length, 4);
     assert.equal(wms.filter(r => r.expected === 409).length, 2);
     assert.equal(wms.filter(r => r.expected === 503).length, 3);
+    assert.equal(fixture.requests.slice(v060RequestCount).length, storageAttributeRequestCount);
+    assert.ok(fixture.requests.slice(v060RequestCount).every(r => r.path.startsWith(storageAttributesPath) || r.path === `${modulesPath}/${WMS_ID}`));
     const response = await fetch(`${fixture.baseUrl}${modulesPath}`, { headers: { Authorization: 'Bearer synthetic.token_123' } });
     assert.ok((await response.json()).items.every(module => module.enabled));
   } finally { await fixture.close(); }
@@ -415,12 +421,14 @@ test('documented Bruno request and named-check counts match the sole collection'
   let checks = 0;
   const moduleChecks = ((await readFile('/runner/bruno/modules/folder.bru', 'utf8')).match(/\btest\("/g) ?? []).length;
   const wmsChecks = ((await readFile('/runner/bruno/wms/folder.bru', 'utf8')).match(/\btest\("/g) ?? []).length;
+  const storageChecks = ((await readFile('/runner/bruno/storage-attributes/folder.bru', 'utf8')).match(/\btest\("/g) ?? []).length;
   const sequences = [];
   for (const file of files) {
     const source = await readFile(join('/runner/bruno', file), 'utf8');
     checks += (source.match(/\btest\("/g) ?? []).length;
     if (file.startsWith('modules/')) checks += moduleChecks;
     if (file.startsWith('wms/')) checks += wmsChecks;
+    if (file.startsWith('storage-attributes/')) checks += storageChecks;
     sequences.push(Number(source.match(/seq: (\d+)/)[1]));
   }
   assert.equal(checks, fullNamedCheckCount);
@@ -568,4 +576,101 @@ test('module fixture handles empty availability, case-sensitive lookup and retai
     const original = await fetch(`${fixture.baseUrl}${modulesPath}`, { headers });
     assert.ok((await original.json()).items.every(module => module.enabled));
   } finally { await fixture.close(); }
+});
+
+
+for (const [storageAttributeFault, targetSequence, method] of [
+  ['accepted-duplicate', 197, 'POST'], ['ignored-gate', 189, 'GET'],
+  ['order', 196, 'GET'], ['pagination', 183, 'GET'],
+  ['unicode-length', 194, 'POST'], ['untrimmed-description', 194, 'POST'],
+  ['length-before-trim', 194, 'POST'], ['untrimmed-persistence', 196, 'GET'],
+  ['normalized-code', 210, 'POST'], ['accepted-extra', 215, 'POST']
+]) {
+  test(`runner rejects Storage Attribute fault: ${storageAttributeFault}`, { timeout: 15000 }, async () => {
+    const fixture = await startFixture({ storageAttributeFault });
+    try {
+      const result = await runBruno(fixture.baseUrl, { env: fixtureEnv, scope: conformanceScopes.storageAttributes });
+      assert.notEqual(result.code, 0, result.output);
+      assert.notEqual(result.code, 124, 'watchdog must not hide the defect');
+      assert.ok(fixture.faultsReached.includes(storageAttributeFault));
+      const bootstrapRequests = 3;
+      const firstStorageSequence = v060RequestCount + 1;
+      assert.equal(fixture.requests.length, bootstrapRequests + targetSequence - firstStorageSequence + 1);
+      assert.equal(fixture.requests.at(-1).path.split('?')[0], storageAttributesPath);
+      assert.equal(fixture.requests.at(-1).method, method);
+      assert.ok(fixture.requests.every(r => !r.path.startsWith(uomsPath)));
+    } finally { await fixture.close(); }
+  });
+}
+
+test('WMS-002 OpenAPI is additive and precisely defines the shared catalogue', async () => {
+  const source = await readFile('/runner/openapi/erbas.yaml', 'utf8');
+  const directory = await mkdtemp(join(tmpdir(), 'erbas-schema-'));
+  let api;
+  try {
+    const bundled = join(directory, 'contract.json');
+    const result = await runProcess(process.execPath, [
+      '/runner/node_modules/@redocly/cli/bin/cli.js', 'bundle', '/runner/openapi/erbas.yaml',
+      '--output', bundled, '--ext', 'json'
+    ], { timeoutMs: 30000, capture: true });
+    assert.equal(result.code, 0, result.output);
+    api = JSON.parse(await readFile(bundled, 'utf8'));
+  } finally { await rm(directory, { recursive: true, force: true }); }
+  const schemas = api.components.schemas;
+  const responses = api.components.responses;
+  const ref = name => ({ $ref: `#/components/schemas/${name}` });
+  assert.equal(api.info.version, '0.7.0');
+  const operations = api.paths[storageAttributesPath];
+  assert.deepEqual(Object.keys(operations).sort(), ['get', 'post']);
+  assert.ok(!Object.keys(api.paths).some(path => path.startsWith(storageAttributesPath + '/')));
+  for (const operation of Object.values(operations)) {
+    assert.deepEqual(operation.security, [{ bearerAuth: [] }]);
+    for (const [status, response] of Object.entries({400: 'InvalidRequest', 401: 'Unauthorized', 403: 'Forbidden', 503: 'WmsDisabled'})) {
+      assert.deepEqual(operation.responses[status], { $ref: `#/components/responses/${response}` });
+    }
+    assert.match(operation.description, /Administrator only/);
+    assert.match(operation.description, /erbas.wms enabled/);
+  }
+  assert.deepEqual(operations.get.parameters, ['Offset', 'Limit'].map(name => ({ $ref: `#/components/parameters/${name}` })));
+  assert.equal(operations.post.parameters, undefined);
+  assert.deepEqual(operations.post.requestBody.content['application/json'].schema, ref('CreateWmsStorageAttribute'));
+  for (const [status, response, schema, method] of [
+    ['200', 'WmsStorageAttributeList', 'WmsStorageAttributeCollection', 'get'],
+    ['201', 'CreatedWmsStorageAttribute', 'WmsStorageAttribute', 'post'],
+    ['409', 'WmsStorageAttributeCodeConflict', 'WmsStorageAttributeCodeConflict', 'post']
+  ]) {
+    assert.deepEqual(operations[method].responses[status], { $ref: `#/components/responses/${response}` });
+    assert.deepEqual(responses[response].content['application/json'].schema, ref(schema));
+    assert.equal(responses[response].headers['Cache-Control'].schema.const, 'no-store');
+  }
+  for (const [name, fields] of [
+    ['CreateWmsStorageAttribute', ['code', 'name']], ['WmsStorageAttribute', ['id', 'code', 'name']],
+    ['WmsStorageAttributeCollection', ['items', 'offset', 'limit', 'total', 'order']],
+    ['WmsStorageAttributeCodeConflict', ['code']]
+  ]) {
+    assert.equal(schemas[name].additionalProperties, false);
+    assert.deepEqual(schemas[name].required, fields);
+    assert.deepEqual(Object.keys(schemas[name].properties), fields);
+  }
+  assert.equal(schemas.WmsStorageAttributeCode.pattern, storageAttributeCodePattern.source);
+  assert.equal(schemas.WmsStorageAttributeCode.maxLength, 30);
+  assert.equal(schemas.WmsStorageAttributeCode.minLength, 1);
+  assert.equal(schemas.WmsStorageAttributeName.maxLength, 255);
+  assert.equal(schemas.WmsStorageAttributeName.minLength, 1);
+  assert.equal(schemas.WmsStorageAttributeNameInput.maxLength, undefined);
+  assert.equal(schemas.WmsStorageAttributeName.not.pattern, '\\u0000');
+  assert.match(schemas.WmsStorageAttributeName.description, /unpaired surrogates/);
+  assert.deepEqual(schemas.WmsStorageAttribute.properties.id, ref('WmsEntityId'));
+  assert.equal(schemas.WmsEntityId.format, 'uuid');
+  assert.deepEqual(schemas.WmsStorageAttributeCollection.properties.order, schemas.WmsUomCollection.properties.order);
+  for (const field of ['offset', 'limit', 'total']) assert.deepEqual(schemas.WmsStorageAttributeCollection.properties[field], schemas.WmsUomCollection.properties[field]);
+  assert.equal(schemas.WmsStorageAttributeCodeConflict.properties.code.const, storageAttributeCodeConflict);
+  // The sole v0.6.0 schema change is equivalent UUID component extraction.
+  let preserved = source.slice(source.indexOf('paths:\n'));
+  preserved = preserved.replace(/  \/api\/wms\/storage-attributes:[\s\S]*?(?=components:\n)/, '');
+  preserved = preserved.replace(/    CreatedWmsStorageAttribute:[\s\S]*?(?=    WmsDisabled:)/, '');
+  preserved = preserved.replace(/    WmsEntityId:[\s\S]*?(?=    ModuleDisabled:)/, '');
+  const uuidSource = source.slice(source.indexOf('    WmsEntityId:\n') + '    WmsEntityId:\n'.length, source.indexOf('    WmsStorageAttributeCode:\n'));
+  preserved = preserved.replace("          $ref: '#/components/schemas/WmsEntityId'\n", () => uuidSource.split('\n').filter(Boolean).map(line => '    ' + line + '\n').join(''));
+  assert.equal(createHash('sha256').update(preserved).digest('hex'), 'e3783894ef2a92278fade1ebc6b115af5e16053bea9e184fa565bce6ed10ab8c');
 });

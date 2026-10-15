@@ -1,0 +1,35 @@
+meta {
+  name: Storage Attributes unicode-spaces-preserved
+  type: http
+  seq: 238
+}
+
+post {
+  url: {{baseUrl}}{{storageAttributesPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"code": "UNICODE", "name": "\u00a0\u2003Cold\t  storage\u2003\u00a0"}
+}
+
+script:pre-request {
+  const input = {"code": "UNICODE", "name": "\u00a0\u2003Cold\t  storage\u2003\u00a0"}; bru.setVar("storageAttributeInput", input); req.setBody(input);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 201
+  responseKind: attribute
+}

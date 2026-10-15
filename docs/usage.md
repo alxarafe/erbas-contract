@@ -18,9 +18,9 @@ inside its container. It does not establish external backend conformance.
 After the image has been built, the check container has no external network
 access; loopback is sufficient for its fixtures.
 
-The synthetic battery keeps one full positive run of all 182 draft requests,
-including all 130 unchanged v0.5.0 definitions.
-Health cases and AUTH, Users, Collections, Modules and WMS faults select existing
+The synthetic battery keeps one full positive run of all 266 requests,
+including all 182 unchanged v0.6.0 definitions / 714 named checks.
+Health cases and AUTH, Users, Collections, Modules, UoM and Storage Attribute faults select existing
 requests through internal scopes, with contractual HTTP bootstrap where needed.
 Every negative case must reach its configured defect; scope selection does not
 change request assertions, fault coverage or the shared HTTP contract. Each run
@@ -50,14 +50,14 @@ enabled administrator in an isolated validation environment before invoking
 usage error, never a skipped login check. USERS-001 creates and modifies users;
 never run the suite against production. Unique test users remain until the
 backend disposes of its environment. See [USERS-001](users-001.md) for required
-account state and mutations; current suite counters are in [modules](modules.md). COLLECTIONS-001
+account state and mutations; current suite counters are in [WMS-002](wms-002.md). COLLECTIONS-001
 checks paged user windows and totals; use an environment without concurrent
 external mutations during the run. See [collections](collections.md).
 See
 [AUTH-001](auth-001.md) for
 negative fixture prerequisites, safe injection, scenarios and logging rules.
 
-Full published v0.5.0 conformance requires the backend to register the canonical
+Full published v0.6.0 conformance requires the backend to register the canonical
 AVAILABLE development modules `erbas.dev.math` (no dependencies) and
 `erbas.dev.statistics` (depends exactly on Math). They are reserved ERBAS
 development/conformance infrastructure, not required production business modules;
@@ -70,11 +70,13 @@ secrets. `bin/check` requires neither and uses the same canonical synthetic modu
 CONTRACT-003 changes these modules' persistent enabled states. Use an isolated,
 disposable environment without concurrent administrators or functional use; never
 run the suite against production. Success leaves both enabled; after failure,
-discard the environment. Java/.NET consume published v0.5.0. This development
-checkout prepares v0.6.0 and additionally requires enabled AVAILABLE `erbas.wms`
-with an initially empty UoM catalogue. Do not run this draft against those backends
-before separately approved WMS adoption. WMS mutations leave four UoMs and restore
-the module enabled; dispose of its environment. See [WMS-001](wms-001.md).
+discard the environment. Java/.NET consume published v0.6.0. Published conformance
+requires enabled AVAILABLE `erbas.wms` and an initially empty UoM catalogue.
+This checkout prepares unpublished v0.7.0 and additionally requires an initially
+empty Storage Attribute catalogue. Use it against a backend only after separately
+approved adoption. WMS mutations persist catalogue rows and restore the module
+enabled; dispose of the environment. See [WMS-001](wms-001.md) and
+[WMS-002](wms-002.md). This repository does not claim v0.7.0 backend conformance.
 
 | URL rule | Behavior |
 | --- | --- |

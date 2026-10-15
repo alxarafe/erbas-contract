@@ -1,0 +1,27 @@
+meta {
+  name: Storage Attributes disabled-query
+  type: http
+  seq: 189
+}
+
+get {
+  url: {{baseUrl}}{{storageAttributesPath}}?offset=bad
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 503
+  responseKind: error
+  expectedCode: module_disabled
+}

@@ -1,0 +1,35 @@
+meta {
+  name: Storage Attributes unprefixed-maximum-name
+  type: http
+  seq: 237
+}
+
+post {
+  url: {{baseUrl}}{{storageAttributesPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  null
+}
+
+script:pre-request {
+  const input = {code: "MAX_NAME", name: "x".repeat(Number(bru.getFolderVar("nameMaximum")))}; bru.setVar("storageAttributeInput", input); req.setBody(input);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 201
+  responseKind: attribute
+}
