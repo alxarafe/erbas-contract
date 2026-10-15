@@ -1,0 +1,35 @@
+meta {
+  name: Item Families create-single-character
+  type: http
+  seq: 279
+}
+
+post {
+  url: {{baseUrl}}{{itemFamiliesPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  const input = {code: "M", name: " X "}; bru.setVar("itemFamilyInput", input); req.setBody(input);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 201
+  responseKind: attribute
+}

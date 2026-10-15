@@ -1,0 +1,33 @@
+meta {
+  name: WMS-003 invalid-query-428
+  type: http
+  seq: 429
+}
+
+get {
+  url: {{baseUrl}}{{itemFamiliesPath}}/{{wms003FamilyId}}/{{associationSegment}}?other=1
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+script:pre-request {
+  const family = bru.getVar("wmsItemFamilies")[0];
+  bru.setVar("wms003FamilyId", family.id);
+
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  responseKind: error
+  expectedCode: invalid_request
+}

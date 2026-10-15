@@ -16,9 +16,9 @@ the published tag. Current backend adoption is documented in the
 [documentation index](README.md#verification-badges).
 Demo defaults remain outside the HTTP contract.
 
-## Current published immutable release: v0.6.0
+## Previous published immutable release: v0.6.0
 
-**v0.6.0 is the current published immutable ERBAS Contract release.**
+**v0.6.0 remains an immutable previous ERBAS Contract release.**
 
 - Tag: `v0.6.0`.
 - Annotated tag object: `73740c956402a7405b667498507ede66fc19a66c`.
@@ -37,14 +37,37 @@ v0.5.0 remains an immutable previous release, tag object
 v0.4.0 remains the first formal published release, with its identity recorded above.
 Existing release tags must never be moved or recreated.
 
-## Next revision preparation: v0.7.0
+## Current published immutable release: v0.7.0
 
-OpenAPI on this branch is **0.7.0**, a **compatible additive MINOR** preparation:
-[WMS-002](wms-002.md) adds Storage Attribute create/list to `erbas.wms` and
-preserves all v0.6.0 operations, including UoM semantics. See
-[draft release notes](releases/v0.7.0.md). v0.7.0 is local preparation only;
-there is no publication or backend conformance claim. Consumers continue to pin
-an explicit published release. This task creates no tag, push or release.
+**v0.7.0 is the current published immutable release.**
+
+- Annotated tag object: `c6cdbe0d90c63fb79b1bb36a96d67d822243ffdb`.
+- Target commit: `76618b4d6776dca5e13466e7fde44af675d5b08f`.
+
+It adds WMS-002 Storage Attributes. Its tag is unchanged. Earlier release notes
+and verification reports retain their historical preparation evidence.
+Publication does not imply consumer adoption or conformance.
+
+## Next revision preparation: v0.8.0
+
+OpenAPI on this branch is **0.8.0**, an **incompatible pre-1.0 MINOR** preparation.
+[WMS-003](wms-003.md) adds Item Families and Storage Attribute associations.
+[API conventions](api-conventions.md) standardize all errors as mandatory
+`code` plus nonempty `errors`; existing successful behavior is preserved.
+See [draft release notes](releases/v0.8.0.md). No v0.8.0 backend/client adoption
+or conformance is claimed. Consumers must pin an explicit published release.
+This preparation creates no tag or publication.
+
+## Public HTTP version and route policy
+
+The erbas-contract semantic release is the public HTTP contract version;
+published Git tags identify immutable releases. The normative
+[public API versioning policy](api-conventions.md#public-api-versioning-policy)
+defines how it relates to unversioned routes, coordinated breaking migrations,
+possible simultaneous route generations, independent `moduleApiVersion` and
+explicit consumer compatibility. Apply that policy alongside the release rules
+below. This documentation clarification belongs to v0.8.0 preparation and does
+not change routes or require another version increment.
 
 ## Compatibility and consumption policy
 

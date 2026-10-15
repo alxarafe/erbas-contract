@@ -1,0 +1,26 @@
+meta {
+  name: Item Families anonymous-query
+  type: http
+  seq: 268
+}
+
+get {
+  url: {{baseUrl}}{{itemFamiliesPath}}?offset=bad
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 401
+  responseKind: error
+  expectedCode: unauthorized
+}

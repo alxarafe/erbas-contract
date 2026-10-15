@@ -41,7 +41,7 @@ tests {
   });
 
   test("Closed generic error representation", function () {
-    expect(res.getBody()).to.deep.equal({ code: "invalid_credentials" });
+    expect(res.getBody()).to.deep.equal({code: "invalid_credentials", errors: [{code: "invalid_credentials"}]});
     expect(res.getHeader("www-authenticate")).to.equal("Bearer");
   });
 }

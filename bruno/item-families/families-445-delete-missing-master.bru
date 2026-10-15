@@ -1,0 +1,36 @@
+meta {
+  name: WMS-003 delete-missing-master
+  type: http
+  seq: 445
+}
+
+delete {
+  url: {{baseUrl}}{{itemFamiliesPath}}/{{wms003FamilyId}}/{{associationSegment}}/{{wms003DeleteId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+script:pre-request {
+  const family = bru.getVar("wmsItemFamilies")[0];
+  const value = key => bru.getFolderVar(key);
+  const absent = value("absentAttribute");
+  const detail = (code, resource, resourceId, path) => ({code: value(code), resource: value(resource), resourceId, ...(path ? {path} : {})});
+  const error = (code, details) => bru.setVar("wms003ExpectedError", {code: value(code), errors: details});
+  bru.setVar("wms003FamilyId", family.id);
+  bru.setVar("wms003FamilyId",family.id); bru.setVar("wms003DeleteId",absent);error("attributeMissing",[detail("attributeMissing","attributeResource",absent)]);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 404
+  responseKind: error
+}

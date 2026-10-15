@@ -19,11 +19,12 @@ export function requireCredentials(env = process.env) {
 // Scope names are the only selection API; callers never assemble CLI paths.
 export const conformanceScopes = Object.freeze({
   full: 'full', health: 'health', auth: 'auth', users: 'users',
-  collections: 'collections', modules: 'modules', wms: 'wms', storageAttributes: 'storage-attributes'
+  collections: 'collections', modules: 'modules', wms: 'wms', storageAttributes: 'storage-attributes', itemFamilies: 'item-families'
 });
 const collectionDirectory = '/runner/bruno';
 const scopedConformanceTimeoutMs = 30000;
-const fullConformanceTimeoutMs = 45000;
+const fullConformanceTimeoutMs = 120000;
+const itemFamilyConformanceTimeoutMs = 90000;
 const administratorLogin = 'login-success.bru';
 const createNormalUser = 'users-19-create-normal-user.bru';
 const listUsers = 'users-20-list-users.bru';
@@ -32,10 +33,12 @@ const passwordBoundaryRequests = ['users-66-password-boundary-12.bru', 'users-67
 
 async function scopePaths(scope) {
   switch (scope) {
-    case conformanceScopes.full: return ['.', conformanceScopes.modules, conformanceScopes.wms, conformanceScopes.storageAttributes];
+    case conformanceScopes.full: return ['.', conformanceScopes.modules, conformanceScopes.wms, conformanceScopes.storageAttributes, conformanceScopes.itemFamilies];
     case conformanceScopes.health: return ['health.bru'];
     case conformanceScopes.modules:
       return [administratorLogin, createNormalUser, normalUserLogin, conformanceScopes.modules];
+    case conformanceScopes.itemFamilies:
+      return [administratorLogin, createNormalUser, normalUserLogin, conformanceScopes.itemFamilies];
     case conformanceScopes.storageAttributes:
       return [administratorLogin, createNormalUser, normalUserLogin, conformanceScopes.storageAttributes];
     case conformanceScopes.wms:
@@ -66,7 +69,7 @@ export async function runBruno(baseUrl, { scope = conformanceScopes.full, env = 
   const paths = await scopePaths(scope);
   const timeoutMs = scope === conformanceScopes.full
     ? fullConformanceTimeoutMs
-    : scopedConformanceTimeoutMs;
+    : scope === conformanceScopes.itemFamilies ? itemFamilyConformanceTimeoutMs : scopedConformanceTimeoutMs;
   const result = await runProcess(process.execPath, [
     // Bruno 4.2.0 executes explicit paths in argument order, retaining folder checks.
     '/runner/node_modules/@usebruno/cli/bin/bru.js', 'run', ...paths,

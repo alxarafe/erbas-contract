@@ -1,0 +1,27 @@
+meta {
+  name: Item Families limit-repeat
+  type: http
+  seq: 347
+}
+
+get {
+  url: {{baseUrl}}{{itemFamiliesPath}}?limit=1&limit=1
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  responseKind: error
+  expectedCode: invalid_request
+}

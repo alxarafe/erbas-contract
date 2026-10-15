@@ -1,0 +1,137 @@
+meta {
+  name: WMS Item Families
+  seq: 267
+}
+
+vars:pre-request {
+  WMS_ID: erbas.wms
+  itemFamiliesPath: /api/wms/item-families
+  wmsModulesPath: /api/modules
+  catalogueCodePattern: ^[A-Z][A-Z0-9_]{0,29}$
+  nameMaximum: 255
+  nameTrimPattern: ^[ \t\r\n]+|[ \t\r\n]+$
+  defaultLimit: 50
+  maximumLimit: 100
+  storageAttributesPath: /api/wms/storage-attributes
+  associationSegment: storage-attributes
+  familyResource: wms_item_family
+  attributeResource: wms_storage_attribute
+  relationResource: wms_item_family_storage_attribute
+  familyMissing: wms_item_family_not_found
+  attributeMissing: wms_storage_attribute_not_found
+  relationMissing: wms_item_family_storage_attribute_not_found
+  resourcesMissing: wms_item_family_storage_attributes_not_found
+  relationConflict: wms_item_family_storage_attribute_conflict
+  relationsConflict: wms_item_family_storage_attributes_conflict
+  alreadyExists: wms_item_family_storage_attribute_already_exists
+  notAssociated: wms_item_family_storage_attribute_not_associated
+  absentFamily: 11111111-1111-1111-1111-111111111111
+  absentAttribute: 22222222-2222-2222-2222-222222222222
+  anotherAbsentAttribute: 33333333-3333-3333-3333-333333333333
+  nilUuid: 00000000-0000-0000-0000-000000000000
+}
+
+script:pre-request {
+  bru.setVar("wms003ExpectedError", null);
+}
+
+tests {
+  test("Expected HTTP status", function () {
+    expect(res.getStatus()).to.equal(Number(bru.getRequestVar("expectedStatus")));
+  });
+
+  test("JSON media type and contractual headers", function () {
+    const token = "[!#$%&'*+.^_`|~0-9A-Za-z-]+";
+    const quoted = '"(?:[\\t\\x20\\x21\\x23-\\x5b\\x5d-\\x7e\\x80-\\xff]|\\\\[\\t\\x20-\\x7e\\x80-\\xff])*"';
+    const mediaType = new RegExp("^application/json(?:[ \\t]*;[ \\t]*" + token + "=(?:" + token + "|" + quoted + "))*[ \\t]*$", "i");
+    if (Number(bru.getRequestVar("expectedStatus")) !== 204) expect(res.getHeader("content-type")).to.be.a("string").and.match(mediaType);
+    expect(res.getHeader("cache-control")).to.equal("no-store");
+    expect(res.getHeader("www-authenticate")).to.equal(Number(bru.getRequestVar("expectedStatus")) === 401 ? "Bearer" : undefined);
+    expect(res.getHeader("retry-after")).to.equal(undefined);
+  });
+
+  test("Closed response and technical semantics", function () {
+    const result = res.getBody();
+    const kind = bru.getRequestVar("responseKind");
+    if (["association", "relation-collection", "empty", "master"].includes(kind)) return;
+    if (kind === "error") {
+      expect(result).to.deep.equal(bru.getVar("wms003ExpectedError") || {code: bru.getRequestVar("expectedCode"), errors: [{code: bru.getRequestVar("expectedCode")}]});
+    } else if (kind === "module") {
+      expect(Object.keys(result).sort()).to.deep.equal(["dependencies", "enabled", "id", "moduleApiVersion"]);
+      expect(result.id).to.equal(bru.getFolderVar("WMS_ID"));
+      expect(result.dependencies).to.deep.equal([]);
+      expect(Number.isInteger(result.moduleApiVersion) && result.moduleApiVersion >= 1).to.equal(true);
+      expect(result.enabled).to.equal(bru.getRequestVar("expectedEnabled") === "true");
+    } else {
+      const validate = attribute => {
+        expect(Object.keys(attribute).sort()).to.deep.equal(["code", "id", "name"]);
+        expect(attribute.id).to.be.a("string").and.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+        expect(attribute.id).not.to.equal(bru.getFolderVar("nilUuid"));
+        expect(attribute.code).to.be.a("string").and.match(new RegExp(bru.getFolderVar("catalogueCodePattern")));
+        expect(attribute.name).to.be.a("string");
+        expect(attribute.name).to.equal(attribute.name.replace(new RegExp(bru.getFolderVar("nameTrimPattern"), "g"), ""));
+        expect(/[\u0000\uD800-\uDFFF]/u.test(attribute.name)).to.equal(false);
+        expect([...attribute.name].length).to.be.within(1, Number(bru.getFolderVar("nameMaximum")));
+      };
+      if (kind === "attribute") validate(result);
+      else {
+        expect(Object.keys(result).sort()).to.deep.equal(["items", "limit", "offset", "order", "total"]);
+        expect(result.offset).to.equal((bru.getRequestVar("expectedOffset") === "total" ? (bru.getVar("wmsItemFamilies") || []).length : Number(bru.getRequestVar("expectedOffset"))));
+        expect(result.limit).to.equal(Number(bru.getRequestVar("expectedLimit")));
+        expect(result.order).to.deep.equal([{field: "code", direction: "asc"}]);
+        result.items.forEach(validate);
+      }
+    }
+  });
+
+  test("Persistent identity, normalized text and ordered window", function () {
+    const kind = bru.getRequestVar("responseKind");
+    if (["association", "relation-collection", "empty", "master"].includes(kind)) return;
+    const expected = bru.getVar("wmsItemFamilies") || [];
+    if (kind === "attribute") {
+      const input = bru.getVar("itemFamilyInput");
+      const result = res.getBody();
+      expect(result.code).to.equal(input.code);
+      expect(result.name).to.equal(input.name.replace(new RegExp(bru.getFolderVar("nameTrimPattern"), "g"), ""));
+      expect(expected.map(attribute => attribute.id)).not.to.include(result.id);
+      expected.push(result);
+      bru.setVar("wmsItemFamilies", expected);
+    } else if (kind === "collection") {
+      const result = res.getBody();
+      const ordered = [...expected].sort((a, b) => a.code < b.code ? -1 : a.code > b.code ? 1 : 0);
+      expect(result.total).to.equal(ordered.length);
+      expect(result.items).to.deep.equal(ordered.slice(result.offset, result.offset + result.limit));
+    }
+  });
+
+  test("WMS-003 exact association state, identity and no-content semantics", function () {
+    const kind = bru.getRequestVar("responseKind");
+    const body = res.getBody();
+    if (kind === "master") {
+      const input = bru.getVar("wms003MasterInput");
+      expect(Object.keys(body).sort()).to.deep.equal(["code", "id", "name"]);
+      expect(body.id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+      expect(body.id).not.to.equal(bru.getFolderVar("nilUuid"));
+      expect(body.code).to.equal(input.code); expect(body.name).to.equal(input.name);
+      const masters = bru.getVar("wms003Masters") || [];
+      expect(masters.map(value => value.id)).not.to.include(body.id);
+      masters.push(body); bru.setVar("wms003Masters", masters);
+    } else if (kind === "association") {
+      const attribute = bru.getVar("wms003SelectedAttribute");
+      const family = bru.getVar("wmsItemFamilies")[0];
+      expect(body).to.deep.equal({itemFamilyId: family.id, storageAttribute: attribute});
+      expect(res.getHeader("location")).to.equal(bru.getFolderVar("itemFamiliesPath") + "/" + family.id + "/" + bru.getFolderVar("associationSegment") + "/" + attribute.id);
+      const state = bru.getVar("wms003Relation") || [];
+      state.push(attribute); bru.setVar("wms003Relation", state);
+    } else if (kind === "empty") {
+      expect(["", undefined, null].includes(body)).to.equal(true);
+      const target = bru.getVar("wms003NextRelation");
+      bru.setVar("wms003Relation", target);
+    } else if (kind === "relation-collection") {
+      const state = [...(bru.getVar("wms003Relation") || [])].sort((a,b) => a.code < b.code ? -1 : a.code > b.code ? 1 : 0);
+      const offset = Number(bru.getRequestVar("expectedOffset") || 0);
+      const limit = Number(bru.getRequestVar("expectedLimit") || bru.getFolderVar("defaultLimit"));
+      expect(body).to.deep.equal({items: state.slice(offset, offset + limit), offset, limit, total: state.length, order: [{field: "code", direction: "asc"}]});
+    }
+  });
+}

@@ -1,0 +1,35 @@
+meta {
+  name: WMS-003 delete-success
+  type: http
+  seq: 439
+}
+
+delete {
+  url: {{baseUrl}}{{itemFamiliesPath}}/{{wms003FamilyId}}/{{associationSegment}}/{{wms003DeleteId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+script:pre-request {
+  const masters = bru.getVar("wms003Masters") || [];
+  const family = bru.getVar("wmsItemFamilies")[0];
+  const state = bru.getVar("wms003Relation") || [];
+  const value = key => bru.getFolderVar(key);
+  bru.setVar("wms003FamilyId", family.id);
+  bru.setVar("wms003FamilyId",family.id); bru.setVar("wms003DeleteId",masters[0].id);bru.setVar("wms003NextRelation",state.filter(value=>value.id!==masters[0].id));
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 204
+  responseKind: empty
+}

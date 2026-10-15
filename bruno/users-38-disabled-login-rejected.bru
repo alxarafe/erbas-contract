@@ -45,6 +45,6 @@ tests {
   });
 
   test("Closed response and expected state", function () {
-    expect(res.getBody()).to.deep.equal({ code: "invalid_credentials" });
+    expect(res.getBody()).to.deep.equal({code: "invalid_credentials", errors: [{code: "invalid_credentials"}]});
   });
 }

@@ -1,0 +1,34 @@
+meta {
+  name: WMS-003 relation-window
+  type: http
+  seq: 418
+}
+
+get {
+  url: {{baseUrl}}{{itemFamiliesPath}}/{{wms003FamilyId}}/{{associationSegment}}?offset=1&limit=1
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+script:pre-request {
+  const family = bru.getVar("wmsItemFamilies")[0];
+  bru.setVar("wms003FamilyId", family.id);
+
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  responseKind: relation-collection
+  expectedOffset: 1
+  expectedLimit: 1
+}

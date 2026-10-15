@@ -1,0 +1,33 @@
+meta {
+  name: WMS-003 get-non-admin
+  type: http
+  seq: 357
+}
+
+get {
+  url: {{baseUrl}}{{itemFamiliesPath}}/bad/{{associationSegment}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{userToken}}
+}
+
+script:pre-request {
+  const family = bru.getVar("wmsItemFamilies")[0];
+  bru.setVar("wms003FamilyId", family.id);
+
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 403
+  responseKind: error
+  expectedCode: forbidden
+}

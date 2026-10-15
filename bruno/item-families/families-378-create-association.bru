@@ -1,0 +1,39 @@
+meta {
+  name: WMS-003 create-association
+  type: http
+  seq: 378
+}
+
+post {
+  url: {{baseUrl}}{{itemFamiliesPath}}/{{wms003FamilyId}}/{{associationSegment}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  const masters = bru.getVar("wms003Masters") || [];
+  const family = bru.getVar("wmsItemFamilies")[0];
+  bru.setVar("wms003FamilyId", family.id);
+  bru.setVar("wms003SelectedAttribute", masters[0]);
+  req.setBody({storageAttributeId:masters[0].id});
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 201
+  responseKind: association
+}

@@ -1,0 +1,42 @@
+meta {
+  name: WMS-003 post-missing-family
+  type: http
+  seq: 447
+}
+
+post {
+  url: {{baseUrl}}{{itemFamiliesPath}}/{{wms003FamilyId}}/{{associationSegment}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  const masters = bru.getVar("wms003Masters") || [];
+  const family = bru.getVar("wmsItemFamilies")[0];
+  const value = key => bru.getFolderVar(key);
+  const detail = (code, resource, resourceId, path) => ({code: value(code), resource: value(resource), resourceId, ...(path ? {path} : {})});
+  const error = (code, details) => bru.setVar("wms003ExpectedError", {code: value(code), errors: details});
+  bru.setVar("wms003FamilyId", family.id);
+  bru.setVar("wms003FamilyId",value("absentFamily")); error("familyMissing",[detail("familyMissing","familyResource",value("absentFamily"))]);
+  req.setBody({storageAttributeId:masters[0].id});
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 404
+  responseKind: error
+}

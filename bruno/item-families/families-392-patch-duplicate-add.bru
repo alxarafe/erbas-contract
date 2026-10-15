@@ -1,0 +1,40 @@
+meta {
+  name: WMS-003 patch-duplicate-add
+  type: http
+  seq: 392
+}
+
+patch {
+  url: {{baseUrl}}{{itemFamiliesPath}}/{{wms003FamilyId}}/{{associationSegment}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  const masters = bru.getVar("wms003Masters") || [];
+  const family = bru.getVar("wmsItemFamilies")[0];
+  bru.setVar("wms003FamilyId", family.id);
+
+  req.setBody({add:[masters[0].id,masters[0].id]});
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  responseKind: error
+  expectedCode: invalid_request
+}

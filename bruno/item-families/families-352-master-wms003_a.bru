@@ -1,0 +1,38 @@
+meta {
+  name: WMS-003 master-wms003_a
+  type: http
+  seq: 352
+}
+
+post {
+  url: {{baseUrl}}{{storageAttributesPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  const family = bru.getVar("wmsItemFamilies")[0];
+  bru.setVar("wms003FamilyId", family.id);
+  bru.setVar("wms003MasterInput", {"code": "WMS003_A", "name": "WMS003_A"});
+  req.setBody(bru.getVar("wms003MasterInput"));
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 201
+  responseKind: master
+}

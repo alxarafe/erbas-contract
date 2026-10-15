@@ -1,0 +1,28 @@
+meta {
+  name: Item Families initial-empty
+  type: http
+  seq: 267
+}
+
+get {
+  url: {{baseUrl}}{{itemFamiliesPath}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  responseKind: collection
+  expectedOffset: 0
+  expectedLimit: 50
+}

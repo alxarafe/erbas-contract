@@ -37,6 +37,6 @@ tests {
   });
 
   test("Closed response and expected state", function () {
-    expect(res.getBody()).to.deep.equal({ code: "unauthorized" });
+    expect(res.getBody()).to.deep.equal({code: "unauthorized", errors: [{code: "unauthorized"}]});
   });
 }

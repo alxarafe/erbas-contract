@@ -2,7 +2,7 @@ import { validateOpenApi } from './scripts/validate.mjs';
 import { normalizeBaseUrl, runBruno, requireCredentials } from './scripts/conformance.mjs';
 import { runProcess } from './scripts/process.mjs';
 
-const repositoryTestTimeoutMs = 600000;
+const repositoryTestTimeoutMs = 900000;
 
 async function main() {
   const [mode, ...args] = process.argv.slice(2);

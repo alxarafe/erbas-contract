@@ -1,0 +1,36 @@
+meta {
+  name: Item Families duplicate-name
+  type: http
+  seq: 332
+}
+
+post {
+  url: {{baseUrl}}{{itemFamiliesPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  null
+}
+
+script:pre-request {
+  req.setBody('{"code":"DUP_NAME","name":"first","name":"second"}');
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  responseKind: error
+  expectedCode: invalid_request
+}

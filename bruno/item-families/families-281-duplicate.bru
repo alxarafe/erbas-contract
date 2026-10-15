@@ -1,0 +1,33 @@
+meta {
+  name: Item Families duplicate
+  type: http
+  seq: 281
+}
+
+post {
+  url: {{baseUrl}}{{itemFamiliesPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+  Accept-Language: en
+}
+
+body:json {
+  {"code": "M", "name": "Changed label"}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 409
+  responseKind: error
+  expectedCode: wms_item_family_code_conflict
+}
