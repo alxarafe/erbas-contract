@@ -1,16 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { runBrunoScenario } from '../support/scenarios.mjs';
+import { mutationTestTimeoutMs } from '../support/constants.mjs';
+import { collectionScenarios } from './scenarios.mjs';
 import { runBruno, conformanceScopes } from '../../scripts/conformance.mjs';
-import { fullSuiteTestTimeoutMs } from '../support/constants.mjs';
 import { startFixture, fixtureEnv, userCollection, modulesPath } from '../fixtures/core.mjs';
 for (const collectionFault of ['total', 'limit', 'offset', 'order', 'window', 'negative-offset',
   'excessive-limit', 'extra', 'order-extra']) {
-  const timeout = ['offset', 'window', 'negative-offset', 'excessive-limit'].includes(collectionFault)
-    ? fullSuiteTestTimeoutMs : 15000;
-  test(`runner rejects collection fault: ${collectionFault}`, { timeout }, async () => {
+  test(`runner rejects collection fault: ${collectionFault}`, { timeout: mutationTestTimeoutMs }, async () => {
     const fixture = await startFixture({ collectionFault });
     try {
-      const result = await runBruno(fixture.baseUrl, { env: fixtureEnv, scope: conformanceScopes.collections });
+      const scenario = collectionScenarios[collectionFault];
+      // Early collection faults already bail at the bootstrap list request.
+      const result = ['offset', 'window', 'negative-offset', 'excessive-limit'].includes(collectionFault)
+        ? await runBrunoScenario(fixture.baseUrl, scenario, { env: fixtureEnv })
+        : await runBruno(fixture.baseUrl, { env: fixtureEnv, scope: conformanceScopes.collections });
+      assert.equal(fixture.requests.length, scenario.length);
       assert.notEqual(result.code, 0, result.output);
       assert.notEqual(result.code, 124);
       assert.ok(!result.output.includes(fixtureEnv.ERBAS_TEST_PASSWORD));

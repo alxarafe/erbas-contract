@@ -1,5 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { runBrunoScenario } from '../support/scenarios.mjs';
+import { mutationTestTimeoutMs } from '../support/constants.mjs';
+import { userScenarios, disabledTokenScenario } from './scenarios.mjs';
 import { runBruno, conformanceScopes } from '../../scripts/conformance.mjs';
 import { startFixture, fixtureEnv, disabledTokenFault, modulesPath } from '../fixtures/core.mjs';
 const userFailures = [
@@ -21,10 +24,16 @@ const userFailures = [
   ['protected HTTP timeout', { 'me:200': { hang: true } }]
 ];
 for (const [name, users] of userFailures) {
-  test(name, { timeout: 15000 }, async () => {
+  test(name, { timeout: mutationTestTimeoutMs }, async () => {
     const fixture = await startFixture({ users });
     try {
-      const result = await runBruno(fixture.baseUrl, { env: fixtureEnv, scope: conformanceScopes.users });
+      const response = Object.keys(users)[0];
+      const scenario = userScenarios[response];
+      // Current-administrator faults already use only login and their target.
+      const result = response === 'me:200'
+        ? await runBruno(fixture.baseUrl, { env: fixtureEnv, scope: conformanceScopes.users })
+        : await runBrunoScenario(fixture.baseUrl, scenario, { env: fixtureEnv });
+      assert.equal(fixture.requests.length, scenario.length);
       assert.notEqual(result.code, 0, result.output);
       assert.notEqual(result.code, 124);
       assert.ok(fixture.faultsReached.includes(Object.keys(users)[0]), 'fault must reach the targeted Users response');
@@ -35,10 +44,12 @@ for (const [name, users] of userFailures) {
   });
 }
 
-test('runner rejects tokens belonging to disabled users', { timeout: 15000 }, async () => {
+test('runner rejects tokens belonging to disabled users', { timeout: mutationTestTimeoutMs }, async () => {
   const fixture = await startFixture({ acceptDisabledTokens: true });
   try {
-    const result = await runBruno(fixture.baseUrl, { env: fixtureEnv, scope: conformanceScopes.users });
+    const result = await runBrunoScenario(fixture.baseUrl, disabledTokenScenario, { env: fixtureEnv });
+    assert.equal(fixture.requests.length, disabledTokenScenario.length);
+    assert.notEqual(result.code, 124);
     assert.notEqual(result.code, 0, result.output);
     assert.ok(fixture.faultsReached.includes(disabledTokenFault), 'fault must reach a disabled token');
   } finally { await fixture.close(); }

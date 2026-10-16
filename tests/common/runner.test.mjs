@@ -3,7 +3,10 @@ import assert from 'node:assert/strict';
 import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { runBruno, conformanceScopes, normalizeBaseUrl, requireCredentials } from '../../scripts/conformance.mjs';
+import { runBrunoScenario } from '../support/scenarios.mjs';
+import { authScenarios } from '../core/scenarios.mjs';
+import { mutationTestTimeoutMs } from '../support/constants.mjs';
+import { normalizeBaseUrl, requireCredentials } from '../../scripts/conformance.mjs';
 import { runProcess } from '../../scripts/process.mjs';
 import { validateOpenApi } from '../../scripts/validate.mjs';
 import { startFixture, fixtureEnv } from '../fixtures/core.mjs';
@@ -39,10 +42,10 @@ test('invalid base URLs are rejected', () => {
 });
 
 for (const errorFault of ['missing-errors', 'empty-errors', 'malformed-detail']) {
-  test(`runner rejects canonical error envelope fault: ${errorFault}`, { timeout: 15000 }, async () => {
+  test(`runner rejects canonical error envelope fault: ${errorFault}`, { timeout: mutationTestTimeoutMs }, async () => {
     const fixture = await startFixture({ errorFault });
     try {
-      const result = await runBruno(fixture.baseUrl, { env: fixtureEnv, scope: conformanceScopes.auth });
+      const result = await runBrunoScenario(fixture.baseUrl, authScenarios[401], { env: fixtureEnv });
       assert.notEqual(result.code, 0, result.output);
       assert.notEqual(result.code, 124);
       assert.ok(fixture.faultsReached.includes(errorFault));

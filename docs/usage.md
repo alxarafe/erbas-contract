@@ -20,14 +20,17 @@ access; loopback is sufficient for its fixtures.
 
 The synthetic battery keeps one full positive run of all 494 requests / 2190 named checks. Existing successful behavior is preserved;
 legacy errors now require the v0.8.0 envelope.
-Health cases and AUTH, Users, Collections, Modules, UoM, Storage Attribute and ItemFamily faults select existing
-requests through internal scopes, with contractual HTTP bootstrap where needed.
-Every negative case must reach its configured defect; scope selection does not
-change request assertions, fault coverage or the shared HTTP contract. Each run
-starts a fresh Bruno process, sequentially, with the same `--bail` and watchdogs.
+Health cases retain their single-request scope. AUTH, Users, Collections,
+Modules, UoM, Storage Attribute and ItemFamily faults use test-only ordered
+scenarios when their scopes would replay unrelated requests. Scenarios select
+original requests, including only their prerequisite HTTP setup and any
+required persisted-state verification. Folder variables, scripts and
+assertions still execute. Every negative case must reach its configured defect;
+scenarios do not change request assertions, fault coverage or the shared HTTP
+contract. Each run starts a fresh Bruno process, sequentially, with `--bail`.
 `bin/test` always executes the complete collection. Scope selection is not a
-public command option. See [scoped verification evidence](verification/contract-006b.md)
-for bootstrap sequences, coverage and the measured comparison with CONTRACT-006A.
+public command option. See [earlier scoped verification evidence](verification/contract-006b.md)
+for the historical coverage and measured comparison with CONTRACT-006A.
 
 Both public commands build the runner with the pinned base image and lockfile,
 then execute the resulting immutable local image ID without tagging or
@@ -138,14 +141,15 @@ for platform support and limitations.
 | HTTP request | 2 seconds |
 | Bruno process watchdog (full conformance) | 120 seconds |
 | Bruno process watchdog (scoped conformance) | 30 seconds; ItemFamily scope 90 seconds |
+| Bruno process watchdog (synthetic scenario) | 10 seconds |
 | OpenAPI lint | 30 seconds |
 | Synthetic test suite | 900 seconds |
 
-Within the synthetic suite, full Bruno runs and late pagination-fault tests have
-a 130-second outer test budget so the 120-second full-conformance watchdog and fixture
-cleanup can finish on slower hosted runners. Shorter Bruno tests retain their
-15-second budgets; HTTP timeout and stuck-subprocess assertions remain bounded
-independently.
+Within the synthetic suite, full Bruno runs retain a 130-second outer test
+budget so the 120-second full-conformance watchdog and fixture cleanup can
+finish on slower hosted runners. Targeted mutation scenarios have 15-second
+outer budgets, including cleanup. HTTP timeout and stuck-subprocess assertions
+remain bounded independently.
 
 The expanded WMS-003 fault battery uses a bounded 900-second suite budget;
 individual HTTP requests retain their 2-second limit.

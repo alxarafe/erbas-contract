@@ -1,5 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { runBrunoScenario } from '../support/scenarios.mjs';
+import { mutationTestTimeoutMs } from '../support/constants.mjs';
+import { authScenarios } from './scenarios.mjs';
 import { runBruno, conformanceScopes } from '../../scripts/conformance.mjs';
 import { startFixture, fixtureEnv } from '../fixtures/core.mjs';
 const authFailures = [
@@ -165,10 +168,16 @@ const authFailures = [
   ]
 ];
 for (const [name, auth] of authFailures) {
-  test(name, { timeout: 15000 }, async () => {
+  test(name, { timeout: mutationTestTimeoutMs }, async () => {
     const fixture = await startFixture({ auth });
     try {
-      const result = await runBruno(fixture.baseUrl, { env: fixtureEnv, scope: conformanceScopes.auth });
+      const response = Object.keys(auth)[0];
+      const scenario = authScenarios[response];
+      // Success mutations already bail on the scope's first request.
+      const result = response === '200'
+        ? await runBruno(fixture.baseUrl, { env: fixtureEnv, scope: conformanceScopes.auth })
+        : await runBrunoScenario(fixture.baseUrl, scenario, { env: fixtureEnv });
+      assert.equal(fixture.requests.length, scenario.length);
       assert.notEqual(result.code, 0, result.output);
       assert.notEqual(result.code, 124);
       assert.ok(fixture.faultsReached.includes(Object.keys(auth)[0]), 'fault must reach the targeted AUTH response');
