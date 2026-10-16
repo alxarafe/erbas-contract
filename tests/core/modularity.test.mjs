@@ -1,8 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { runBruno, conformanceScopes, requireCredentials } from '../../scripts/conformance.mjs';
-import { fullSuiteTestTimeoutMs } from '../support/constants.mjs';
+import { runBrunoScenario } from '../support/scenarios.mjs';
+import { mutationTestTimeoutMs, loginPath } from '../support/constants.mjs';
+import { moduleScenarios } from './scenarios.mjs';
+import { requireCredentials } from '../../scripts/conformance.mjs';
 import { startFixture, fixtureEnv, userCollection, fixtureModules, modulesPath, moduleNotFound, moduleDependencyConflict, MATH_ID, STATISTICS_ID, maximumCollectionLimit } from '../fixtures/core.mjs';
 test('canonical module IDs agree with Bruno and require no ID environment variables', async () => {
   const folder = await readFile('/runner/bruno/core/modularity/folder.bru', 'utf8');
@@ -32,21 +34,26 @@ const moduleFailures = [
 ];
 
 for (const [name, options] of moduleFailures) {
-  test(`runner rejects module fault: ${name}`, { timeout: fullSuiteTestTimeoutMs }, async () => {
+  test(`runner rejects module fault: ${name}`, { timeout: mutationTestTimeoutMs }, async () => {
     const fixture = await startFixture(options);
     try {
-      const result = await runBruno(fixture.baseUrl, { env: fixtureEnv, scope: conformanceScopes.modules });
+      const scenario = moduleScenarios[name];
+      const result = await runBrunoScenario(fixture.baseUrl, scenario, { env: fixtureEnv });
+      assert.equal(fixture.requests.length, scenario.length);
       assert.notEqual(result.code, 0, result.output);
       assert.notEqual(result.code, 124);
       assert.ok(fixture.requests.at(-1).path.startsWith(modulesPath), 'fault must reach module administration');
       const target = options.moduleFault ?? Object.keys(options.modules)[0];
       assert.ok(fixture.faultsReached.includes(target), 'fault must reach the targeted module operation');
       if (name.endsWith('-absent')) {
-        assert.equal(fixture.requests.at(-1).path,
-          `${modulesPath}?offset=0&limit=${maximumCollectionLimit}`,
-          'absence must fail GET descriptor discovery, not an unrelated assertion');
+        assert.deepEqual(fixture.requests.map(({ method, path }) => [method, path]), [
+          ['POST', loginPath],
+          ['GET', modulesPath],
+          ['GET', `${modulesPath}?offset=0&limit=${maximumCollectionLimit}`]
+        ], 'descriptor discovery must execute only login, reference and discovery GETs');
       }
       assert.ok(!result.output.includes(fixtureEnv.ERBAS_TEST_PASSWORD));
+      assert.ok(!result.output.includes('synthetic.token_123'));
     } finally { await fixture.close(); }
   });
 }
