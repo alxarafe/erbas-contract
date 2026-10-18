@@ -55,7 +55,85 @@ paths:
           $ref: '../../common/errors.yaml#/responses/Unauthorized'
         '404':
           $ref: '#/responses/CapabilityNotFound'
+  /api/core/capabilities/{capabilityId}/invocations:
+    post:
+      operationId: invokeReadCapability
+      summary: Invoke an effective registered READ capability synchronously
+      description: >-
+        Authenticate first, validate capabilityId syntax, resolve the effective
+        capability using CORE-CAP-001 visibility, and enforce owning module
+        availability and all requiredPermissions before validating the body/input.
+        Unknown, unavailable, disabled and unauthorized capabilities return the
+        same masked 404 even with malformed input. Only READ capabilities execute.
+        The closed body contains only input, validated against the resolved
+        descriptor inputSchema. Security context comes exclusively from trusted
+        server state; requiredPermissions are requirements, never grants.
+        CORE governs invocation; the provider owns existing business/data behavior.
+        No internal HTTP loopback or runtime validation mechanism is prescribed.
+        Successful output must conform to the resolved descriptor outputSchema;
+        capabilityId exactly matches the requested ID and invocationId is generated
+        by the server. Any unexpected execution/provider failure, including known
+        non-contractual output, returns the same safe 500 capability_execution_failed.
+        Never emit known invalid output as 200 or disclose failure details.
+        Error envelopes do not contain invocationId. All responses are strict JSON
+        with Cache-Control no-store; no redirects. Only 401 includes
+        WWW-Authenticate Bearer. See docs/core/capabilities-002.md for trusted
+        execution context and minimum audit requirements. Trusted server context
+        conceptually carries invocationId, correlationId when available,
+        authenticated subject, capabilityId, owning module, effective permissions
+        and caller=user; none is caller-supplied security state. Audit attempts and
+        results with invocationId (including failures), available correlationId,
+        capabilityId, module, authenticated subject, timestamp, outcome
+        (completed/denied/failed), duration and safe error code when applicable.
+        Audit does not require full input/output and must avoid logging them by
+        default. No public audit API or context fields are introduced.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: capabilityId
+          in: path
+          required: true
+          schema:
+            $ref: '#/schemas/CapabilityId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/schemas/CapabilityInvocationRequest'
+      responses:
+        '200':
+          $ref: '#/responses/CapabilityInvocation'
+        '400':
+          $ref: '../../common/errors.yaml#/responses/InvalidRequest'
+        '401':
+          $ref: '../../common/errors.yaml#/responses/Unauthorized'
+        '404':
+          $ref: '#/responses/CapabilityNotFound'
+        '500':
+          $ref: '#/responses/CapabilityExecutionFailed'
+
 responses:
+  CapabilityInvocation:
+    description: Synchronous contractual result. WWW-Authenticate is absent.
+    headers:
+      Cache-Control:
+        required: true
+        schema: {type: string, const: no-store}
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/CapabilityInvocation'
+  CapabilityExecutionFailed:
+    description: Unexpected provider/execution failure or known invalid output; no implementation details or public invocationId. WWW-Authenticate is absent.
+    headers:
+      Cache-Control:
+        required: true
+        schema: {type: string, const: no-store}
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/CapabilityExecutionFailed'
   CapabilityList:
     description: Effective catalogue after module and user filtering; never an administrative inventory.
     headers:
@@ -87,6 +165,44 @@ responses:
         schema:
           $ref: '#/schemas/CapabilityNotFound'
 schemas:
+  CapabilityInvocationRequest:
+    type: object
+    additionalProperties: false
+    required: [input]
+    description: Exactly input; no identity, permissions, roles, scopes, module state or execution context. Validate against the effective descriptor inputSchema.
+    properties:
+      input:
+        $ref: '../../common/pagination.yaml#/schemas/CapabilityListInput'
+  CapabilityInvocation:
+    type: object
+    additionalProperties: false
+    required: [invocationId, capabilityId, output]
+    properties:
+      invocationId:
+        type: string
+        minLength: 1
+        description: Server-generated nonempty opaque invocation identifier; no prescribed format.
+      capabilityId:
+        $ref: '#/schemas/CapabilityId'
+      output:
+        type: object
+        description: Must conform to the effective descriptor outputSchema, preserving existing provider collection semantics.
+  CapabilityExecutionFailed:
+    allOf:
+      - $ref: '../../common/errors.yaml#/schemas/ErrorResponse'
+      - properties:
+          code:
+            const: capability_execution_failed
+          errors:
+            minItems: 1
+            maxItems: 1
+            items:
+              type: object
+              additionalProperties: false
+              required: [code]
+              properties:
+                code:
+                  const: capability_execution_failed
   CapabilityId:
     type: string
     pattern: '^[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*(?![\s\S])'

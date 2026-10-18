@@ -1,0 +1,29 @@
+meta {
+  name: Invocations 539 item-families-default-baseline
+  type: http
+  seq: 539
+}
+
+get {
+  url: {{baseUrl}}/api/wms/item-families
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  kind: baseline
+  targetId: wms.item-families.list
+  expectedOffset: 0
+  expectedLimit: 50
+}

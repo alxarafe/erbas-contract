@@ -1,0 +1,29 @@
+meta {
+  name: Invocations 533 uoms-window-baseline
+  type: http
+  seq: 533
+}
+
+get {
+  url: {{baseUrl}}/api/wms/uoms?offset=1&limit=1
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  kind: baseline
+  targetId: wms.uoms.list
+  expectedOffset: 1
+  expectedLimit: 1
+}

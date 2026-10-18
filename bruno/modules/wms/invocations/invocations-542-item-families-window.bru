@@ -1,0 +1,34 @@
+meta {
+  name: Invocations 542 item-families-window
+  type: http
+  seq: 542
+}
+
+post {
+  url: {{baseUrl}}{{capabilitiesPath}}/wms.item-families.list{{invocationSuffix}}
+  body: text
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:text {
+  {"input":{"offset":1,"limit":1}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  kind: invocation
+  targetId: wms.item-families.list
+  expectedOffset: 1
+  expectedLimit: 1
+}

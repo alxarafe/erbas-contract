@@ -1,0 +1,29 @@
+meta {
+  name: Invocations 531 uoms-default-baseline
+  type: http
+  seq: 531
+}
+
+get {
+  url: {{baseUrl}}/api/wms/uoms
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  kind: baseline
+  targetId: wms.uoms.list
+  expectedOffset: 0
+  expectedLimit: 50
+}

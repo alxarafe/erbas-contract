@@ -5,6 +5,9 @@
 | [Usage](usage.md) | Local commands, Docker networking, limits, cleanup, and pinned tooling. |
 | [COLLECTIONS-001](common/collections.md) | Standard paged envelope, user and module pagination, order, totals and compatibility. |
 | [CORE-CAP-001](core/capabilities-001.md) | Capability ownership, descriptors, permissions, effective discovery, schemas and deferred execution. |
+| [CORE-CAP-002](core/capabilities-002.md) | Unpublished v0.10.0 synchronous READ invocation, trusted context, audit and safe failures. |
+| [CORE-CAP-002 verification](verification/core-cap-002.md) | Focused and full Docker repository validation, contract preservation, and no live conformance claim. |
+| [v0.10.0 preparation](releases/v0.10.0.md) | Unpublished compatible additive MINOR over immutable v0.9.0. |
 | [CORE-CAP-001 verification](verification/core-cap-001.md) | New discovery coverage, contract preservation and Docker verification evidence. |
 | [Module administration](core/modules.md) | CORE administration introduced in v0.5.0, availability, dependency invariants and canonical development/conformance modules. |
 | [WMS-001](modules/wms/wms-001.md) | Published v0.6.0 UoM vertical, laboratory audit, design decisions, security, gating and portability. |
@@ -90,3 +93,8 @@ requires initially empty disposable UoM, Storage Attribute and ItemFamily
 catalogues and enabled AVAILABLE `erbas.wms`. Repository checks examine only
 synthetic fixtures. Historical reports retain their original versions, counts
 and results.
+
+The development checkout prepares **unpublished v0.10.0** with
+[CORE-CAP-002](core/capabilities-002.md). The current sole collection has
+**560 requests / 2467 named checks**; this does not change the published v0.9.0
+identity or the historical evidence above.

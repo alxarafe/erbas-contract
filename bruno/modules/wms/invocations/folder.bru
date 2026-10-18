@@ -1,0 +1,90 @@
+meta {
+  name: READ capability invocation
+}
+
+vars:pre-request {
+  capabilitiesPath: /api/core/capabilities
+  invocationSuffix: /invocations
+  invalidInvocationToken: invalid-invocation-token
+  modulesPath: /api/modules
+  WMS_ID: erbas.wms
+  defaultLimit: 50
+  maximumLimit: 100
+  labelMaximum: 255
+  labelTrimPattern: ^[ \t\r\n]+|[ \t\r\n]+$
+  uomCodePattern: ^[A-Z][A-Z0-9]{0,9}$
+  catalogueCodePattern: ^[A-Z][A-Z0-9_]{0,29}$
+  entityIdPattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
+  codeForbiddenPattern: [\r\n]
+  labelForbiddenPattern: [\u0000\uD800-\uDFFF]
+  nilUuid: 00000000-0000-0000-0000-000000000000
+}
+
+tests {
+  test("Expected HTTP status", function () {
+    expect(res.getStatus()).to.equal(Number(bru.getRequestVar("expectedStatus")));
+  });
+  test("JSON media type and contractual headers", function () {
+    const token = "[!#$%&'*+.^_`|~0-9A-Za-z-]+";
+    const quoted = '"(?:[\\t\\x20\\x21\\x23-\\x5b\\x5d-\\x7e\\x80-\\xff]|\\\\[\\t\\x20-\\x7e\\x80-\\xff])*"';
+    const mediaType = new RegExp("^application/json(?:[ \\t]*;[ \\t]*" + token + "=(?:" + token + "|" + quoted + "))*[ \\t]*$", "i");
+    expect(res.getHeader("content-type")).to.be.a("string").and.match(mediaType);
+    expect(res.getHeader("cache-control")).to.equal("no-store");
+    expect(res.getHeader("www-authenticate")).to.equal(Number(bru.getRequestVar("expectedStatus")) === 401 ? "Bearer" : undefined);
+  });
+  test("Closed invocation, exact capability and generated identity", function () {
+    const body = res.getBody();
+    const status = Number(bru.getRequestVar("expectedStatus"));
+    const kind = bru.getRequestVar("kind");
+    if (status !== 200) {
+      const codes = {400: "invalid_request", 401: "unauthorized", 404: "capability_not_found", 500: "capability_execution_failed"};
+      expect(body).to.deep.equal({code: codes[status], errors: [{code: codes[status]}]});
+      return;
+    }
+    if (kind !== "invocation") return;
+    expect(Object.keys(body).sort()).to.deep.equal(["capabilityId", "invocationId", "output"]);
+    expect(body.capabilityId).to.equal(bru.getRequestVar("targetId"));
+    expect(body.invocationId).to.be.a("string").and.not.equal("");
+    const seen = bru.getVar("invocationIds") || [];
+    expect(seen).not.to.include(body.invocationId);
+    bru.setVar("invocationIds", [...seen, body.invocationId]);
+  });
+  test("Provider collection shape, pagination and existing business result", function () {
+    if (Number(bru.getRequestVar("expectedStatus")) !== 200) return;
+    const kind = bru.getRequestVar("kind");
+    const body = res.getBody();
+    if (kind === "module") {
+      expect(body).to.deep.equal({id: bru.getFolderVar("WMS_ID"), moduleApiVersion: 1,
+        dependencies: [], enabled: bru.getRequestVar("expectedEnabled") === "true"});
+      return;
+    }
+    const output = kind === "invocation" ? body.output : body;
+    expect(Object.keys(output).sort()).to.deep.equal(["items", "limit", "offset", "order", "total"]);
+    expect(output.offset).to.equal(Number(bru.getRequestVar("expectedOffset")));
+    expect(output.limit).to.equal(Number(bru.getRequestVar("expectedLimit")));
+    expect(Number.isInteger(output.total) && output.total >= 0).to.equal(true);
+    expect(output.order).to.deep.equal([{field: "code", direction: "asc"}]);
+    expect(output.items).to.be.an("array").with.lengthOf(Math.min(output.limit, Math.max(0, output.total - output.offset)));
+    const uom = bru.getRequestVar("targetId") === "wms.uoms.list";
+    const label = uom ? "description" : "name";
+    let previous;
+    const identities = [];
+    for (const item of output.items) {
+      expect(Object.keys(item).sort()).to.deep.equal(["code", label, "id"].sort());
+      expect(item.id).to.be.a("string").and.match(new RegExp(bru.getFolderVar("entityIdPattern")));
+      expect(item.id).not.to.equal(bru.getFolderVar("nilUuid"));
+      expect(identities).not.to.include(item.id);
+      identities.push(item.id);
+      expect(item.code).to.match(new RegExp(bru.getFolderVar(uom ? "uomCodePattern" : "catalogueCodePattern")));
+      expect(item.code).not.to.match(new RegExp(bru.getFolderVar("codeForbiddenPattern")));
+      if (previous !== undefined) expect(item.code > previous).to.equal(true);
+      previous = item.code;
+      expect(item[label]).to.be.a("string");
+      expect(item[label]).not.to.match(new RegExp(bru.getFolderVar("labelForbiddenPattern"), "u"));
+      expect([...item[label]].length).to.be.within(1, Number(bru.getFolderVar("labelMaximum")));
+      expect(item[label]).to.equal(item[label].replace(new RegExp(bru.getFolderVar("labelTrimPattern"), "g"), ""));
+    }
+    if (kind === "baseline") bru.setVar("invocationExpected", output);
+    else expect(output).to.deep.equal(bru.getVar("invocationExpected"));
+  });
+}

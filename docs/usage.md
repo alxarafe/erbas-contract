@@ -53,7 +53,7 @@ enabled administrator in an isolated validation environment before invoking
 usage error, never a skipped login check. USERS-001 creates and modifies users;
 never run the suite against production. Unique test users remain until the
 backend disposes of its environment. See [USERS-001](core/users-001.md) for required
-account state and mutations; current suite counters are in [v0.9.0 release notes](releases/v0.9.0.md). COLLECTIONS-001
+account state and mutations; development suite counters are in [v0.10.0 preparation notes](releases/v0.10.0.md). COLLECTIONS-001
 checks paged user windows and totals; use an environment without concurrent
 external mutations during the run. See [collections](common/collections.md).
 See
@@ -214,3 +214,12 @@ The suite disables and restores WMS using existing module administration to
 observe discovery filtering. Run only against a disposable supplied service URL.
 Schemas referenced by descriptors resolve against the bundled OpenAPI from the
 explicitly selected contract revision, not against the service URL.
+
+The unpublished v0.10.0 full suite also includes
+[CORE-CAP-002](core/capabilities-002.md) READ invocation. It uses the same service
+URL, credentials and disposable WMS prerequisites. Invocation results are compared
+with the existing GET collections for default and explicit offset/limit windows;
+the suite also disables/restores WMS to verify masked invocation responses.
+No backend/client v0.10.0 adoption or live conformance is claimed. Unexpected
+execution failures have one safe HTTP 500 response; the suite does not require a
+public fault-injection interface or intentionally break a supplied backend.

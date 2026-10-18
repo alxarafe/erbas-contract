@@ -1,0 +1,35 @@
+meta {
+  name: Invocations 558 restore
+  type: http
+  seq: 558
+}
+
+patch {
+  url: {{baseUrl}}{{modulesPath}}/{{WMS_ID}}
+  body: text
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:text {
+  {"enabled":true}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  kind: module
+  targetId: wms.uoms.list
+  expectedOffset: 0
+  expectedLimit: 50
+  expectedEnabled: true
+}
