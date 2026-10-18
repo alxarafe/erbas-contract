@@ -13,7 +13,7 @@
 | [v0.6.0 release notes](releases/v0.6.0.md) | Previous immutable release: WMS UoMs and exact release identity. |
 | [API conventions](common/api-conventions.md) | Reusable HTTP semantics, precedence and the v0.8.0 error envelope. |
 | [WMS-003](modules/wms/wms-003.md) | Item Families, association mutations, multi-errors and portability. |
-| [v0.9.0 preparation](releases/v0.9.0.md) | Unpublished compatible MINOR: CORE-CAP-001 discovery and validation. |
+| [v0.9.0 release notes](releases/v0.9.0.md) | Published compatible MINOR: CORE-CAP-001 discovery and validation. |
 | [v0.8.0 preparation evidence](releases/v0.8.0.md) | Historical WMS-003 preparation notes; v0.8.0 is published and immutable. |
 | [WMS-002](modules/wms/wms-002.md) | Storage Attribute create/list, exact code/name semantics, portability and conformance. |
 | [v0.7.0 preparation evidence](releases/v0.7.0.md) | Historical preparation notes for the previous immutable v0.7.0 release. |
@@ -77,14 +77,14 @@ or conformance. Demo defaults are outside the HTTP release scope.
 
 ## Published contract and consumer adoption
 
-**v0.8.0 is the current published immutable release**, target
-`9dcb1605bcddbd450d4c009285313a142ab9fb35`. See [release identity and policy](common/versioning.md).
+**v0.9.0 is the current published immutable release**, target
+`138e2381e1010e994a0f9d6306af6f9d420658e5`. See [release identity and policy](common/versioning.md).
 The recorded Java/.NET adoption remains v0.6.0; publication and adoption are
 distinct. Angular WMS or module administration adoption is not claimed.
 
-The checkout prepares unpublished **v0.9.0**. Its sole collection currently
-contains **522 requests / 2315 named checks**, measured after implementation.
-See [CORE-CAP-001](core/capabilities-001.md) and [validation](releases/v0.9.0.md).
+Published **v0.9.0** contains **522 requests / 2315 named checks**, measured
+after CORE-CAP-001 implementation.
+See [CORE-CAP-001](core/capabilities-001.md) and [release notes](releases/v0.9.0.md).
 No backend/client v0.9.0 adoption or conformance is claimed. Full conformance
 requires initially empty disposable UoM, Storage Attribute and ItemFamily
 catalogues and enabled AVAILABLE `erbas.wms`. Repository checks examine only
