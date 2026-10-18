@@ -53,7 +53,7 @@ enabled administrator in an isolated validation environment before invoking
 usage error, never a skipped login check. USERS-001 creates and modifies users;
 never run the suite against production. Unique test users remain until the
 backend disposes of its environment. See [USERS-001](core/users-001.md) for required
-account state and mutations; current suite counters are in [v0.9.0 preparation](releases/v0.9.0.md). COLLECTIONS-001
+account state and mutations; current suite counters are in [v0.9.0 release notes](releases/v0.9.0.md). COLLECTIONS-001
 checks paged user windows and totals; use an environment without concurrent
 external mutations during the run. See [collections](common/collections.md).
 See
@@ -77,9 +77,8 @@ discard the environment. Java/.NET consume published v0.6.0. Published conforman
 requires enabled AVAILABLE `erbas.wms` and an initially empty UoM catalogue.
 Published v0.7.0 additionally requires an empty Storage Attribute catalogue.
 Published v0.8.0 additionally requires an initially empty ItemFamily catalogue,
-association support and the standard error envelope. This checkout prepares
-unpublished v0.9.0 with capability discovery; the existing catalogue prerequisites
-remain unchanged.
+association support and the standard error envelope. Published v0.9.0 adds
+capability discovery; the existing catalogue prerequisites remain unchanged.
 Use it against a backend only after separately approved adoption. WMS mutations
 persist catalogue rows and associations and restore the module enabled; dispose
 of the environment. See [WMS-003](modules/wms/wms-003.md). No backend/client v0.9.0 adoption

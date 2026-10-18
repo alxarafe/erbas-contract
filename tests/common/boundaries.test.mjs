@@ -83,7 +83,7 @@ test('OpenAPI has one composition root with external path/component references',
   assert.doesNotMatch(components, /^      (?!\$ref:).+/m);
 });
 
-test('the single public contract version prepares v0.9.0', async () => {
+test('the single public contract version is v0.9.0', async () => {
   const source = await readFile(join(openapiDirectory, rootOpenapi), 'utf8');
   assert.equal(source.match(/^  version: (.+)$/m)?.[1], contractVersion);
 });

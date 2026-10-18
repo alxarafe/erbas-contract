@@ -1,7 +1,7 @@
 # CORE-CAP-001 — Capability descriptors, registry and discovery
 
-Status: approved-scope contract preparation within unpublished v0.9.0. No backend
-implementation, adoption, live conformance, tag or publication is claimed.
+Status: approved CORE-CAP-001 contract published in immutable v0.9.0. No backend
+implementation, adoption or live conformance is claimed by this document.
 OpenAPI is authoritative; the single Bruno collection checks observable behavior.
 This extends discovery only. It does not introduce capability execution.
 
@@ -186,12 +186,12 @@ Clients may compare declared versions; automated schema compatibility analysis
 and negotiation are deferred. Shared descriptor-shape evolution uses the
 ERBAS contract version, so a redundant `descriptorVersion` is unnecessary here.
 
-CORE-CAP-001 prepares **v0.9.0**, a compatible additive MINOR after the
-published immutable **v0.8.0** WMS-003 contract. The v0.8.0 annotated tag object is
-`303a61b0207d3984780539da4068ab68c1264a8d`, targeting
-`9dcb1605bcddbd450d4c009285313a142ab9fb35`. No published release or historical
-release document is modified. No v0.9.0 tag or publication is created; existing
-consumer pins and capability behavioral versions remain unchanged.
+CORE-CAP-001 was published as **v0.9.0**, a compatible additive MINOR after the
+published immutable **v0.8.0** WMS-003 contract. The v0.9.0 annotated tag object is
+`adcfad11c6fe51cb54a92a93f9c1e99a13fb7dc8`, targeting
+`138e2381e1010e994a0f9d6306af6f9d420658e5`. Publication does not imply consumer
+adoption or conformance; existing consumer pins and capability behavioral versions
+remain unchanged.
 
 ## Cross-stack design review
 

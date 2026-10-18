@@ -48,7 +48,7 @@ It adds WMS-002 Storage Attributes. Its tag is unchanged. Earlier release notes
 and verification reports retain their historical preparation evidence.
 Publication does not imply consumer adoption or conformance.
 
-## Current published immutable release: v0.8.0
+## Previous published immutable release: v0.8.0
 
 **v0.8.0 is the current published immutable release.**
 
@@ -62,16 +62,21 @@ Its [historical preparation notes](../releases/v0.8.0.md) retain their original
 wording and verification evidence; publication does not imply consumer adoption.
 The tag must not be changed.
 
-## Next revision preparation: v0.9.0
+## Current published immutable release: v0.9.0
 
-OpenAPI on this branch is **0.9.0**, a **compatible additive MINOR** preparation.
-[CORE-CAP-001](../core/capabilities-001.md) adds capability descriptors, registration
-invariants and contextual discovery without changing published v0.8.0 behavior.
-Capability behavioral versions are independent of the shared API release and
-module implementation versions; see its version identity rules.
-See [draft release notes](../releases/v0.9.0.md). No v0.9.0 backend/client adoption
-or conformance is claimed. Consumers must pin an explicit published release.
-This preparation creates no tag or publication.
+**v0.9.0 is the current published immutable release.**
+
+- Annotated tag object: `adcfad11c6fe51cb54a92a93f9c1e99a13fb7dc8`.
+- Target commit: `138e2381e1010e994a0f9d6306af6f9d420658e5`.
+
+OpenAPI is **0.9.0**, a **compatible additive MINOR** over v0.8.0.
+[CORE-CAP-001](../core/capabilities-001.md) adds capability descriptors,
+registration invariants and contextual discovery without changing published
+v0.8.0 behavior. Capability behavioral versions are independent of the shared
+API release and module implementation versions; see its version identity rules.
+See [release notes](../releases/v0.9.0.md). Publication does not imply
+backend/client adoption or conformance. Consumers may pin the immutable
+`v0.9.0` tag. The tag must not be changed.
 
 ## Public HTTP version and route policy
 
