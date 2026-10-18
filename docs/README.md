@@ -4,6 +4,8 @@
 | --- | --- |
 | [Usage](usage.md) | Local commands, Docker networking, limits, cleanup, and pinned tooling. |
 | [COLLECTIONS-001](common/collections.md) | Standard paged envelope, user and module pagination, order, totals and compatibility. |
+| [CORE-CAP-001](core/capabilities-001.md) | Capability ownership, descriptors, permissions, effective discovery, schemas and deferred execution. |
+| [CORE-CAP-001 verification](verification/core-cap-001.md) | New discovery coverage, contract preservation and Docker verification evidence. |
 | [Module administration](core/modules.md) | CORE administration introduced in v0.5.0, availability, dependency invariants and canonical development/conformance modules. |
 | [WMS-001](modules/wms/wms-001.md) | Published v0.6.0 UoM vertical, laboratory audit, design decisions, security, gating and portability. |
 | [WMS-001 verification](verification/wms-001.md) | Local contract validation, compatibility preservation, scoped faults and deliberate limitations. |
@@ -11,9 +13,10 @@
 | [v0.6.0 release notes](releases/v0.6.0.md) | Previous immutable release: WMS UoMs and exact release identity. |
 | [API conventions](common/api-conventions.md) | Reusable HTTP semantics, precedence and the v0.8.0 error envelope. |
 | [WMS-003](modules/wms/wms-003.md) | Item Families, association mutations, multi-errors and portability. |
-| [v0.8.0 preparation](releases/v0.8.0.md) | Unpublished incompatible MINOR, validation and exclusions. |
+| [v0.9.0 preparation](releases/v0.9.0.md) | Unpublished compatible MINOR: CORE-CAP-001 discovery and validation. |
+| [v0.8.0 preparation evidence](releases/v0.8.0.md) | Historical WMS-003 preparation notes; v0.8.0 is published and immutable. |
 | [WMS-002](modules/wms/wms-002.md) | Storage Attribute create/list, exact code/name semantics, portability and conformance. |
-| [v0.7.0 preparation evidence](releases/v0.7.0.md) | Historical preparation notes; v0.7.0 is now the published immutable baseline. |
+| [v0.7.0 preparation evidence](releases/v0.7.0.md) | Historical preparation notes for the previous immutable v0.7.0 release. |
 | [USERS-001](core/users-001.md) | CORE user model, current user, administration, security invariants and conformance coverage. |
 | [AUTH-001](core/auth-001.md) | Login behavior, credentials, scope and backend adaptation requirements. |
 | [Shared demo defaults](../demo/README.md) | Canonical public initial demo values, override precedence and adoption boundaries. |
@@ -74,15 +77,15 @@ or conformance. Demo defaults are outside the HTTP release scope.
 
 ## Published contract and consumer adoption
 
-**v0.7.0 is the current published immutable release**, target
-`76618b4d6776dca5e13466e7fde44af675d5b08f`. See [release identity and policy](common/versioning.md).
+**v0.8.0 is the current published immutable release**, target
+`9dcb1605bcddbd450d4c009285313a142ab9fb35`. See [release identity and policy](common/versioning.md).
 The recorded Java/.NET adoption remains v0.6.0; publication and adoption are
 distinct. Angular WMS or module administration adoption is not claimed.
 
-The checkout prepares unpublished **v0.8.0**. Its sole collection currently
-contains **494 requests / 2190 named checks**, measured after implementation.
-See [WMS-003](modules/wms/wms-003.md) and [validation](releases/v0.8.0.md).
-No backend/client v0.8.0 adoption or conformance is claimed. Full conformance
+The checkout prepares unpublished **v0.9.0**. Its sole collection currently
+contains **522 requests / 2315 named checks**, measured after implementation.
+See [CORE-CAP-001](core/capabilities-001.md) and [validation](releases/v0.9.0.md).
+No backend/client v0.9.0 adoption or conformance is claimed. Full conformance
 requires initially empty disposable UoM, Storage Attribute and ItemFamily
 catalogues and enabled AVAILABLE `erbas.wms`. Repository checks examine only
 synthetic fixtures. Historical reports retain their original versions, counts

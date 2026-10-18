@@ -1,0 +1,32 @@
+meta {
+  name: Capabilities 512 detail-uoms
+  type: http
+  seq: 512
+}
+
+get {
+  url: {{baseUrl}}{{capabilitiesPath}}/wms.uoms.list
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+script:pre-request {
+  bru.setVar("capOffset", bru.getVar("capOffset") || 0);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  kind: detail
+  requestName: Capabilities 512 detail-uoms
+  targetId: wms.uoms.list
+}

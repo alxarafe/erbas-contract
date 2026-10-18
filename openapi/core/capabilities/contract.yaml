@@ -1,0 +1,187 @@
+paths:
+  /api/core/capabilities:
+    get:
+      operationId: listCapabilities
+      summary: Discover the effective authenticated-user capability catalogue
+      description: >-
+        CORE is never module-gated. Authenticate before query validation. Include
+        only registered descriptors whose owning Module is AVAILABLE and enabled
+        and whose requiredPermissions are all granted to the current user.
+        Filter before counting, ordering by id ASC and applying COLLECTIONS-001
+        pagination. IDs are unique across all pages. Empty catalogues return 200.
+        Only single offset and limit query values are accepted. Unknown keys,
+        repeated keys and invalid pagination return 400. No administrative view.
+        All responses are strict JSON with Cache-Control no-store; no redirects.
+        Only 401 includes WWW-Authenticate Bearer; other responses omit it.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '../../common/pagination.yaml#/parameters/Offset'
+        - $ref: '../../common/pagination.yaml#/parameters/Limit'
+      responses:
+        '200':
+          $ref: '#/responses/CapabilityList'
+        '400':
+          $ref: '../../common/errors.yaml#/responses/InvalidRequest'
+        '401':
+          $ref: '../../common/errors.yaml#/responses/Unauthorized'
+  /api/core/capabilities/{capabilityId}:
+    get:
+      operationId: getCapability
+      summary: Describe one effective capability
+      description: >-
+        Authenticate before validation or lookup. Exact case-sensitive ID matching.
+        No query parameters are accepted. Invalid ID syntax returns 400.
+        Unknown, unavailable-module, disabled-module and unauthorized capabilities
+        share the same 404 capability_not_found response without existence hints.
+        A successful descriptor is identical to its effective catalogue entry.
+        Discovery does not execute or grant access to data. All responses are
+        strict JSON with Cache-Control no-store; no redirects. Only 401 includes
+        WWW-Authenticate Bearer; other responses omit it.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: capabilityId
+          in: path
+          required: true
+          schema:
+            $ref: '#/schemas/CapabilityId'
+      responses:
+        '200':
+          $ref: '#/responses/CapabilityDetail'
+        '400':
+          $ref: '../../common/errors.yaml#/responses/InvalidRequest'
+        '401':
+          $ref: '../../common/errors.yaml#/responses/Unauthorized'
+        '404':
+          $ref: '#/responses/CapabilityNotFound'
+responses:
+  CapabilityList:
+    description: Effective catalogue after module and user filtering; never an administrative inventory.
+    headers:
+      Cache-Control:
+        required: true
+        schema: {type: string, const: no-store}
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/CapabilityCollection'
+  CapabilityDetail:
+    description: Complete effective descriptor. WWW-Authenticate is absent.
+    headers:
+      Cache-Control:
+        required: true
+        schema: {type: string, const: no-store}
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/Capability'
+  CapabilityNotFound:
+    description: No effective capability matches; deliberately does not disclose the reason. WWW-Authenticate is absent.
+    headers:
+      Cache-Control:
+        required: true
+        schema: {type: string, const: no-store}
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/CapabilityNotFound'
+schemas:
+  CapabilityId:
+    type: string
+    pattern: '^[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*(?![\s\S])'
+    description: Stable module namespace, resource/domain and operation; exactly three lowercase dot-separated segments. Version is separate.
+  CapabilitySchemaReference:
+    type: object
+    additionalProperties: false
+    required: ['$ref']
+    description: >-
+      JSON Schema reference-only schema, resolved against the canonical bundled
+      OpenAPI document for the explicitly selected erbas-contract revision,
+      never against the discovery HTTP URL. Target must exist in components.schemas.
+      No network retrieval, inline schemas or arbitrary external references.
+    properties:
+      $ref:
+        type: string
+        pattern: '^#/components/schemas/[A-Za-z_][A-Za-z0-9_]*(?![\s\S])'
+  Capability:
+    type: object
+    additionalProperties: false
+    required: [id, module, version, name, description, effect, inputSchema, outputSchema, requiredPermissions]
+    properties:
+      id:
+        $ref: '#/schemas/CapabilityId'
+      module:
+        type: string
+        minLength: 1
+        description: Exact owning Module.id, not necessarily the capability namespace; provider declares the mapping explicitly.
+      version:
+        type: string
+        pattern: '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?![\s\S])'
+        description: Capability behavioral contract SemVer without prerelease/build metadata; independent of implementation, moduleApiVersion and erbas-contract release.
+      name:
+        type: string
+        minLength: 1
+        pattern: '\S'
+        description: Human-readable stable English name, not an authorization key.
+      description:
+        type: string
+        minLength: 1
+        pattern: '\S'
+        description: English behavior and usage description, without secrets or implementation details.
+      effect:
+        type: string
+        enum: [read, write]
+        description: Read does not mutate business state; write may mutate it. This is descriptive, not an execution guarantee.
+      inputSchema:
+        $ref: '#/schemas/CapabilitySchemaReference'
+      outputSchema:
+        $ref: '#/schemas/CapabilitySchemaReference'
+      requiredPermissions:
+        type: array
+        uniqueItems: true
+        description: All listed functional permissions are required for discovery and use; empty means authenticated access. Stable ordinal ASC order. No roles or data scopes.
+        items:
+          type: string
+          minLength: 1
+          pattern: '\S'
+  CapabilityCollection:
+    type: object
+    additionalProperties: false
+    required: [items, offset, limit, total, order]
+    properties:
+      items:
+        type: array
+        items:
+          $ref: '#/schemas/Capability'
+      offset:
+        $ref: '../../common/pagination.yaml#/parameters/Offset/schema'
+      limit:
+        $ref: '../../common/pagination.yaml#/parameters/Limit/schema'
+      total:
+        type: integer
+        minimum: 0
+        description: Effective user-visible count before pagination; never counts hidden descriptors.
+      order:
+        type: array
+        minItems: 1
+        maxItems: 1
+        items:
+          $ref: '../../common/pagination.yaml#/schemas/Order'
+        const: [{field: id, direction: asc}]
+  CapabilityNotFound:
+    allOf:
+      - $ref: '../../common/errors.yaml#/schemas/ErrorResponse'
+      - properties:
+          code:
+            const: capability_not_found
+          errors:
+            minItems: 1
+            maxItems: 1
+            items:
+              type: object
+              additionalProperties: false
+              required: [code]
+              properties:
+                code:
+                  const: capability_not_found

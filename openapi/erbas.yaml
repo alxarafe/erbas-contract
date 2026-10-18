@@ -1,11 +1,15 @@
 openapi: 3.1.0
 info:
   title: ERBAS shared HTTP contract
-  version: 0.8.0
+  version: 0.9.0
   description: >-
-    ERBAS Contract 0.8.0 unpublished preparation: WMS-003 Item Families and associations, with an incompatible standard error envelope. Published immutable baseline: v0.7.0. No v0.8.0 backend or client adoption or conformance is claimed. See docs/api-conventions.md and docs/wms-003.md.
+    ERBAS Contract 0.9.0 unpublished preparation: CORE-CAP-001 capability descriptors, registry and contextual discovery. Published immutable baseline: v0.8.0 (WMS-003 and the standard error envelope). No v0.9.0 backend or client adoption or conformance is claimed. See docs/core/capabilities-001.md and docs/releases/v0.9.0.md.
 security: []
 paths:
+  /api/core/capabilities:
+    $ref: './core/capabilities/contract.yaml#/paths/~1api~1core~1capabilities'
+  /api/core/capabilities/{capabilityId}:
+    $ref: './core/capabilities/contract.yaml#/paths/~1api~1core~1capabilities~1{capabilityId}'
   /health:
     $ref: './core/health/contract.yaml#/paths/~1health'
   /api/auth/login:
@@ -44,6 +48,12 @@ components:
     bearerAuth:
       $ref: './common/security.yaml#/securitySchemes/bearerAuth'
   responses:
+    CapabilityList:
+      $ref: './core/capabilities/contract.yaml#/responses/CapabilityList'
+    CapabilityDetail:
+      $ref: './core/capabilities/contract.yaml#/responses/CapabilityDetail'
+    CapabilityNotFound:
+      $ref: './core/capabilities/contract.yaml#/responses/CapabilityNotFound'
     CurrentUser:
       $ref: './core/users/contract.yaml#/responses/CurrentUser'
     CreatedUser:
@@ -99,6 +109,18 @@ components:
     WmsAssociationConflict:
       $ref: './modules/wms/item-families/contract.yaml#/responses/WmsAssociationConflict'
   schemas:
+    CapabilityListInput:
+      $ref: './common/pagination.yaml#/schemas/CapabilityListInput'
+    CapabilityId:
+      $ref: './core/capabilities/contract.yaml#/schemas/CapabilityId'
+    CapabilitySchemaReference:
+      $ref: './core/capabilities/contract.yaml#/schemas/CapabilitySchemaReference'
+    Capability:
+      $ref: './core/capabilities/contract.yaml#/schemas/Capability'
+    CapabilityCollection:
+      $ref: './core/capabilities/contract.yaml#/schemas/CapabilityCollection'
+    CapabilityNotFound:
+      $ref: './core/capabilities/contract.yaml#/schemas/CapabilityNotFound'
     WmsUomCode:
       $ref: './modules/wms/uoms/contract.yaml#/schemas/WmsUomCode'
     WmsUomDescription:

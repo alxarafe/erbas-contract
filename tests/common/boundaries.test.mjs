@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
+import { contractVersion } from '../support/constants.mjs';
 import { dirname, join, relative, resolve } from 'node:path';
 
 const repository = '/runner';
@@ -9,7 +10,6 @@ const wmsOpenapiDirectory = 'modules/wms/';
 const wmsBrunoDirectory = 'modules/wms/';
 const coreModularityDirectory = 'core/modularity/';
 const rootOpenapi = 'erbas.yaml';
-const contractVersion = '0.8.0';
 const yamlFiles = (await readdir(openapiDirectory, { recursive: true })).filter(file => file.endsWith('.yaml'));
 const brunoFiles = await readdir(join(repository, 'bruno'), { recursive: true });
 const refs = source => [...source.matchAll(/\$ref:\s*['"]([^'"]+)['"]/g)].map(match => match[1]);
@@ -83,7 +83,7 @@ test('OpenAPI has one composition root with external path/component references',
   assert.doesNotMatch(components, /^      (?!\$ref:).+/m);
 });
 
-test('the single public contract version remains 0.8.0', async () => {
+test('the single public contract version prepares v0.9.0', async () => {
   const source = await readFile(join(openapiDirectory, rootOpenapi), 'utf8');
   assert.equal(source.match(/^  version: (.+)$/m)?.[1], contractVersion);
 });

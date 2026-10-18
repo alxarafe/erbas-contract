@@ -19,6 +19,15 @@ parameters:
       maximum: 100
       default: 50
 schemas:
+  CapabilityListInput:
+    type: object
+    additionalProperties: false
+    description: Optional offset/limit inputs for paged capabilities; defaults and validation match the HTTP query parameters.
+    properties:
+      offset:
+        $ref: '#/parameters/Offset/schema'
+      limit:
+        $ref: '#/parameters/Limit/schema'
   Order:
     type: object
     additionalProperties: false

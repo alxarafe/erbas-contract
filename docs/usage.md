@@ -53,7 +53,7 @@ enabled administrator in an isolated validation environment before invoking
 usage error, never a skipped login check. USERS-001 creates and modifies users;
 never run the suite against production. Unique test users remain until the
 backend disposes of its environment. See [USERS-001](core/users-001.md) for required
-account state and mutations; current suite counters are in [WMS-003](releases/v0.8.0.md). COLLECTIONS-001
+account state and mutations; current suite counters are in [v0.9.0 preparation](releases/v0.9.0.md). COLLECTIONS-001
 checks paged user windows and totals; use an environment without concurrent
 external mutations during the run. See [collections](common/collections.md).
 See
@@ -76,11 +76,13 @@ run the suite against production. Success leaves both enabled; after failure,
 discard the environment. Java/.NET consume published v0.6.0. Published conformance
 requires enabled AVAILABLE `erbas.wms` and an initially empty UoM catalogue.
 Published v0.7.0 additionally requires an empty Storage Attribute catalogue.
-This checkout prepares unpublished v0.8.0 and additionally requires an initially
-empty ItemFamily catalogue, association support and the standard error envelope.
+Published v0.8.0 additionally requires an initially empty ItemFamily catalogue,
+association support and the standard error envelope. This checkout prepares
+unpublished v0.9.0 with capability discovery; the existing catalogue prerequisites
+remain unchanged.
 Use it against a backend only after separately approved adoption. WMS mutations
 persist catalogue rows and associations and restore the module enabled; dispose
-of the environment. See [WMS-003](modules/wms/wms-003.md). No backend/client v0.8.0 adoption
+of the environment. See [WMS-003](modules/wms/wms-003.md). No backend/client v0.9.0 adoption
 or conformance is claimed.
 
 | URL rule | Behavior |
@@ -202,3 +204,14 @@ dependency and compatibility review.
 
 For individual positive and negative test cases and recorded cleanup evidence,
 see [CONTRACT-001A verification](verification/contract-001a.md).
+
+## Capability discovery conformance
+
+The full suite includes [CORE-CAP-001](core/capabilities-001.md): authenticated
+effective discovery and three WMS-owned descriptors. The existing enabled admin,
+normal user created by the suite and AVAILABLE `erbas.wms` fixture prerequisites
+remain sufficient; no new credentials or permission configuration is required.
+The suite disables and restores WMS using existing module administration to
+observe discovery filtering. Run only against a disposable supplied service URL.
+Schemas referenced by descriptors resolve against the bundled OpenAPI from the
+explicitly selected contract revision, not against the service URL.

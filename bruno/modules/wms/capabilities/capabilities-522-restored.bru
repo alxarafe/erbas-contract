@@ -1,0 +1,33 @@
+meta {
+  name: Capabilities 522 restored
+  type: http
+  seq: 522
+}
+
+get {
+  url: {{baseUrl}}{{capabilitiesPath}}?offset={{capOffset}}&limit={{maximumLimit}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+script:pre-request {
+  bru.setVar("capOffset", bru.getVar("capNextOffset") || 0);
+  if (!bru.getVar("capOffset")) bru.setVar("capSeen", []);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  kind: collection
+  requestName: Capabilities 522 restored
+  wmsVisible: true
+}

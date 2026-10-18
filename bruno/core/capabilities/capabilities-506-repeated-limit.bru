@@ -1,0 +1,31 @@
+meta {
+  name: Capabilities 506 repeated-limit
+  type: http
+  seq: 506
+}
+
+get {
+  url: {{baseUrl}}{{capabilitiesPath}}?limit=1&limit=2
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+script:pre-request {
+  bru.setVar("capOffset", bru.getVar("capOffset") || 0);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  kind: error
+  requestName: Capabilities 506 repeated-limit
+}

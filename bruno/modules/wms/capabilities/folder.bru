@@ -1,0 +1,117 @@
+meta {
+  name: Capability discovery
+}
+
+vars:pre-request {
+  capabilitiesPath: /api/core/capabilities
+  maximumLimit: 100
+  capabilityIdPattern: ^[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*(?![\s\S])
+  WMS_ID: erbas.wms
+  modulesPath: /api/modules
+  wmsDescriptors: [{"id":"wms.uoms.list","module":"erbas.wms","version":"1.0.0","name":"List units of measure","description":"GET /api/wms/uoms with optional offset and limit; returns the existing paged catalogue.","effect":"read","inputSchema":{"$ref":"#/components/schemas/CapabilityListInput"},"outputSchema":{"$ref":"#/components/schemas/WmsUomCollection"},"requiredPermissions":["wms.uoms.read"]},{"id":"wms.storage-attributes.list","module":"erbas.wms","version":"1.0.0","name":"List storage attributes","description":"GET /api/wms/storage-attributes with optional offset and limit; returns the existing paged catalogue.","effect":"read","inputSchema":{"$ref":"#/components/schemas/CapabilityListInput"},"outputSchema":{"$ref":"#/components/schemas/WmsStorageAttributeCollection"},"requiredPermissions":["wms.storage-attributes.read"]},{"id":"wms.item-families.list","module":"erbas.wms","version":"1.0.0","name":"List item families","description":"GET /api/wms/item-families with optional offset and limit; returns the existing paged catalogue.","effect":"read","inputSchema":{"$ref":"#/components/schemas/CapabilityListInput"},"outputSchema":{"$ref":"#/components/schemas/WmsItemFamilyCollection"},"requiredPermissions":["wms.item-families.read"]}]
+}
+
+script:post-response {
+  if (Number(bru.getRequestVar("expectedStatus")) === 200 && bru.getRequestVar("kind") === "collection") {
+    const body = res.getBody();
+    const next = body.offset + body.limit;
+    if (next < body.total) {
+      bru.setVar("capNextOffset", next);
+      bru.setNextRequest(bru.getRequestVar("requestName"));
+    } else {
+      bru.setVar("capNextOffset", 0);
+    }
+  }
+}
+
+tests {
+  test("Expected HTTP status", function () {
+    expect(res.getStatus()).to.equal(Number(bru.getRequestVar("expectedStatus")));
+  });
+
+  test("Content-Type is JSON with syntactically valid optional parameters", function () {
+    const token = "[!#$%&'*+.^_`|~0-9A-Za-z-]+";
+    const quoted = '"(?:[\\t\\x20\\x21\\x23-\\x5b\\x5d-\\x7e\\x80-\\xff]|\\\\[\\t\\x20-\\x7e\\x80-\\xff])*"';
+    const mediaType = new RegExp("^application/json(?:[ \\t]*;[ \\t]*" + token + "=(?:" + token + "|" + quoted + "))*[ \\t]*$", "i");
+    expect(res.getHeader("content-type")).to.be.a("string").and.match(mediaType);
+  });
+
+  test("Contractual response headers", function () {
+    expect(res.getHeader("cache-control")).to.equal("no-store");
+    expect(res.getHeader("www-authenticate")).to.equal(
+      Number(bru.getRequestVar("expectedStatus")) === 401 ? "Bearer" : undefined);
+  });
+
+  test("Strict capability response and effective catalogue", function () {
+    const status = Number(bru.getRequestVar("expectedStatus"));
+    const body = res.getBody();
+    if (status !== 200) {
+      const codes = {400: "invalid_request", 401: "unauthorized", 404: "capability_not_found"};
+      expect(body).to.deep.equal({code: codes[status], errors: [{code: codes[status]}]});
+      return;
+    }
+    if (bru.getRequestVar("kind") === "module") {
+      expect(body).to.deep.equal({id: bru.getFolderVar("WMS_ID"), moduleApiVersion: 1,
+        dependencies: [], enabled: bru.getRequestVar("expectedEnabled") === "true"});
+      return;
+    }
+    const validate = descriptor => {
+      expect(descriptor).to.be.an("object");
+      expect(Object.keys(descriptor).sort()).to.deep.equal([
+        "description", "effect", "id", "inputSchema", "module", "name", "outputSchema", "requiredPermissions", "version"]);
+      expect(descriptor.id).to.match(new RegExp(bru.getFolderVar("capabilityIdPattern")));
+      expect(descriptor.version).to.match(/^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?![\s\S])/);
+      expect(descriptor.module).to.be.a("string").and.not.equal("");
+      for (const field of ["name", "description"]) expect(descriptor[field]).to.be.a("string").and.match(/\S/);
+      expect(["read", "write"]).to.include(descriptor.effect);
+      for (const field of ["inputSchema", "outputSchema"]) {
+        expect(descriptor[field]).to.be.an("object");
+        expect(Object.keys(descriptor[field])).to.deep.equal(["$ref"]);
+        expect(descriptor[field].$ref).to.match(/^#\/components\/schemas\/[A-Za-z_][A-Za-z0-9_]*(?![\s\S])/);
+      }
+      expect(descriptor.requiredPermissions).to.be.an("array");
+      expect(new Set(descriptor.requiredPermissions).size).to.equal(descriptor.requiredPermissions.length);
+      expect(descriptor.requiredPermissions).to.deep.equal([...descriptor.requiredPermissions].sort());
+      descriptor.requiredPermissions.forEach(permission => expect(permission).to.be.a("string").and.match(/\S/));
+    };
+    if (bru.getRequestVar("kind") === "detail") {
+      validate(body);
+      expect(body.id).to.equal(bru.getRequestVar("targetId"));
+      return;
+    }
+    expect(body).to.be.an("object");
+    expect(Object.keys(body).sort()).to.deep.equal(["items", "limit", "offset", "order", "total"]);
+    expect(body.offset).to.equal(bru.getVar("capOffset") || 0);
+    expect(body.limit).to.equal(Number(bru.getFolderVar("maximumLimit")));
+    expect(Number.isInteger(body.total) && body.total >= 0).to.equal(true);
+    expect(body.order).to.deep.equal([{field: "id", direction: "asc"}]);
+    expect(body.items).to.be.an("array").with.lengthOf(Math.min(body.limit, Math.max(0, body.total - body.offset)));
+    body.items.forEach(validate);
+    const seen = bru.getVar("capSeen") || [];
+    if (body.offset) expect(body.total).to.equal(bru.getVar("capTotal"));
+    bru.setVar("capTotal", body.total);
+    for (const descriptor of body.items) {
+      expect(seen.map(item => item.id)).not.to.include(descriptor.id);
+      if (seen.length) expect(descriptor.id > seen[seen.length - 1].id).to.equal(true);
+      seen.push(descriptor);
+    }
+    bru.setVar("capSeen", seen);
+  });
+  test("WMS provider declarations and effective visibility", function () {
+    if (Number(bru.getRequestVar("expectedStatus")) !== 200 || bru.getRequestVar("kind") === "module") return;
+    const expected = JSON.parse(bru.getFolderVar("wmsDescriptors"));
+    const body = res.getBody();
+    const visible = bru.getRequestVar("wmsVisible") === "true";
+    if (bru.getRequestVar("kind") === "detail") {
+      expect(body).to.deep.equal(expected.find(item => item.id === bru.getRequestVar("targetId")));
+    } else {
+      const items = [...(bru.getVar("capSeen") || []), ...body.items];
+      if (body.offset + body.limit >= body.total) {
+        const provided = items.filter(item => item.module === bru.getFolderVar("WMS_ID"));
+        if (visible) {
+          for (const descriptor of expected) expect(provided).to.deep.include(descriptor);
+        } else expect(provided).to.deep.equal([]);
+      }
+    }
+  });
+}
