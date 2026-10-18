@@ -53,7 +53,7 @@ enabled administrator in an isolated validation environment before invoking
 usage error, never a skipped login check. USERS-001 creates and modifies users;
 never run the suite against production. Unique test users remain until the
 backend disposes of its environment. See [USERS-001](core/users-001.md) for required
-account state and mutations; development suite counters are in [v0.10.0 preparation notes](releases/v0.10.0.md). COLLECTIONS-001
+account state and mutations; suite counters are in [v0.10.0 release notes](releases/v0.10.0.md). COLLECTIONS-001
 checks paged user windows and totals; use an environment without concurrent
 external mutations during the run. See [collections](common/collections.md).
 See
@@ -78,10 +78,11 @@ requires enabled AVAILABLE `erbas.wms` and an initially empty UoM catalogue.
 Published v0.7.0 additionally requires an empty Storage Attribute catalogue.
 Published v0.8.0 additionally requires an initially empty ItemFamily catalogue,
 association support and the standard error envelope. Published v0.9.0 adds
-capability discovery; the existing catalogue prerequisites remain unchanged.
-Use it against a backend only after separately approved adoption. WMS mutations
+capability discovery; v0.10.0 adds synchronous READ capability invocation. The
+existing catalogue prerequisites remain unchanged. Use the suite against a backend
+only after separately approved adoption. WMS mutations
 persist catalogue rows and associations and restore the module enabled; dispose
-of the environment. See [WMS-003](modules/wms/wms-003.md). No backend/client v0.9.0 adoption
+of the environment. See [WMS-003](modules/wms/wms-003.md). No backend/client v0.10.0 adoption
 or conformance is claimed.
 
 | URL rule | Behavior |
@@ -215,7 +216,7 @@ observe discovery filtering. Run only against a disposable supplied service URL.
 Schemas referenced by descriptors resolve against the bundled OpenAPI from the
 explicitly selected contract revision, not against the service URL.
 
-The unpublished v0.10.0 full suite also includes
+The v0.10.0 full suite also includes
 [CORE-CAP-002](core/capabilities-002.md) READ invocation. It uses the same service
 URL, credentials and disposable WMS prerequisites. Invocation results are compared
 with the existing GET collections for default and explicit offset/limit windows;

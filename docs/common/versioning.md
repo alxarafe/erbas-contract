@@ -62,9 +62,9 @@ Its [historical preparation notes](../releases/v0.8.0.md) retain their original
 wording and verification evidence; publication does not imply consumer adoption.
 The tag must not be changed.
 
-## Current published immutable release: v0.9.0
+## Previous published immutable release: v0.9.0
 
-**v0.9.0 is the current published immutable release.**
+**v0.9.0 is a previous published immutable release.**
 
 - Annotated tag object: `adcfad11c6fe51cb54a92a93f9c1e99a13fb7dc8`.
 - Target commit: `138e2381e1010e994a0f9d6306af6f9d420658e5`.
@@ -78,13 +78,14 @@ See [release notes](../releases/v0.9.0.md). Publication does not imply
 backend/client adoption or conformance. Consumers may pin the immutable
 `v0.9.0` tag. The tag must not be changed.
 
-## Unpublished preparation: v0.10.0
+## Current published immutable release: v0.10.0
 
-The development OpenAPI is **0.10.0**, a compatible additive MINOR over published
+The release OpenAPI is **0.10.0**, a compatible additive MINOR over published
 immutable v0.9.0. [CORE-CAP-002](../core/capabilities-002.md) adds synchronous READ
 invocation without changing discovery, provider descriptors or existing routes.
-See [preparation notes](../releases/v0.10.0.md). No v0.10.0 tag/release is created;
-consumer pins and historical verification evidence remain unchanged.
+See [release notes](../releases/v0.10.0.md). The exact publication identity will
+be recorded after the tag exists. Publication does not imply consumer adoption or
+conformance; historical verification evidence remains unchanged.
 
 ## Public HTTP version and route policy
 

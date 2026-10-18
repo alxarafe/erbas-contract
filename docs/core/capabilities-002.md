@@ -1,6 +1,6 @@
 # CORE-CAP-002 — Synchronous READ capability invocation
 
-Status: approved contract-only preparation for **unpublished v0.10.0**, a
+Status: included in **v0.10.0**, a
 compatible additive MINOR over published immutable **v0.9.0**. No backend/client
 implementation, adoption or live conformance is claimed. OpenAPI is authoritative;
 the existing single Bruno collection checks the observable HTTP behavior.
@@ -138,5 +138,5 @@ structured/default pagination, malformed IDs/bodies/inputs, masked unknown,
 unauthorized/unavailable/disabled providers, rejection of caller security context,
 and output equivalence with existing provider collection shapes and data.
 See [verification](../verification/core-cap-002.md) and
-[release preparation](../releases/v0.10.0.md). Synthetic fixtures verify the runner;
+[release notes](../releases/v0.10.0.md). Synthetic fixtures verify the runner;
 backend execution, trusted context and audit require backend-owned verification.

@@ -8,7 +8,7 @@
 [![.NET backend CI / shared conformance](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml)
 [![Angular client CI](https://github.com/alxarafe/erbas-client/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alxarafe/erbas-client/actions/workflows/ci.yml)
 
-[![Published v0.9.0](https://img.shields.io/badge/contract-v0.9.0-blue)](https://github.com/alxarafe/erbas-contract/tree/v0.9.0)
+[![Published v0.10.0](https://img.shields.io/badge/contract-v0.10.0-blue)](https://github.com/alxarafe/erbas-contract/tree/v0.10.0)
 [![OpenAPI 3.1](https://img.shields.io/badge/OpenAPI-3.1-6BA539)](openapi/erbas.yaml)
 [![Bruno CLI 4.2.0](https://img.shields.io/badge/Bruno_CLI-4.2.0-F4AA41)](bruno/)
 [![Docker-based validation](https://img.shields.io/badge/validation-Docker--based-2496ED)](docs/usage.md)
@@ -32,7 +32,7 @@ flowchart LR
 
 | Repository | Responsibility | Current status |
 | --- | --- | --- |
-| [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Published immutable v0.9.0 |
+| [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Published immutable v0.10.0 |
 | [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 | Adopted v0.6.0; authoritative `./bin/check` requires shared conformance locally and in CI |
 | [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 plus platform modules | Adopted v0.6.0; authoritative `./bin/check` requires shared conformance locally and in CI |
 | [erbas-client](https://github.com/alxarafe/erbas-client) | Angular 22 client consuming Health, AUTH-001, USERS-001 basic user administration and COLLECTIONS-001 pagination from either backend | Shared client for both backends; real Java/.NET interoperability verified |
@@ -60,14 +60,15 @@ Both run through Docker; see [usage and networking](docs/usage.md).
 
 See [development ports](docs/common/development-ports.md) for local infrastructure conventions.
 
-Published **v0.9.0** adds capability descriptors and contextual discovery.
-See [CORE-CAP-001](docs/core/capabilities-001.md).
-No backend or client v0.9.0 adoption or conformance is claimed.
+Published **v0.10.0** includes capability descriptors and contextual discovery,
+plus synchronous READ invocation. See [CORE-CAP-001](docs/core/capabilities-001.md)
+and [CORE-CAP-002](docs/core/capabilities-002.md).
+No backend or client v0.10.0 adoption or conformance is claimed.
 
 ## Current contractual coverage
 
-**v0.9.0 is the current published immutable release**, including CORE module
-administration and capability discovery, plus WMS UoMs, Storage Attributes,
+**v0.10.0 is the current published immutable release**, including CORE module
+administration, capability discovery and synchronous READ invocation, plus WMS UoMs, Storage Attributes,
 Item Families and associations. See [versioning](docs/common/versioning.md)
 and [WMS-003](docs/modules/wms/wms-003.md). Backend adoption, shared conformance and client
 consumption are separate facts; the recorded Java/.NET adoption remains v0.6.0.
