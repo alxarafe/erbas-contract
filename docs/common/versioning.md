@@ -37,9 +37,9 @@ v0.5.0 remains an immutable previous release, tag object
 v0.4.0 remains the first formal published release, with its identity recorded above.
 Existing release tags must never be moved or recreated.
 
-## Current published immutable release: v0.7.0
+## Previous published immutable release: v0.7.0
 
-**v0.7.0 is the current published immutable release.**
+**v0.7.0 remains an immutable previous release.**
 
 - Annotated tag object: `c6cdbe0d90c63fb79b1bb36a96d67d822243ffdb`.
 - Target commit: `76618b4d6776dca5e13466e7fde44af675d5b08f`.
@@ -48,13 +48,28 @@ It adds WMS-002 Storage Attributes. Its tag is unchanged. Earlier release notes
 and verification reports retain their historical preparation evidence.
 Publication does not imply consumer adoption or conformance.
 
-## Next revision preparation: v0.8.0
+## Current published immutable release: v0.8.0
 
-OpenAPI on this branch is **0.8.0**, an **incompatible pre-1.0 MINOR** preparation.
-[WMS-003](../modules/wms/wms-003.md) adds Item Families and Storage Attribute associations.
-[API conventions](api-conventions.md) standardize all errors as mandatory
-`code` plus nonempty `errors`; existing successful behavior is preserved.
-See [draft release notes](../releases/v0.8.0.md). No v0.8.0 backend/client adoption
+**v0.8.0 is the current published immutable release.**
+
+- Annotated tag object: `303a61b0207d3984780539da4068ab68c1264a8d`.
+- Target commit: `9dcb1605bcddbd450d4c009285313a142ab9fb35`.
+
+[WMS-003](../modules/wms/wms-003.md) adds Item Families and Storage Attribute
+associations. [API conventions](api-conventions.md) standardize errors as mandatory
+`code` plus nonempty `errors`. This was an incompatible pre-1.0 MINOR release.
+Its [historical preparation notes](../releases/v0.8.0.md) retain their original
+wording and verification evidence; publication does not imply consumer adoption.
+The tag must not be changed.
+
+## Next revision preparation: v0.9.0
+
+OpenAPI on this branch is **0.9.0**, a **compatible additive MINOR** preparation.
+[CORE-CAP-001](../core/capabilities-001.md) adds capability descriptors, registration
+invariants and contextual discovery without changing published v0.8.0 behavior.
+Capability behavioral versions are independent of the shared API release and
+module implementation versions; see its version identity rules.
+See [draft release notes](../releases/v0.9.0.md). No v0.9.0 backend/client adoption
 or conformance is claimed. Consumers must pin an explicit published release.
 This preparation creates no tag or publication.
 

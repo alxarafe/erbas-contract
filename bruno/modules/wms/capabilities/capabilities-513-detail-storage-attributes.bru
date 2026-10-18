@@ -1,0 +1,32 @@
+meta {
+  name: Capabilities 513 detail-storage-attributes
+  type: http
+  seq: 513
+}
+
+get {
+  url: {{baseUrl}}{{capabilitiesPath}}/wms.storage-attributes.list
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+script:pre-request {
+  bru.setVar("capOffset", bru.getVar("capOffset") || 0);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  kind: detail
+  requestName: Capabilities 513 detail-storage-attributes
+  targetId: wms.storage-attributes.list
+}

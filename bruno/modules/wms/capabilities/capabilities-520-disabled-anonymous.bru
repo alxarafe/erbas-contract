@@ -1,0 +1,30 @@
+meta {
+  name: Capabilities 520 disabled-anonymous
+  type: http
+  seq: 520
+}
+
+get {
+  url: {{baseUrl}}{{capabilitiesPath}}/wms.uoms.list
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+script:pre-request {
+  bru.setVar("capOffset", bru.getVar("capOffset") || 0);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 401
+  kind: error
+  requestName: Capabilities 520 disabled-anonymous
+}

@@ -1,0 +1,32 @@
+meta {
+  name: Capabilities 514 detail-item-families
+  type: http
+  seq: 514
+}
+
+get {
+  url: {{baseUrl}}{{capabilitiesPath}}/wms.item-families.list
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+script:pre-request {
+  bru.setVar("capOffset", bru.getVar("capOffset") || 0);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  kind: detail
+  requestName: Capabilities 514 detail-item-families
+  targetId: wms.item-families.list
+}

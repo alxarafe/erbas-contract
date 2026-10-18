@@ -1,5 +1,5 @@
-import { coreScopes, coreFullPaths, coreScopePaths, administratorBootstrap } from './conformance/core.mjs';
-import { wmsScopes, wmsFullPaths, wmsScopePaths, wmsScopeTimeoutMs } from './conformance/modules/wms.mjs';
+import { coreScopes, coreFullPaths, coreCapabilityPaths, coreScopePaths, administratorBootstrap } from './conformance/core.mjs';
+import { wmsScopes, wmsFullPaths, wmsCapabilityPaths, wmsScopePaths, wmsScopeTimeoutMs } from './conformance/modules/wms.mjs';
 import { executeBruno, requireCredentials, collectionDirectory } from './bruno-process.mjs';
 export { normalizeBaseUrl, requireCredentials } from './bruno-process.mjs';
 
@@ -9,7 +9,7 @@ const scopedConformanceTimeoutMs = 30000;
 const fullConformanceTimeoutMs = 120000;
 
 async function scopePaths(scope) {
-  if (scope === conformanceScopes.full) return [...coreFullPaths, ...wmsFullPaths];
+  if (scope === conformanceScopes.full) return [...coreFullPaths, ...wmsFullPaths, ...coreCapabilityPaths, ...wmsCapabilityPaths];
   const core = await coreScopePaths(scope, collectionDirectory);
   if (core) return core;
   const module = wmsScopePaths(scope);

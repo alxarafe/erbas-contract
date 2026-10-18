@@ -1,0 +1,31 @@
+meta {
+  name: Capabilities 501 normal-missing-detail
+  type: http
+  seq: 501
+}
+
+get {
+  url: {{baseUrl}}{{capabilitiesPath}}/absent.resource.read
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{userToken}}
+}
+
+script:pre-request {
+  bru.setVar("capOffset", bru.getVar("capOffset") || 0);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 404
+  kind: error
+  requestName: Capabilities 501 normal-missing-detail
+}

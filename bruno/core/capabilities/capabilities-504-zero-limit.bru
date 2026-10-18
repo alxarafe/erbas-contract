@@ -1,0 +1,31 @@
+meta {
+  name: Capabilities 504 zero-limit
+  type: http
+  seq: 504
+}
+
+get {
+  url: {{baseUrl}}{{capabilitiesPath}}?limit=0
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+script:pre-request {
+  bru.setVar("capOffset", bru.getVar("capOffset") || 0);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 400
+  kind: error
+  requestName: Capabilities 504 zero-limit
+}

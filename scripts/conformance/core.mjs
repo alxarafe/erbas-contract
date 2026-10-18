@@ -2,9 +2,10 @@ import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 export const coreScopes = Object.freeze({
-  health: 'health', auth: 'auth', users: 'users', collections: 'collections', modules: 'modules'
+  health: 'health', auth: 'auth', users: 'users', collections: 'collections', modules: 'modules', capabilities: 'capabilities'
 });
 export const coreFullPaths = ['core/health', 'core/auth', 'core/users', 'core/collections', 'core/modularity'];
+export const coreCapabilityPaths = ['core/capabilities'];
 const administratorLogin = 'core/auth/login-success.bru';
 const createNormalUser = 'core/users/users-19-create-normal-user.bru';
 const normalUserLogin = 'core/users/users-22-normal-user-login.bru';
@@ -14,6 +15,7 @@ export const administratorBootstrap = [administratorLogin, createNormalUser, nor
 
 export async function coreScopePaths(scope, collectionDirectory) {
   if (scope === coreScopes.health) return ['core/health/health.bru'];
+  if (scope === coreScopes.capabilities) return [...administratorBootstrap, ...coreCapabilityPaths];
   if (scope === coreScopes.modules) return [...administratorBootstrap, 'core/modularity'];
   if (![coreScopes.auth, coreScopes.users, coreScopes.collections].includes(scope)) return undefined;
   const directory = `core/${scope}`;

@@ -5,6 +5,7 @@ const scopePaths = {
   [wmsScopes.itemFamilies]: 'modules/wms/item-families'
 };
 export const wmsFullPaths = [scopePaths[wmsScopes.wms], scopePaths[wmsScopes.storageAttributes], scopePaths[wmsScopes.itemFamilies]];
+export const wmsCapabilityPaths = ['modules/wms/capabilities'];
 const itemFamilyConformanceTimeoutMs = 90000;
 export function wmsScopePaths(scope) {
   return Object.hasOwn(scopePaths, scope) ? [scopePaths[scope]] : undefined;

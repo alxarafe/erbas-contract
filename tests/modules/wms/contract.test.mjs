@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { runBrunoScenario } from '../../support/scenarios.mjs';
 import { uomScenarios, storageScenarios, associationScenarios, itemFamilyScenarios } from './scenarios.mjs';
-import { mutationTestTimeoutMs, loginPath } from '../../support/constants.mjs';
+import { mutationTestTimeoutMs, loginPath, contractVersion } from '../../support/constants.mjs';
 import { startFixture, fixtureEnv } from '../../fixtures/composed.mjs';
 import { modulesPath } from '../../fixtures/core.mjs';
 import { WMS_ID, uomsPath, storageAttributesPath, storageAttributeCodePattern, storageAttributeCodeConflict } from '../../fixtures/modules/wms/catalogues.mjs';
@@ -61,7 +61,7 @@ test('OpenAPI preserves the Storage Attribute catalogue and precisely defines WM
   const schemas = api.components.schemas;
   const responses = api.components.responses;
   const ref = name => ({ $ref: `#/components/schemas/${name}` });
-  assert.equal(api.info.version, '0.8.0');
+  assert.equal(api.info.version, contractVersion);
   const operations = api.paths[storageAttributesPath];
   assert.deepEqual(Object.keys(operations).sort(), ['get', 'post']);
   assert.ok(!Object.keys(api.paths).some(path => path.startsWith(storageAttributesPath + '/')));

@@ -1,0 +1,30 @@
+meta {
+  name: Capabilities 509 authentication-first
+  type: http
+  seq: 509
+}
+
+get {
+  url: {{baseUrl}}{{capabilitiesPath}}/invalid?unknown=1
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+script:pre-request {
+  bru.setVar("capOffset", bru.getVar("capOffset") || 0);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 401
+  kind: error
+  requestName: Capabilities 509 authentication-first
+}

@@ -1,0 +1,37 @@
+meta {
+  name: Capabilities 521 restore
+  type: http
+  seq: 521
+}
+
+patch {
+  url: {{baseUrl}}{{modulesPath}}/{{WMS_ID}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"enabled": true}
+}
+
+script:pre-request {
+  bru.setVar("capOffset", bru.getVar("capOffset") || 0);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  kind: module
+  requestName: Capabilities 521 restore
+  expectedEnabled: true
+}
