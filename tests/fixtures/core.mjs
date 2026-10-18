@@ -27,7 +27,7 @@ export function userCollection(users, offset = 0, limit = defaultCollectionLimit
     order: [{ field: 'id', direction: 'asc' }] };
 }
 
-export function coreFixture({ status = 200, contentType = 'application/json', body = '{"status":"ok"}', redirect = false, hang = false, auth = {}, users = {}, acceptDisabledTokens = false, collectionFault, modules = {}, moduleFault, availableModules = fixtureModules(), capabilityDescriptors = [], capabilityFault } = {}, context) {
+export function coreFixture({ status = 200, contentType = 'application/json', body = '{"status":"ok"}', redirect = false, hang = false, auth = {}, users = {}, acceptDisabledTokens = false, collectionFault, modules = {}, moduleFault, availableModules = fixtureModules(), capabilityDescriptors = [], capabilityFault, executeCapability, invocationFault } = {}, context) {
   const { requests, faultsReached, hasFault, serialize } = context;
   const accounts = new Map([['synthetic-admin', { id: 'synthetic-admin', email: fixtureEnv.ERBAS_TEST_EMAIL,
     enabled: true, admin: true, password: fixtureEnv.ERBAS_TEST_PASSWORD }]]);
@@ -35,7 +35,7 @@ export function coreFixture({ status = 200, contentType = 'application/json', bo
   const registry = new Map(availableModules.map(module => [module.id, structuredClone(module)]));
   const publicUser = ({ id, email, enabled, admin }) => ({ id, email, enabled, admin });
   let nextId = 1;
-  const discovery = capabilityFixture({ capabilityDescriptors, capabilityFault }, context, {
+  const discovery = capabilityFixture({ capabilityDescriptors, capabilityFault, executeCapability, invocationFault }, context, {
     actorFor: request => accounts.get(tokens.get((request.headers.authorization ?? '').replace(/^Bearer /, ''))),
     moduleAvailable: id => registry.get(id)?.enabled === true,
     collection: userCollection

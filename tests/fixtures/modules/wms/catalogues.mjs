@@ -25,7 +25,7 @@ export function wmsFixture({ wmsFault, storageAttributeFault, itemFamilyFault, a
   const associations = associationFixture({ families: itemFamilies, attributes: storageAttributes,
     actorFor, disabled: () => isModuleDisabled(WMS_ID), requests, fault: associationFault, hasFault,
     defaultLimit: defaultCollectionLimit, maximumLimit: maximumCollectionLimit });
-  return async (request, response, url) => {
+  const handle = async (request, response, url) => {
     const path = url.pathname;
     if (await associations(request, response, url)) return true;
     if (path === uomsPath || path === storageAttributesPath || path === itemFamiliesPath) {
@@ -110,4 +110,13 @@ export function wmsFixture({ wmsFault, storageAttributeFault, itemFamilyFault, a
     }
     return false;
   };
+  // Synthetic provider dispatch uses the same catalogue state as the existing GETs.
+  handle.invoke = (descriptor, { offset = 0, limit = defaultCollectionLimit }) => {
+    const catalogues = { uoms, 'storage-attributes': storageAttributes, 'item-families': itemFamilies };
+    const catalogue = catalogues[descriptor.id.split('.')[1]];
+    const ordered = [...catalogue].sort((a, b) => a.code < b.code ? -1 : a.code > b.code ? 1 : 0);
+    return { items: ordered.slice(offset, offset + limit), offset, limit, total: ordered.length,
+      order: [{ field: 'code', direction: 'asc' }] };
+  };
+  return handle;
 }

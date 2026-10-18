@@ -1,0 +1,33 @@
+meta {
+  name: Invocations 557 disabled-anonymous
+  type: http
+  seq: 557
+}
+
+post {
+  url: {{baseUrl}}{{capabilitiesPath}}/wms.uoms.list{{invocationSuffix}}
+  body: text
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:text {
+  {
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 401
+  kind: invocation
+  targetId: wms.uoms.list
+  expectedOffset: 0
+  expectedLimit: 50
+}

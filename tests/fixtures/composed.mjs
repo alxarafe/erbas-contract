@@ -13,7 +13,11 @@ export function fixtureModules() {
 export async function startFixture(options = {}) {
   const context = createContext(options);
   const capabilityDescriptors = JSON.parse(await readFile(new URL('../../openapi/modules/wms/capabilities.json', import.meta.url), 'utf8'));
-  const core = coreFixture({ capabilityDescriptors, ...options, availableModules: options.availableModules === undefined ? fixtureModules() : options.availableModules }, context);
+  const core = coreFixture({ capabilityDescriptors, executeCapability: (descriptor, input) => {
+    if (context.hasFault(options.executionFailure, 'provider-exception')) throw new Error('Synthetic provider exception');
+    if (context.hasFault(options.executionFailure, 'invalid-provider-output')) return null;
+    return wms.invoke(descriptor, input);
+  }, ...options, availableModules: options.availableModules === undefined ? fixtureModules() : options.availableModules }, context);
   const wms = wmsFixture(options, context, core);
   return startServer(async (request, response, url) => {
     if (!await wms(request, response, url)) await core.handle(request, response, url);

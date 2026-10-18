@@ -1,0 +1,33 @@
+meta {
+  name: Invocations 524 anonymous-first
+  type: http
+  seq: 524
+}
+
+post {
+  url: {{baseUrl}}{{capabilitiesPath}}/INVALID{{invocationSuffix}}
+  body: text
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:text {
+  {
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 401
+  kind: invocation
+  targetId: INVALID
+  expectedOffset: 0
+  expectedLimit: 50
+}

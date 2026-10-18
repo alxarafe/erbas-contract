@@ -1,0 +1,34 @@
+meta {
+  name: Invocations 538 storage-attributes-window
+  type: http
+  seq: 538
+}
+
+post {
+  url: {{baseUrl}}{{capabilitiesPath}}/wms.storage-attributes.list{{invocationSuffix}}
+  body: text
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:text {
+  {"input":{"offset":1,"limit":1}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  kind: invocation
+  targetId: wms.storage-attributes.list
+  expectedOffset: 1
+  expectedLimit: 1
+}

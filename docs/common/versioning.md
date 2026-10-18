@@ -69,7 +69,7 @@ The tag must not be changed.
 - Annotated tag object: `adcfad11c6fe51cb54a92a93f9c1e99a13fb7dc8`.
 - Target commit: `138e2381e1010e994a0f9d6306af6f9d420658e5`.
 
-OpenAPI is **0.9.0**, a **compatible additive MINOR** over v0.8.0.
+Published v0.9.0 OpenAPI is **0.9.0**, a **compatible additive MINOR** over v0.8.0.
 [CORE-CAP-001](../core/capabilities-001.md) adds capability descriptors,
 registration invariants and contextual discovery without changing published
 v0.8.0 behavior. Capability behavioral versions are independent of the shared
@@ -77,6 +77,14 @@ API release and module implementation versions; see its version identity rules.
 See [release notes](../releases/v0.9.0.md). Publication does not imply
 backend/client adoption or conformance. Consumers may pin the immutable
 `v0.9.0` tag. The tag must not be changed.
+
+## Unpublished preparation: v0.10.0
+
+The development OpenAPI is **0.10.0**, a compatible additive MINOR over published
+immutable v0.9.0. [CORE-CAP-002](../core/capabilities-002.md) adds synchronous READ
+invocation without changing discovery, provider descriptors or existing routes.
+See [preparation notes](../releases/v0.10.0.md). No v0.10.0 tag/release is created;
+consumer pins and historical verification evidence remain unchanged.
 
 ## Public HTTP version and route policy
 

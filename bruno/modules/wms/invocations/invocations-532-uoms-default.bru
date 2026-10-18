@@ -1,0 +1,34 @@
+meta {
+  name: Invocations 532 uoms-default
+  type: http
+  seq: 532
+}
+
+post {
+  url: {{baseUrl}}{{capabilitiesPath}}/wms.uoms.list{{invocationSuffix}}
+  body: text
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:text {
+  {"input":{}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+vars:pre-request {
+  expectedStatus: 200
+  kind: invocation
+  targetId: wms.uoms.list
+  expectedOffset: 0
+  expectedLimit: 50
+}
