@@ -83,9 +83,14 @@ backend/client adoption or conformance. Consumers may pin the immutable
 The release OpenAPI is **0.10.0**, a compatible additive MINOR over published
 immutable v0.9.0. [CORE-CAP-002](../core/capabilities-002.md) adds synchronous READ
 invocation without changing discovery, provider descriptors or existing routes.
-See [release notes](../releases/v0.10.0.md). The exact publication identity will
-be recorded after the tag exists. Publication does not imply consumer adoption or
-conformance; historical verification evidence remains unchanged.
+See [release notes](../releases/v0.10.0.md).
+
+- Annotated tag object: `a55a8d25beef5c24bc9cdce956a2eb2b14f41fb3`.
+- Target commit: `1b7b182374ad432637dd41f46b94b4004470eba0`.
+
+v0.10.0 is the current published immutable release. Its tag must not be moved
+or recreated. Publication does not imply consumer adoption or conformance;
+historical verification evidence remains unchanged.
 
 ## Public HTTP version and route policy
 
