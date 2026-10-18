@@ -3,7 +3,7 @@ info:
   title: ERBAS shared HTTP contract
   version: 0.10.0
   description: >-
-    ERBAS Contract 0.10.0 unpublished preparation: CORE-CAP-002 synchronous READ capability invocation. Published immutable baseline: v0.9.0. No v0.10.0 backend or client adoption or conformance is claimed. See docs/core/capabilities-002.md and docs/releases/v0.10.0.md.
+    ERBAS Contract 0.10.0 includes CORE-CAP-002 synchronous READ capability invocation. No v0.10.0 backend or client adoption or conformance is claimed. See docs/core/capabilities-002.md and docs/releases/v0.10.0.md.
 security: []
 paths:
   /api/core/capabilities/{capabilityId}/invocations:

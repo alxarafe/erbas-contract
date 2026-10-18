@@ -9,7 +9,7 @@ const baseResolvedContractSha256 = '0ad19e56e34d44eb90464436c8dfbb09a2e99fa52e82
 test('CORE-CAP-002 preserves every published v0.9.0 and prior v0.8.0 contract definition', async () => {
   const api = await bundleOpenApi({ dereferenced: true });
   assert.equal(api.info.version, contractVersion);
-  assert.equal(api.info.description, `ERBAS Contract ${contractVersion} unpublished preparation: CORE-CAP-002 synchronous READ capability invocation. Published immutable baseline: v0.9.0. No v${contractVersion} backend or client adoption or conformance is claimed. See docs/core/capabilities-002.md and docs/releases/v${contractVersion}.md.`);
+  assert.equal(api.info.description, `ERBAS Contract ${contractVersion} includes CORE-CAP-002 synchronous READ capability invocation. No v${contractVersion} backend or client adoption or conformance is claimed. See docs/core/capabilities-002.md and docs/releases/v${contractVersion}.md.`);
   delete api.paths['/api/core/capabilities/{capabilityId}/invocations'];
   for (const name of ['CapabilityInvocationRequest', 'CapabilityInvocation', 'CapabilityExecutionFailed']) delete api.components.schemas[name];
   for (const name of ['CapabilityInvocation', 'CapabilityExecutionFailed']) delete api.components.responses[name];
