@@ -3,6 +3,7 @@
 | Document | What to find |
 | --- | --- |
 | [Usage](usage.md) | Local commands, Docker networking, limits, cleanup, and pinned tooling. |
+| [CONTRACT-007 verification](verification/contract-007.md) | FAST, scoped and full checks, impact classification and CI policy. |
 | [COLLECTIONS-001](common/collections.md) | Standard paged envelope, user and module pagination, order, totals and compatibility. |
 | [CORE-CAP-001](core/capabilities-001.md) | Capability ownership, descriptors, permissions, effective discovery, schemas and deferred execution. |
 | [CORE-CAP-002](core/capabilities-002.md) | v0.10.0 synchronous READ invocation, trusted context, audit and safe failures. |
@@ -42,7 +43,7 @@ it is not a test result.
 
 | Workflow source | What the workflow checks |
 | --- | --- |
-| [Contract CI](../.github/workflows/ci.yml) | The authoritative Docker-based `./bin/check`: OpenAPI validation and synthetic/unit runner tests. No live backend conformance or publication. |
+| [Contract CI](../.github/workflows/ci.yml) | Impact-aware PR checks and authoritative Docker-based `./bin/check` on main. No live backend conformance or publication. |
 | [Java backend CI](https://github.com/alxarafe/erbas/actions/workflows/ci.yml) | Authoritative `./bin/check`: Docker build, native/integration tests, clean PostgreSQL, application readiness, Flyway, mandatory shared Bruno against published `v0.6.0`, and cleanup. Its workflow display name is `Java CI`. |
 | [.NET backend CI / shared conformance](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml) | Authoritative `./bin/check`: native/module tests, validation Host, mandatory shared Bruno against published `v0.6.0`, persistence and cleanup. Its display name is `.NET CI / shared conformance`. This is a combined workflow result, not a separate Bruno-only result. |
 | [Angular client CI](https://github.com/alxarafe/erbas-client/actions/workflows/ci.yml) | Client `bin/check`: Angular tests, production build, Docker runtime and isolated shared API proxies. No backend shared-conformance claim. Real dual-backend demo verification is separate. |
