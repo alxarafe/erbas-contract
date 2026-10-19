@@ -52,6 +52,36 @@ Pin direct dependencies exactly, commit the dependency lockfile only when
 authorized, and pin the Docker base image by version and digest. Install with
 `npm ci` inside Docker; never resolve floating dependencies during checks.
 
+### Efficient validation execution
+
+During implementation, prefer the narrowest applicable validation: focused
+tests, then `./bin/check-fast` for cheap structural feedback, then
+`./bin/check-scope` for behavior owned by known scopes; use broader validation
+only when required. `./bin/check-impact` remains the impact-aware planner where
+appropriate. `./bin/check` remains the authoritative full repository
+verification, and `./bin/test URL` remains external live-backend conformance,
+not repository verification.
+
+Do not run a long-running full `./bin/check` or other wait-heavy
+repository-wide validation inside an AI-agent session merely to wait for it to
+finish when the developer or CI can execute it directly. Repeated polling of a
+long-running external process is discouraged because it may cause additional
+model turns that repeatedly process existing repository and conversation
+context even though the process itself requires no reasoning.
+
+When full verification is mandatory and expected to take materially longer
+than focused checks, normally provide the exact command for the developer or
+CI to execute; stop and wait for the real result when required before task
+completion or commit; continue only after the result is provided; and never
+claim that full verification passed unless its result is actually known.
+Required full verification remains mandatory wherever current repository or
+release rules require it, including before publication when applicable.
+
+If a long-running command genuinely must be executed by the agent, avoid
+repeated polling, wait as efficiently as the tooling permits, do not repeatedly
+reread unchanged files, and do not rerun unchanged validations without a
+concrete reason.
+
 ## Versioning and compatibility
 
 Use semantic versioning and immutable release tags. See `docs/common/versioning.md`.
