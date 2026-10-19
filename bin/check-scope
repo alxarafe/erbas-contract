@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ $# -eq 0 ]]; then echo 'Usage: ./bin/check-scope <scope> [<scope>...]' >&2; exit 2; fi
+source "$(dirname "${BASH_SOURCE[0]}")/lib/runner"
+run_container none scope "$@"

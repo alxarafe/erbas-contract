@@ -138,9 +138,12 @@ historical. See [AUTH-001](../core/auth-001.md), [USERS-001](../core/users-001.m
 
 ## CI and publication procedure
 
-[Contract CI](../../.github/workflows/ci.yml) runs the authoritative `./bin/check`
-on pull requests and pushes to `main`. It validates OpenAPI and the runner in
+[Contract CI](../../.github/workflows/ci.yml) runs impact-aware checks on pull
+requests and the authoritative `./bin/check` on pushes to `main`. It validates OpenAPI and the runner in
 Docker; it neither tests a live backend nor publishes tags, releases or packages.
+FULL `./bin/check` remains mandatory before publishing a contract tag; an
+impact-aware PR check never replaces release verification. Unknown or transverse
+impact escalates to FULL. See [verification levels](../verification/contract-007.md).
 Backend publication/deployment must depend on shared conformance against its
 own clean ephemeral environment. Backend CI/pin adoption is separate consumer
 work, not implemented by this repository's workflow.

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ $# -ne 1 ]]; then echo 'Usage: ./bin/check-impact <base-ref>' >&2; exit 2; fi
+source "$(dirname "${BASH_SOURCE[0]}")/lib/runner"
+if ! base="$(git -C "$ROOT_DIR" merge-base "$1" HEAD)"; then
+    echo "ERROR: cannot resolve merge-base for base ref: $1" >&2
+    exit 2
+fi
+paths_file="$(mktemp)"
+trap 'rm -f "$paths_file"' EXIT
+git -C "$ROOT_DIR" diff --no-renames --name-only -z "$base" HEAD -- > "$paths_file"
+mapfile -d '' -t paths < "$paths_file"
+rm -f "$paths_file"
+trap - EXIT
+run_container none impact "${paths[@]}"
