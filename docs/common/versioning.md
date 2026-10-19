@@ -50,7 +50,7 @@ Publication does not imply consumer adoption or conformance.
 
 ## Previous published immutable release: v0.8.0
 
-**v0.8.0 is the current published immutable release.**
+**v0.8.0 is a previous published immutable release.**
 
 - Annotated tag object: `303a61b0207d3984780539da4068ab68c1264a8d`.
 - Target commit: `9dcb1605bcddbd450d4c009285313a142ab9fb35`.
