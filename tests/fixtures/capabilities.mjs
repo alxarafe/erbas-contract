@@ -10,7 +10,22 @@ export const capabilityIdPattern = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.[a-z][a-z0-9
 
 export function capabilityFixture({ capabilityDescriptors, capabilityFault, executeCapability, invocationFault }, context, core) {
   const { requests, faultsReached, hasFault, serialize } = context;
-  return async (request, response, url) => {
+  const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+  const effectiveFor = actor => capabilityDescriptors.filter(descriptor =>
+    (core.moduleAvailable(descriptor.module) || hasFault(capabilityFault, 'ignored-module'))
+    && (actor.admin || descriptor.requiredPermissions.length === 0 || hasFault(capabilityFault, 'disclosure')));
+  const invokeCapability = (actor, id, input, invocationId = randomUUID()) => {
+    if (!actor?.enabled) return { status: 401, body: { code: 'unauthorized' } };
+    const target = effectiveFor(actor).find(descriptor => descriptor.id === id);
+    if (!target) return { status: 404, body: { code: capabilityNotFound } };
+    try {
+      const output = executeCapability(target, input);
+      // Null/non-object output is already known to violate the generic envelope.
+      if (!object(output)) throw new Error('Synthetic non-contractual provider output');
+      return { status: 200, body: { invocationId, capabilityId: id, output } };
+    } catch { return { status: 500, body: { code: capabilityExecutionFailed } }; }
+  };
+  const handle = async (request, response, url) => {
     const path = url.pathname;
     if (path !== capabilitiesPath && !path.startsWith(capabilitiesPath + '/')) return false;
     const invocation = request.method === 'POST' && path.endsWith(invocationSuffix);
@@ -34,9 +49,7 @@ export function capabilityFixture({ capabilityDescriptors, capabilityFault, exec
     else if (!validQuery || detail && !capabilityIdPattern.test(id)) {
       status = 400; body = { code: 'invalid_request' };
     } else {
-      const effective = capabilityDescriptors.filter(descriptor =>
-        (core.moduleAvailable(descriptor.module) || hasFault(capabilityFault, 'ignored-module'))
-        && (actor.admin || descriptor.requiredPermissions.length === 0 || hasFault(capabilityFault, 'disclosure')));
+      const effective = effectiveFor(actor);
       const target = effective.find(descriptor => descriptor.id === id);
       status = detail && !target ? 404 : 200;
       body = status === 404 ? { code: capabilityNotFound }
@@ -46,7 +59,6 @@ export function capabilityFixture({ capabilityDescriptors, capabilityFault, exec
         for await (const chunk of request) raw += chunk;
         let input;
         try { input = JSON.parse(raw); } catch { /* Invalid JSON after effective lookup. */ }
-        const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
         const valid = object(input) && Object.keys(input).length === 1 && object(input.input)
           && Object.keys(input.input).every(key => ['offset', 'limit'].includes(key))
           && (input.input.offset === undefined || Number.isInteger(input.input.offset) && input.input.offset >= 0)
@@ -54,14 +66,7 @@ export function capabilityFixture({ capabilityDescriptors, capabilityFault, exec
             && input.input.limit >= 1 && input.input.limit <= maximumCollectionLimit);
         if (!valid) { status = 400; body = { code: 'invalid_request' }; }
         else {
-          try {
-            const output = executeCapability(target, input.input);
-            // Null/non-object output is already known to violate the generic envelope.
-            if (!object(output)) throw new Error('Synthetic non-contractual provider output');
-            body = { invocationId, capabilityId: id, output };
-          } catch {
-            status = 500; body = { code: capabilityExecutionFailed };
-          }
+          ({ status, body } = invokeCapability(actor, id, input.input, invocationId));
           if (hasFault(invocationFault, 'wrong-id')) body.capabilityId = 'example.wrong.list';
           if (hasFault(invocationFault, 'empty-id')) body.invocationId = '';
           if (hasFault(invocationFault, 'extra')) body.subject = 'internal-subject';
@@ -88,4 +93,5 @@ export function capabilityFixture({ capabilityDescriptors, capabilityFault, exec
     response.end(faultBody ?? serialize(body));
     return true;
   };
+  return { handle, effectiveFor, invokeCapability };
 }

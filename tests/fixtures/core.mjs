@@ -27,11 +27,18 @@ export function userCollection(users, offset = 0, limit = defaultCollectionLimit
     order: [{ field: 'id', direction: 'asc' }] };
 }
 
-export function coreFixture({ status = 200, contentType = 'application/json', body = '{"status":"ok"}', redirect = false, hang = false, auth = {}, users = {}, acceptDisabledTokens = false, collectionFault, modules = {}, moduleFault, availableModules = fixtureModules(), capabilityDescriptors = [], capabilityFault, executeCapability, invocationFault } = {}, context) {
+export const assistantToken = 'synthetic.assistant_token';
+
+export function coreFixture({ status = 200, contentType = 'application/json', body = '{"status":"ok"}', redirect = false, hang = false, auth = {}, users = {}, acceptDisabledTokens = false, assistant = false, collectionFault, modules = {}, moduleFault, availableModules = fixtureModules(), capabilityDescriptors = [], capabilityFault, executeCapability, invocationFault } = {}, context) {
   const { requests, faultsReached, hasFault, serialize } = context;
   const accounts = new Map([['synthetic-admin', { id: 'synthetic-admin', email: fixtureEnv.ERBAS_TEST_EMAIL,
     enabled: true, admin: true, password: fixtureEnv.ERBAS_TEST_PASSWORD }]]);
   const tokens = new Map([['synthetic.token_123', 'synthetic-admin']]);
+  if (assistant) {
+    accounts.set('synthetic-assistant', { id: 'synthetic-assistant', email: 'assistant@example.test',
+      enabled: true, admin: false, assistant: true, password: fixtureEnv.ERBAS_TEST_PASSWORD });
+    tokens.set(assistantToken, 'synthetic-assistant');
+  }
   const registry = new Map(availableModules.map(module => [module.id, structuredClone(module)]));
   const publicUser = ({ id, email, enabled, admin }) => ({ id, email, enabled, admin });
   let nextId = 1;
@@ -41,7 +48,7 @@ export function coreFixture({ status = 200, contentType = 'application/json', bo
     collection: userCollection
   });
   const handle = async (request, response, url) => {
-    if (await discovery(request, response, url)) return;
+    if (await discovery.handle(request, response, url)) return;
     const path = url.pathname;
     if (path === modulesPath || path.startsWith(`${modulesPath}/`)) {
       const operation = request.method === 'PATCH' ? 'patch' : 'list';
@@ -243,7 +250,10 @@ export function coreFixture({ status = 200, contentType = 'application/json', bo
   return {
     handle,
     actorFor: request => accounts.get(tokens.get((request.headers.authorization ?? '').replace(/^Bearer /, ''))),
-    isModuleDisabled: id => registry.get(id)?.enabled === false
+    isModuleDisabled: id => registry.get(id)?.enabled === false,
+    setModuleEnabled: (id, enabled) => { const module = registry.get(id); if (module) module.enabled = enabled; },
+    capabilitiesFor: actor => structuredClone(discovery.effectiveFor(actor)),
+    invokeCapability: discovery.invokeCapability
   };
 }
 

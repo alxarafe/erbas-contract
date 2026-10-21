@@ -1,0 +1,73 @@
+meta {
+  name: AI assistant invocation
+}
+
+vars:pre-request {
+  assistantPath: /api/ai/assistant/invocations
+  modulesPath: /api/modules
+  AI_ID: erbas.ai
+  WMS_ID: erbas.wms
+  capabilityIdPattern: ^[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*(?![\s\S])
+  assistantMessageMaximum: 4000
+  assistantPermission: ai.assistant.invoke
+}
+
+tests {
+  test("Expected HTTP status", function () {
+    expect(res.getStatus()).to.equal(Number(bru.getVar("expectedStatus")));
+  });
+
+  test("JSON media type and contractual headers", function () {
+    const token = "[!#$%&'*+.^_`|~0-9A-Za-z-]+";
+    const quoted = '"(?:[\\t\\x20\\x21\\x23-\\x5b\\x5d-\\x7e\\x80-\\xff]|\\\\[\\t\\x20-\\x7e\\x80-\\xff])*"';
+    const mediaType = new RegExp("^application/json(?:[ \\t]*;[ \\t]*" + token + "=(?:" + token + "|" + quoted + "))*[ \\t]*$", "i");
+    expect(res.getHeader("content-type")).to.be.a("string").and.match(mediaType);
+    expect(res.getHeader("cache-control")).to.equal("no-store");
+    expect(res.getHeader("www-authenticate")).to.equal(
+      Number(bru.getVar("expectedStatus")) === 401 ? "Bearer" : undefined);
+  });
+
+  test("Closed module state for AI setup", function () {
+    const kind = bru.getVar("kind");
+    if (kind !== "setup") return;
+    const body = res.getBody();
+    expect(Object.keys(body).sort()).to.deep.equal(["dependencies", "enabled", "id", "moduleApiVersion"]);
+    expect(body.id).to.equal(bru.getVar("moduleTarget"));
+    expect(body.moduleApiVersion).to.equal(1);
+    expect(body.dependencies).to.deep.equal([]);
+    expect(body.enabled).to.equal(bru.getVar("expectedEnabled") === "true");
+  });
+
+  test("Closed response and safe error envelope", function () {
+    const status = Number(bru.getVar("expectedStatus"));
+    const body = res.getBody();
+    if (status !== 200) {
+      const codes = {400: "invalid_request", 401: "unauthorized", 403: "forbidden",
+        500: "assistant_execution_failed", 503: "module_disabled"};
+      const code = bru.getVar("expectedCode") || codes[status];
+      expect(body).to.deep.equal({code, errors: [{code}]});
+      return;
+    }
+    if (bru.getVar("kind") !== "assistant") return;
+    expect(Object.keys(body).sort()).to.deep.equal(["answer", "invocationId", "toolsUsed"]);
+    expect(body.invocationId).to.be.a("string").and.not.equal("");
+    expect(body.answer).to.be.a("string").and.match(/\S/);
+    expect(body.toolsUsed).to.be.an("array");
+    const aiIds = bru.getVar("aiInvocationIds") || [];
+    expect(aiIds).not.to.include(body.invocationId);
+    bru.setVar("aiInvocationIds", [...aiIds, body.invocationId]);
+    const coreIds = bru.getVar("coreInvocationIds") || [];
+    expect(coreIds).not.to.include(body.invocationId);
+    for (const tool of body.toolsUsed) {
+      expect(Object.keys(tool).sort()).to.deep.equal(["capabilityId", "invocationId"]);
+      expect(tool.capabilityId).to.match(new RegExp(bru.getFolderVar("capabilityIdPattern")));
+      expect(tool.invocationId).to.be.a("string").and.not.equal("");
+      expect(tool.invocationId).not.to.equal(body.invocationId);
+      expect(coreIds).not.to.include(tool.invocationId);
+      coreIds.push(tool.invocationId);
+    }
+    bru.setVar("coreInvocationIds", coreIds);
+    const expected = (bru.getVar("expectedCapabilities") || "").split(",").filter(Boolean);
+    expect(body.toolsUsed.map(tool => tool.capabilityId)).to.deep.equal(expected);
+  });
+}

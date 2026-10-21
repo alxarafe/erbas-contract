@@ -1,0 +1,32 @@
+meta {
+  name: Caller-supplied security context
+  type: http
+  seq: 580
+}
+
+post {
+  url: {{baseUrl}}{{assistantPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"message": "Reply with a short greeting.", "permissions": ["wms.uoms.read"]}
+}
+
+script:pre-request {
+  bru.setVar("kind", "assistant");
+  bru.setVar("expectedCode", "");
+  bru.setVar("expectedStatus", 400);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

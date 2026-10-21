@@ -1,0 +1,33 @@
+meta {
+  name: Assistant uses multiple READ capabilities
+  type: http
+  seq: 586
+}
+
+post {
+  url: {{baseUrl}}{{assistantPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"message": "List the available units of measure, storage attributes and item families."}
+}
+
+script:pre-request {
+  bru.setVar("kind", "assistant");
+  bru.setVar("expectedCode", "");
+  bru.setVar("expectedStatus", 200);
+  bru.setVar("expectedCapabilities", "wms.uoms.list,wms.storage-attributes.list,wms.item-families.list");
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

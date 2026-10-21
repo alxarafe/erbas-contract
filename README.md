@@ -65,6 +65,10 @@ plus synchronous READ invocation. See [CORE-CAP-001](docs/core/capabilities-001.
 and [CORE-CAP-002](docs/core/capabilities-002.md).
 No backend or client v0.10.0 adoption or conformance is claimed.
 
+Unreleased **v0.11.0** preparation adds [AI-001](docs/modules/ai/ai-001.md), a
+provider-agnostic assistant over effective READ capabilities. It is not published,
+tagged or adopted.
+
 ## Current contractual coverage
 
 **v0.10.0 is the current published immutable release**, including CORE module

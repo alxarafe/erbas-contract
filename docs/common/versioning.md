@@ -92,6 +92,19 @@ v0.10.0 is the current published immutable release. Its tag must not be moved
 or recreated. Publication does not imply consumer adoption or conformance;
 historical verification evidence remains unchanged.
 
+## Unreleased preparation: v0.11.0
+
+**v0.11.0 is prepared but not published and has no tag.** The OpenAPI version is
+**0.11.0**, a compatible additive MINOR over immutable v0.10.0. [AI-001](../modules/ai/ai-001.md)
+adds provider-agnostic assistant invocation over effective READ capabilities
+without changing existing routes or common error behavior. See the
+[preparation notes](../releases/v0.11.0.md).
+
+Preparing a release does not authorize publication, tagging or deployment. Until
+the separately authorized release procedure completes and an annotated immutable
+tag exists, consumers must continue pinning v0.10.0 and must not assume v0.11.0
+availability. No backend/client v0.11.0 adoption or conformance is claimed.
+
 ## Public HTTP version and route policy
 
 The erbas-contract semantic release is the public HTTP contract version;

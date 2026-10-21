@@ -1,0 +1,31 @@
+meta {
+  name: Anonymous assistant request
+  type: http
+  seq: 562
+}
+
+post {
+  url: {{baseUrl}}{{assistantPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {"message": "Reply with a short greeting."}
+}
+
+script:pre-request {
+  bru.setVar("kind", "assistant");
+  bru.setVar("expectedCode", "");
+  bru.setVar("expectedStatus", 401);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

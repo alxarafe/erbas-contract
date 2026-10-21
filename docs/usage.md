@@ -53,7 +53,7 @@ enabled administrator in an isolated validation environment before invoking
 usage error, never a skipped login check. USERS-001 creates and modifies users;
 never run the suite against production. Unique test users remain until the
 backend disposes of its environment. See [USERS-001](core/users-001.md) for required
-account state and mutations; suite counters are in [v0.10.0 release notes](releases/v0.10.0.md). COLLECTIONS-001
+account state and mutations; suite counters are in [v0.11.0 preparation](releases/v0.11.0.md). COLLECTIONS-001
 checks paged user windows and totals; use an environment without concurrent
 external mutations during the run. See [collections](common/collections.md).
 See
@@ -78,12 +78,14 @@ requires enabled AVAILABLE `erbas.wms` and an initially empty UoM catalogue.
 Published v0.7.0 additionally requires an empty Storage Attribute catalogue.
 Published v0.8.0 additionally requires an initially empty ItemFamily catalogue,
 association support and the standard error envelope. Published v0.9.0 adds
-capability discovery; v0.10.0 adds synchronous READ capability invocation. The
+capability discovery; v0.10.0 adds synchronous READ capability invocation.
+Unreleased v0.11.0 preparation adds [AI-001](modules/ai/ai-001.md), requiring
+AVAILABLE enabled `erbas.ai` and `ai.assistant.invoke` for the administrator. The
 existing catalogue prerequisites remain unchanged. Use the suite against a backend
 only after separately approved adoption. WMS mutations
 persist catalogue rows and associations and restore the module enabled; dispose
-of the environment. See [WMS-003](modules/wms/wms-003.md). No backend/client v0.10.0 adoption
-or conformance is claimed.
+of the environment. See [WMS-003](modules/wms/wms-003.md). No backend/client v0.10.0
+adoption or live conformance is claimed, and no v0.11.0 adoption is claimed.
 
 | URL rule | Behavior |
 | --- | --- |
@@ -224,3 +226,20 @@ the suite also disables/restores WMS to verify masked invocation responses.
 No backend/client v0.10.0 adoption or live conformance is claimed. Unexpected
 execution failures have one safe HTTP 500 response; the suite does not require a
 public fault-injection interface or intentionally break a supplied backend.
+
+## AI assistant conformance
+
+The unreleased v0.11.0 preparation also includes [AI-001](modules/ai/ai-001.md).
+The suite authenticates the administrator, requires `ai.assistant.invoke`, and
+exercises the disabled `erbas.ai` gate, closed request validation, a direct answer,
+one and multiple READ tool calls, identity shape and module filtering. It
+disables/restores `erbas.ai` and `erbas.wms`; success leaves both enabled. The
+normal user created by the suite has no AI permission.
+
+Shared AI success scenarios require a backend-owned deterministic conformance
+assistant/model adapter for the specified messages. Normal contract validation
+must not call a live external LLM service, require an API key or depend on
+probabilistic output. The adapter is a backend conformance prerequisite, not a
+public endpoint or an alternative contract. Synthetic AI fixtures test the
+runner and do not establish backend conformance, real model behavior, provider
+integration or audit implementation.

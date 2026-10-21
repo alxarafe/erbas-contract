@@ -1,0 +1,32 @@
+meta {
+  name: Malformed assistant JSON
+  type: http
+  seq: 571
+}
+
+post {
+  url: {{baseUrl}}{{assistantPath}}
+  body: text
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: Application/JSON
+}
+
+body:text {
+  {
+}
+
+script:pre-request {
+  bru.setVar("kind", "assistant");
+  bru.setVar("expectedCode", "");
+  bru.setVar("expectedStatus", 400);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

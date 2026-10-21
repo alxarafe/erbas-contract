@@ -5,6 +5,7 @@ import { fullSuiteTestTimeoutMs } from './support/constants.mjs';
 import { startFixture, fixtureEnv, fixtureModules } from './fixtures/composed.mjs';
 import { modulesPath, maximumCollectionLimit, MATH_ID, STATISTICS_ID } from './fixtures/core.mjs';
 import { WMS_ID, uomsPath, storageAttributesPath } from './fixtures/modules/wms/catalogues.mjs';
+import { AI_ID } from './fixtures/modules/ai/assistant.mjs';
 import { baselineRequestCount as fullRequestCount } from './support/constants.mjs';
 import { wmsRequestCount, storageAttributeRequestCount } from './modules/wms/support.mjs';
 
@@ -70,7 +71,7 @@ test('canonical descriptors are discovered beyond the first 100 modules', { time
       headers: { Authorization: 'Bearer synthetic.token_123' }
     });
     const items = (await response.json()).items;
-    assert.deepEqual(items.map(module => module.id), [MATH_ID, STATISTICS_ID, WMS_ID]);
+    assert.deepEqual(items.map(module => module.id), [AI_ID, MATH_ID, STATISTICS_ID, WMS_ID]);
     assert.ok(items.every(module => module.enabled));
   } finally { await fixture.close(); }
 });

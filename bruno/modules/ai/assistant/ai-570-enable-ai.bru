@@ -1,0 +1,34 @@
+meta {
+  name: Enable AI module
+  type: http
+  seq: 570
+}
+
+patch {
+  url: {{baseUrl}}{{modulesPath}}/{{AI_ID}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"enabled": true}
+}
+
+script:pre-request {
+  bru.setVar("kind", "setup");
+  bru.setVar("expectedCode", "");
+  bru.setVar("expectedStatus", 200);
+  bru.setVar("moduleTarget", bru.getFolderVar("AI_ID"));
+  bru.setVar("expectedEnabled", "true");
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

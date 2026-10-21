@@ -1,0 +1,32 @@
+meta {
+  name: Invalid assistant token
+  type: http
+  seq: 563
+}
+
+post {
+  url: {{baseUrl}}{{assistantPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer invalid-assistant-token
+  Content-Type: application/json
+}
+
+body:json {
+  {"message": "Reply with a short greeting."}
+}
+
+script:pre-request {
+  bru.setVar("kind", "assistant");
+  bru.setVar("expectedCode", "");
+  bru.setVar("expectedStatus", 401);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

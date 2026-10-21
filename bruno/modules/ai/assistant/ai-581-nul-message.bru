@@ -1,0 +1,32 @@
+meta {
+  name: NUL in assistant message
+  type: http
+  seq: 581
+}
+
+post {
+  url: {{baseUrl}}{{assistantPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"message": "a\u0000b"}
+}
+
+script:pre-request {
+  bru.setVar("kind", "assistant");
+  bru.setVar("expectedCode", "");
+  bru.setVar("expectedStatus", 400);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

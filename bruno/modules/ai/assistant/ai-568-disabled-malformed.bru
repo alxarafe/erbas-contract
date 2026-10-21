@@ -1,0 +1,32 @@
+meta {
+  name: Disabled AI precedes body validation
+  type: http
+  seq: 568
+}
+
+post {
+  url: {{baseUrl}}{{assistantPath}}
+  body: text
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: Application/JSON
+}
+
+body:text {
+  {
+}
+
+script:pre-request {
+  bru.setVar("kind", "assistant");
+  bru.setVar("expectedStatus", 503);
+  bru.setVar("expectedCode", "module_disabled");
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
