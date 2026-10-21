@@ -7,6 +7,9 @@
 | [COLLECTIONS-001](common/collections.md) | Standard paged envelope, user and module pagination, order, totals and compatibility. |
 | [CORE-CAP-001](core/capabilities-001.md) | Capability ownership, descriptors, permissions, effective discovery, schemas and deferred execution. |
 | [CORE-CAP-002](core/capabilities-002.md) | v0.10.0 synchronous READ invocation, trusted context, audit and safe failures. |
+| [AI-001](modules/ai/ai-001.md) | Unreleased v0.11.0 preparation: provider-agnostic assistant over effective READ capabilities, security, errors and audit. |
+| [AI-001 verification](verification/ai-001.md) | AI focused/full Docker validation, preservation and conformance limitations. |
+| [v0.11.0 preparation](releases/v0.11.0.md) | Unreleased compatible additive MINOR over immutable v0.10.0; no tag or adoption claim. |
 | [CORE-CAP-002 verification](verification/core-cap-002.md) | Focused and full Docker repository validation, contract preservation, and no live conformance claim. |
 | [v0.10.0 release notes](releases/v0.10.0.md) | Compatible additive MINOR over immutable v0.9.0. |
 | [CORE-CAP-001 verification](verification/core-cap-001.md) | New discovery coverage, contract preservation and Docker verification evidence. |
@@ -85,13 +88,17 @@ or conformance. Demo defaults are outside the HTTP release scope.
 The recorded Java/.NET adoption remains v0.6.0; publication and adoption are
 distinct. Angular WMS or module administration adoption is not claimed.
 
+Unreleased **v0.11.0** preparation contains **590 requests / 2587 named checks**.
+See [AI-001](modules/ai/ai-001.md) and [preparation notes](releases/v0.11.0.md).
 Published **v0.10.0** contains **560 requests / 2467 named checks**. See
 [CORE-CAP-002](core/capabilities-002.md) and [release notes](releases/v0.10.0.md).
 The previous immutable **v0.9.0** contains **522 requests / 2315 named checks**, measured
 after CORE-CAP-001 implementation.
 See [CORE-CAP-001](core/capabilities-001.md) and [release notes](releases/v0.9.0.md).
-No backend/client v0.10.0 adoption or conformance is claimed. Full conformance
-requires initially empty disposable UoM, Storage Attribute and ItemFamily
-catalogues and enabled AVAILABLE `erbas.wms`. Repository checks examine only
-synthetic fixtures. Historical reports retain their original versions, counts
-and results.
+No backend/client v0.10.0 or v0.11.0 adoption or conformance is claimed. Full
+conformance requires initially empty disposable UoM, Storage Attribute and
+ItemFamily catalogues and enabled AVAILABLE `erbas.wms`. AI success conformance
+also requires AVAILABLE enabled `erbas.ai`, `ai.assistant.invoke` for the
+administrator, and a backend-owned deterministic conformance assistant adapter;
+no live LLM provider is required. Repository checks examine only synthetic
+fixtures. Historical reports retain their original versions, counts and results.

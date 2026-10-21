@@ -14,8 +14,11 @@ Physical source ownership is separated into:
 | CORE | Non-disableable platform behavior: health, authentication, users and module administration. |
 | Functional modules | Disableable capabilities, including all WMS business definitions. |
 
-CORE and functional contracts depend on common primitives. Common never depends
-on functional modules; CORE never depends on functional modules. The root
+CORE and functional contracts depend on common primitives. A functional module may
+consume CORE public capability identities when it explicitly orchestrates
+discovered capabilities; this one-way dependency does not move business
+definitions into CORE. Common never depends on functional modules; CORE never
+depends on functional modules. The root
 composition layer may enumerate and reference installed contract modules, but
 owns no business definitions. `GET/PATCH /api/modules` is CORE administration,
 not the contents of a functional module.

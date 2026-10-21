@@ -1,0 +1,32 @@
+meta {
+  name: Unpaired surrogate in assistant message
+  type: http
+  seq: 582
+}
+
+post {
+  url: {{baseUrl}}{{assistantPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"message": "\ud800"}
+}
+
+script:pre-request {
+  bru.setVar("kind", "assistant");
+  bru.setVar("expectedCode", "");
+  bru.setVar("expectedStatus", 400);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

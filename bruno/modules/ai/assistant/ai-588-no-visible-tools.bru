@@ -1,0 +1,33 @@
+meta {
+  name: Assistant exposes no tools from disabled WMS
+  type: http
+  seq: 588
+}
+
+post {
+  url: {{baseUrl}}{{assistantPath}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"message": "List the available units of measure, storage attributes and item families."}
+}
+
+script:pre-request {
+  bru.setVar("kind", "assistant");
+  bru.setVar("expectedCode", "");
+  bru.setVar("expectedStatus", 200);
+  bru.setVar("expectedCapabilities", "");
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

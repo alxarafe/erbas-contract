@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
   title: ERBAS shared HTTP contract
-  version: 0.10.0
+  version: 0.11.0
   description: >-
-    ERBAS Contract 0.10.0 includes CORE-CAP-002 synchronous READ capability invocation. No v0.10.0 backend or client adoption or conformance is claimed. See docs/core/capabilities-002.md and docs/releases/v0.10.0.md.
+    ERBAS Contract 0.11.0 includes AI-001 provider-agnostic assistant invocation over effective READ capabilities. No v0.11.0 backend or client adoption or conformance is claimed. See docs/modules/ai/ai-001.md and docs/releases/v0.11.0.md.
 security: []
 paths:
   /api/core/capabilities/{capabilityId}/invocations:
@@ -26,6 +26,8 @@ paths:
     $ref: './core/modularity/contract.yaml#/paths/~1api~1modules'
   /api/modules/{id}:
     $ref: './core/modularity/contract.yaml#/paths/~1api~1modules~1{id}'
+  /api/ai/assistant/invocations:
+    $ref: './modules/ai/contract.yaml#/paths/~1api~1ai~1assistant~1invocations'
   /api/wms/uoms:
     $ref: './modules/wms/uoms/contract.yaml#/paths/~1api~1wms~1uoms'
   /api/wms/storage-attributes:
@@ -60,6 +62,14 @@ components:
       $ref: './core/capabilities/contract.yaml#/responses/CapabilityDetail'
     CapabilityNotFound:
       $ref: './core/capabilities/contract.yaml#/responses/CapabilityNotFound'
+    AiAssistantInvalidRequest:
+      $ref: './modules/ai/contract.yaml#/responses/AiAssistantInvalidRequest'
+    AiAssistantForbidden:
+      $ref: './modules/ai/contract.yaml#/responses/AiAssistantForbidden'
+    AiAssistantInvocation:
+      $ref: './modules/ai/contract.yaml#/responses/AiAssistantInvocation'
+    AiAssistantExecutionFailed:
+      $ref: './modules/ai/contract.yaml#/responses/AiAssistantExecutionFailed'
     CurrentUser:
       $ref: './core/users/contract.yaml#/responses/CurrentUser'
     CreatedUser:
@@ -133,6 +143,16 @@ components:
       $ref: './core/capabilities/contract.yaml#/schemas/CapabilityCollection'
     CapabilityNotFound:
       $ref: './core/capabilities/contract.yaml#/schemas/CapabilityNotFound'
+    AiAssistantInvocationRequest:
+      $ref: './modules/ai/contract.yaml#/schemas/AiAssistantInvocationRequest'
+    AiAssistantInvocation:
+      $ref: './modules/ai/contract.yaml#/schemas/AiAssistantInvocation'
+    AiAssistantToolUsage:
+      $ref: './modules/ai/contract.yaml#/schemas/AiAssistantToolUsage'
+    AiAssistantUnavailable:
+      $ref: './modules/ai/contract.yaml#/schemas/AiAssistantUnavailable'
+    AiAssistantExecutionFailed:
+      $ref: './modules/ai/contract.yaml#/schemas/AiAssistantExecutionFailed'
     WmsUomCode:
       $ref: './modules/wms/uoms/contract.yaml#/schemas/WmsUomCode'
     WmsUomDescription:

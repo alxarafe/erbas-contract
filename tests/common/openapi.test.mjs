@@ -6,10 +6,20 @@ import { bundleOpenApi, canonicalJson } from '../support/openapi.mjs';
 
 // Fully dereferenced Redocly 2.5.1 output from authorized base 2fcbe3f8d2d0b6152507f15751fa7ebf5f5a5dc9.
 const baseResolvedContractSha256 = '0ad19e56e34d44eb90464436c8dfbb09a2e99fa52e82608d652a6e3c2318f9b8';
-test('CORE-CAP-002 preserves every published v0.9.0 and prior v0.8.0 contract definition', async () => {
+test('AI-001 preserves every published v0.10.0, v0.9.0 and prior v0.8.0 contract definition', async () => {
   const api = await bundleOpenApi({ dereferenced: true });
   assert.equal(api.info.version, contractVersion);
-  assert.equal(api.info.description, `ERBAS Contract ${contractVersion} includes CORE-CAP-002 synchronous READ capability invocation. No v${contractVersion} backend or client adoption or conformance is claimed. See docs/core/capabilities-002.md and docs/releases/v${contractVersion}.md.`);
+  assert.equal(api.info.description, `ERBAS Contract ${contractVersion} includes AI-001 provider-agnostic assistant invocation over effective READ capabilities. No v${contractVersion} backend or client adoption or conformance is claimed. See docs/modules/ai/ai-001.md and docs/releases/v${contractVersion}.md.`);
+  delete api.paths['/api/ai/assistant/invocations'];
+  for (const name of ['AiAssistantInvocationRequest', 'AiAssistantInvocation', 'AiAssistantToolUsage',
+    'AiAssistantUnavailable', 'AiAssistantExecutionFailed']) delete api.components.schemas[name];
+  for (const name of ['AiAssistantInvalidRequest', 'AiAssistantForbidden', 'AiAssistantInvocation',
+    'AiAssistantExecutionFailed']) delete api.components.responses[name];
+  api.info.version = '0.10.0';
+  api.info.description = 'ERBAS Contract 0.10.0 includes CORE-CAP-002 synchronous READ capability invocation. No v0.10.0 backend or client adoption or conformance is claimed. See docs/core/capabilities-002.md and docs/releases/v0.10.0.md.';
+  // Exact dereferenced immutable v0.10.0 tag, preserving its historical preparation metadata.
+  const publishedV010Sha256 = '40d2ba94f949fc49e7a04733d7eff420f33b7158b75f5bbbeb83304d1f268f61';
+  assert.equal(createHash('sha256').update(canonicalJson(api)).digest('hex'), publishedV010Sha256);
   delete api.paths['/api/core/capabilities/{capabilityId}/invocations'];
   for (const name of ['CapabilityInvocationRequest', 'CapabilityInvocation', 'CapabilityExecutionFailed']) delete api.components.schemas[name];
   for (const name of ['CapabilityInvocation', 'CapabilityExecutionFailed']) delete api.components.responses[name];

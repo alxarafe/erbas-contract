@@ -8,6 +8,7 @@ export const scopeTests = {
   wms: ['tests/modules/wms/contract.test.mjs'],
   'storage-attributes': ['tests/modules/wms/contract.test.mjs'],
   'item-families': ['tests/modules/wms/contract.test.mjs'],
+  ai: ['tests/ai/contract.test.mjs', 'tests/ai/assistant.test.mjs'],
 };
 
 const ownedDirectories = {
@@ -15,6 +16,7 @@ const ownedDirectories = {
   'core/modularity': 'modules', 'core/capabilities': 'capabilities',
   'modules/wms/uoms': 'wms', 'modules/wms/storage-attributes': 'storage-attributes',
   'modules/wms/item-families': 'item-families',
+  'modules/ai': 'ai',
 };
 const testOwners = {
   'tests/core/health.test.mjs': 'health', 'tests/core/auth.test.mjs': 'auth',
@@ -22,6 +24,8 @@ const testOwners = {
   'tests/core/modularity.test.mjs': 'modules', 'tests/core/capabilities.test.mjs': 'capabilities',
   'tests/modules/wms/capabilities.test.mjs': 'capabilities',
   'tests/modules/wms/invocations.test.mjs': 'capabilities',
+  'tests/ai/contract.test.mjs': 'ai', 'tests/ai/assistant.test.mjs': 'ai',
+  'scripts/conformance/modules/ai.mjs': 'ai',
 };
 
 export function normalizeScopes(scopes) {

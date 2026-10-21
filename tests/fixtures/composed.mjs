@@ -4,10 +4,11 @@ import { startServer } from './server.mjs';
 import { createContext } from './common.mjs';
 import { coreFixture, fixtureModules as coreModules } from './core.mjs';
 import { wmsFixture, fixtureModule } from './modules/wms/catalogues.mjs';
+import { assistantFixture, fixtureModule as aiFixtureModule } from './modules/ai/assistant.mjs';
 export { fixtureEnv } from './core.mjs';
 
 export function fixtureModules() {
-  return [...coreModules(), fixtureModule()];
+  return [...coreModules(), fixtureModule(), aiFixtureModule()];
 }
 
 export async function startFixture(options = {}) {
@@ -19,7 +20,10 @@ export async function startFixture(options = {}) {
     return wms.invoke(descriptor, input);
   }, ...options, availableModules: options.availableModules === undefined ? fixtureModules() : options.availableModules }, context);
   const wms = wmsFixture(options, context, core);
+  const assistant = assistantFixture(options, context, core);
   return startServer(async (request, response, url) => {
-    if (!await wms(request, response, url)) await core.handle(request, response, url);
+    if (!await wms(request, response, url) && !await assistant(request, response, url)) {
+      await core.handle(request, response, url);
+    }
   }, context);
 }

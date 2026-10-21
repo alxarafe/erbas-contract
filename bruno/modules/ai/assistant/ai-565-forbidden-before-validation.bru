@@ -1,0 +1,32 @@
+meta {
+  name: AI permission precedes body validation
+  type: http
+  seq: 565
+}
+
+post {
+  url: {{baseUrl}}{{assistantPath}}
+  body: text
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{userToken}}
+  Content-Type: Application/JSON
+}
+
+body:text {
+  {
+}
+
+script:pre-request {
+  bru.setVar("kind", "assistant");
+  bru.setVar("expectedCode", "");
+  bru.setVar("expectedStatus", 403);
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

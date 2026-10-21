@@ -1,0 +1,34 @@
+meta {
+  name: Disable WMS before AI filtering
+  type: http
+  seq: 587
+}
+
+patch {
+  url: {{baseUrl}}{{modulesPath}}/{{WMS_ID}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"enabled": false}
+}
+
+script:pre-request {
+  bru.setVar("kind", "wms-setup");
+  bru.setVar("expectedCode", "");
+  bru.setVar("expectedStatus", 200);
+  bru.setVar("moduleTarget", bru.getFolderVar("WMS_ID"));
+  bru.setVar("expectedEnabled", "false");
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
