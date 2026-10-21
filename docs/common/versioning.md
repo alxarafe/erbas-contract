@@ -78,7 +78,7 @@ See [release notes](../releases/v0.9.0.md). Publication does not imply
 backend/client adoption or conformance. Consumers may pin the immutable
 `v0.9.0` tag. The tag must not be changed.
 
-## Current published immutable release: v0.10.0
+## Previous published immutable release: v0.10.0
 
 The release OpenAPI is **0.10.0**, a compatible additive MINOR over published
 immutable v0.9.0. [CORE-CAP-002](../core/capabilities-002.md) adds synchronous READ
@@ -88,22 +88,24 @@ See [release notes](../releases/v0.10.0.md).
 - Annotated tag object: `a55a8d25beef5c24bc9cdce956a2eb2b14f41fb3`.
 - Target commit: `1b7b182374ad432637dd41f46b94b4004470eba0`.
 
-v0.10.0 is the current published immutable release. Its tag must not be moved
+v0.10.0 is a previous published immutable release. Its tag must not be moved
 or recreated. Publication does not imply consumer adoption or conformance;
 historical verification evidence remains unchanged.
 
-## Unreleased preparation: v0.11.0
+## Current published immutable release: v0.11.0
 
-**v0.11.0 is prepared but not published and has no tag.** The OpenAPI version is
-**0.11.0**, a compatible additive MINOR over immutable v0.10.0. [AI-001](../modules/ai/ai-001.md)
-adds provider-agnostic assistant invocation over effective READ capabilities
-without changing existing routes or common error behavior. See the
-[preparation notes](../releases/v0.11.0.md).
+The release OpenAPI is **0.11.0**, a compatible additive MINOR over published
+immutable v0.10.0. [AI-001](../modules/ai/ai-001.md) adds provider-agnostic
+assistant invocation over effective READ capabilities without changing existing
+routes or common error behavior. See [release notes](../releases/v0.11.0.md).
 
-Preparing a release does not authorize publication, tagging or deployment. Until
-the separately authorized release procedure completes and an annotated immutable
-tag exists, consumers must continue pinning v0.10.0 and must not assume v0.11.0
-availability. No backend/client v0.11.0 adoption or conformance is claimed.
+- Annotated tag object: `fe25924bcf92b30977be3ef3ffb2d484445e0e98`.
+- Target commit: `1211a48b78452db794c5ffb01ff2e1d0ba56605a`.
+
+v0.11.0 is the current published immutable release. Its tag must never be moved
+or recreated. Publication does not imply backend/client adoption or conformance;
+no live provider integration or live backend conformance is claimed. Historical
+verification evidence remains unchanged.
 
 ## Public HTTP version and route policy
 
