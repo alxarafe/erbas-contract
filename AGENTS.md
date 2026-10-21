@@ -40,10 +40,11 @@ with `npm ci` inside Docker; never resolve floating dependencies during checks.
 Every failed assertion, tool error, timeout or cleanup failure must produce a
 nonzero exit status. Do not follow redirects or suppress failing tests.
 
-When a task requires Docker or another repository runtime environment, check it
-once before relying on it. If unavailable, do not start services, build images,
-retry, poll or investigate alternative setups. Report the exact preparation
-command for the developer and stop the task.
+When a task requires Docker or another repository runtime environment that is
+missing but normally preparable, prepare it using the repository's supported
+commands, including starting services and building required images. A missing
+but preparable environment is not by itself a reason to stop. Do not add
+host-installed tooling.
 
 Use the narrowest useful validation during implementation: focused tests, then
 `./bin/check-fast` for structural feedback, then `./bin/check-scope` for known
@@ -53,16 +54,18 @@ repository verification; `./bin/test URL` is live-backend conformance for the
 specified service, not repository verification. Both use the same OpenAPI
 validation. Never claim backend conformance from `./bin/check`.
 
-Short, focused validation may run inside the agent when the required environment
-is already available. Do not start materially long-running repository-wide builds,
-full test suites, image builds, benchmarks, full conformance checks or similar
-validation merely for the agent to wait for them. Never repeatedly poll a running
-process. When such validation is required, report the exact command for the
-developer or CI to run outside the agent session and stop pending its real result.
-Required full verification remains mandatory under repository or release rules,
-including before publication when applicable; never claim it passed without the
-actual result. Report actual commands, results and limitations; do not rerun
-unchanged validations without a concrete reason.
+Run the validation needed to complete the task, including repository-wide builds,
+full test suites, image builds and conformance runs when required. Do not avoid a
+command merely because it takes time; wait for legitimate validation to finish.
+Never repeatedly poll a running process when the tool can wait efficiently, rerun
+unchanged failing commands without a concrete reason, or reread unchanged
+material. Never claim validation passed without its actual result; missing or
+failed mandatory validation blocks task completion and commit. Delegate work to
+the developer or CI only for a real external limitation such as unavailable
+credentials, an inaccessible external service, permissions genuinely unavailable
+to the agent, an operation requiring human authorization, or infrastructure that
+the repository's supported workflow cannot provision. Report actual commands,
+results and limitations.
 
 Perform only the minimum reconnaissance needed to act safely. Batch independent
 inspection where practical, bound command output, and prefer targeted searches
