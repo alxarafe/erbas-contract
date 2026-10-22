@@ -9,7 +9,7 @@ const baseResolvedContractSha256 = '0ad19e56e34d44eb90464436c8dfbb09a2e99fa52e82
 test('AI-001 preserves every published v0.10.0, v0.9.0 and prior v0.8.0 contract definition', async () => {
   const api = await bundleOpenApi({ dereferenced: true });
   assert.equal(api.info.version, contractVersion);
-  assert.equal(api.info.description, `ERBAS Contract ${contractVersion} includes AI-001 provider-agnostic assistant invocation over effective READ capabilities. No v${contractVersion} backend or client adoption or conformance is claimed. See docs/modules/ai/ai-001.md and docs/releases/v${contractVersion}.md.`);
+  assert.equal(api.info.description, `ERBAS Contract ${contractVersion} unpublished preparation: compatible PATCH over published immutable v0.11.0 that increases only the full conformance runner timeout and changes no HTTP behavior. No v${contractVersion} backend or client adoption or conformance is claimed. See docs/releases/v${contractVersion}.md.`);
   delete api.paths['/api/ai/assistant/invocations'];
   for (const name of ['AiAssistantInvocationRequest', 'AiAssistantInvocation', 'AiAssistantToolUsage',
     'AiAssistantUnavailable', 'AiAssistantExecutionFailed']) delete api.components.schemas[name];

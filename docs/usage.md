@@ -143,14 +143,14 @@ for platform support and limitations.
 | Operation | Limit |
 | --- | --- |
 | HTTP request | 2 seconds |
-| Bruno process watchdog (full conformance) | 120 seconds |
+| Bruno process watchdog (full conformance) | 180 seconds |
 | Bruno process watchdog (scoped conformance) | 30 seconds; ItemFamily scope 90 seconds |
 | Bruno process watchdog (synthetic scenario) | 10 seconds |
 | OpenAPI lint | 30 seconds |
 | Synthetic test suite | 900 seconds |
 
-Within the synthetic suite, full Bruno runs retain a 130-second outer test
-budget so the 120-second full-conformance watchdog and fixture cleanup can
+Within the synthetic suite, full Bruno runs retain a 190-second outer test
+budget so the 180-second full-conformance watchdog and fixture cleanup can
 finish on slower hosted runners. Targeted mutation scenarios have 15-second
 outer budgets, including cleanup. HTTP timeout and stuck-subprocess assertions
 remain bounded independently.
