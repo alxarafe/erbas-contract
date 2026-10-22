@@ -92,20 +92,35 @@ v0.10.0 is a previous published immutable release. Its tag must not be moved
 or recreated. Publication does not imply consumer adoption or conformance;
 historical verification evidence remains unchanged.
 
-## Current published immutable release: v0.11.0
+## Previous published immutable release: v0.11.0
 
-The release OpenAPI is **0.11.0**, a compatible additive MINOR over published
-immutable v0.10.0. [AI-001](../modules/ai/ai-001.md) adds provider-agnostic
-assistant invocation over effective READ capabilities without changing existing
-routes or common error behavior. See [release notes](../releases/v0.11.0.md).
+The published v0.11.0 OpenAPI is **0.11.0**, a compatible additive MINOR over
+published immutable v0.10.0. [AI-001](../modules/ai/ai-001.md) adds
+provider-agnostic assistant invocation over effective READ capabilities without
+changing existing routes or common error behavior. See
+[release notes](../releases/v0.11.0.md).
 
 - Annotated tag object: `fe25924bcf92b30977be3ef3ffb2d484445e0e98`.
 - Target commit: `1211a48b78452db794c5ffb01ff2e1d0ba56605a`.
 
-v0.11.0 is the current published immutable release. Its tag must never be moved
+v0.11.0 is a previous published immutable release. Its tag must never be moved
 or recreated. Publication does not imply backend/client adoption or conformance;
 no live provider integration or live backend conformance is claimed. Historical
 verification evidence remains unchanged.
+
+## Unreleased preparation: v0.11.1
+
+**v0.11.1 is prepared but not published and has no tag.** The development
+OpenAPI is **0.11.1**, a compatible PATCH over immutable v0.11.0. It increases
+only the full conformance runner timeout from 120 to 180 seconds. It does not
+change HTTP routes, methods, schemas, bodies, status codes, headers, permissions,
+module or capability identities, Bruno scenarios, fixtures, assertions, provider
+neutrality or shared errors. See the [preparation notes](../releases/v0.11.1.md).
+
+Preparing a release does not authorize publication, tagging or deployment. Until
+the separately authorized release procedure completes and an annotated immutable
+tag exists, consumers must continue pinning v0.11.0 and must not assume v0.11.1
+availability. No backend/client v0.11.1 adoption or conformance is claimed.
 
 ## Public HTTP version and route policy
 

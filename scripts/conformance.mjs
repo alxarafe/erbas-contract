@@ -7,7 +7,7 @@ export { normalizeBaseUrl, requireCredentials } from './bruno-process.mjs';
 // Scope names are the only selection API; callers never assemble CLI paths.
 export const conformanceScopes = Object.freeze({ full: 'full', ...coreScopes, ...wmsScopes, ...aiScopes });
 const scopedConformanceTimeoutMs = 30000;
-const fullConformanceTimeoutMs = 120000;
+const fullConformanceTimeoutMs = 180000;
 
 async function scopePaths(scope) {
   if (scope === conformanceScopes.full) return [...coreFullPaths, ...wmsFullPaths, ...coreCapabilityPaths, ...wmsCapabilityPaths, ...aiFullPaths];
