@@ -108,19 +108,14 @@ or recreated. Publication does not imply backend/client adoption or conformance;
 no live provider integration or live backend conformance is claimed. Historical
 verification evidence remains unchanged.
 
-## Unreleased preparation: v0.11.1
+## Published immutable release: v0.11.1
 
-**v0.11.1 is prepared but not published and has no tag.** The development
-OpenAPI is **0.11.1**, a compatible PATCH over immutable v0.11.0. It increases
-only the full conformance runner timeout from 120 to 180 seconds. It does not
-change HTTP routes, methods, schemas, bodies, status codes, headers, permissions,
-module or capability identities, Bruno scenarios, fixtures, assertions, provider
-neutrality or shared errors. See the [preparation notes](../releases/v0.11.1.md).
-
-Preparing a release does not authorize publication, tagging or deployment. Until
-the separately authorized release procedure completes and an annotated immutable
-tag exists, consumers must continue pinning v0.11.0 and must not assume v0.11.1
-availability. No backend/client v0.11.1 adoption or conformance is claimed.
+Published v0.11.1 is immutable: annotated tag object
+`5ea047b3375cf0362397ee1e21c95d4991f09c10`, target commit
+`5517f0df5d3cacc57c35ef704131dcb30ad9dde2`. It changed only the full conformance
+runner timeout over v0.11.0, without HTTP behavior changes. Its historical
+[preparation report](../releases/v0.11.1.md) remains unchanged. Publication does
+not imply consumer adoption or current backend conformance.
 
 ## Public HTTP version and route policy
 
@@ -234,3 +229,11 @@ Task approval authorizes the final local atomic commit after passing validation,
 as defined in [the working agreement](../../AGENTS.md). Pushes, tags, releases,
 publication and deployment require separate express authorization; passing
 checks alone do not authorize them.
+
+## Unpublished candidate: v0.12.0
+
+v0.12.0 is a MINOR candidate, not a published release and has no tag. It adds
+controlled READ primitive tool semantics and a closed primitive provenance variant
+to the AI response while preserving existing capability responses. See
+[candidate notes](../releases/v0.12.0.md). Consumers must not pin an imaginary tag;
+publication/adoption require separate authorization and validation.

@@ -35,11 +35,19 @@ test('AI-001 OpenAPI exposes one closed, provider-agnostic assistant operation',
   assert.equal(result.properties.answer.type, 'string');
   assert.equal(result.properties.answer.minLength, 1);
   assert.deepEqual(result.properties.toolsUsed.items, schemas.AiAssistantToolUsage);
-  assert.deepEqual(schemas.AiAssistantToolUsage.required, ['capabilityId', 'invocationId']);
-  assert.deepEqual(Object.keys(schemas.AiAssistantToolUsage.properties), schemas.AiAssistantToolUsage.required);
-  assert.deepEqual(schemas.AiAssistantToolUsage.properties.capabilityId, schemas.CapabilityId);
-  assert.equal(schemas.AiAssistantToolUsage.properties.invocationId.type, 'string');
-  assert.equal(schemas.AiAssistantToolUsage.properties.invocationId.minLength, 1);
+  assert.deepEqual(schemas.AiAssistantCapabilityUsage.required, ['capabilityId', 'invocationId']);
+  assert.deepEqual(Object.keys(schemas.AiAssistantCapabilityUsage.properties), schemas.AiAssistantCapabilityUsage.required);
+  assert.deepEqual(schemas.AiAssistantCapabilityUsage.properties.capabilityId, schemas.CapabilityId);
+  assert.equal(schemas.AiAssistantCapabilityUsage.properties.invocationId.type, 'string');
+  assert.equal(schemas.AiAssistantCapabilityUsage.properties.invocationId.minLength, 1);
+
+  assert.deepEqual(schemas.AiAssistantToolUsage.oneOf, [schemas.AiAssistantCapabilityUsage, schemas.AiAssistantPrimitiveUsage]);
+  assert.equal(schemas.AiAssistantCapabilityUsage.additionalProperties, false);
+  assert.equal(schemas.AiAssistantPrimitiveUsage.additionalProperties, false);
+  assert.deepEqual(schemas.AiAssistantPrimitiveUsage.required, ['primitiveId', 'invocationId']);
+  assert.deepEqual(Object.keys(schemas.AiAssistantPrimitiveUsage.properties), ['primitiveId', 'invocationId']);
+  assert.equal(schemas.AiAssistantPrimitiveUsage.properties.primitiveId.pattern, schemas.CapabilityId.pattern);
+  assert.equal(schemas.AiAssistantPrimitiveUsage.properties.invocationId.minLength, 1);
 
   for (const [status, name] of [['400', 'InvalidLoginRequest'], ['401', 'Unauthorized'], ['403', 'Forbidden']]) {
     assert.deepEqual(operation.responses[status].content['application/json'].schema, schemas[name]);

@@ -10,6 +10,7 @@
 | [AI-001](modules/ai/ai-001.md) | Published v0.11.0: provider-agnostic assistant over effective READ capabilities, security, errors and audit. |
 | [AI-001 verification](verification/ai-001.md) | AI focused/full Docker validation, preservation and conformance limitations. |
 | [v0.11.0 release notes](releases/v0.11.0.md) | Published compatible additive MINOR over immutable v0.10.0. |
+| [v0.12.0 candidate](releases/v0.12.0.md) | Unpublished MINOR: typed capability/primitive AI provenance. |
 | [v0.11.1 preparation](releases/v0.11.1.md) | Unreleased compatible PATCH over immutable v0.11.0; full conformance timeout only, no HTTP change. |
 | [CORE-CAP-002 verification](verification/core-cap-002.md) | Focused and full Docker repository validation, contract preservation, and no live conformance claim. |
 | [v0.10.0 release notes](releases/v0.10.0.md) | Compatible additive MINOR over immutable v0.9.0. |
@@ -85,13 +86,13 @@ or conformance. Demo defaults are outside the HTTP release scope.
 
 ## Published contract and consumer adoption
 
-**v0.11.0 is the latest published immutable release**. See [release identity and policy](common/versioning.md).
+**v0.11.1 is the latest published immutable release**. See [release identity and policy](common/versioning.md).
 The recorded Java/.NET adoption remains v0.6.0; publication and adoption are
 distinct. Angular WMS or module administration adoption is not claimed.
 
 Published **v0.11.0** contains **590 requests / 2587 named checks**. See
 [AI-001](modules/ai/ai-001.md) and [release notes](releases/v0.11.0.md).
-Unreleased **v0.11.1** preparation changes only the full conformance timeout and
+Historical **v0.11.1** preparation changed only the full conformance timeout and
 the collection remains at **590 requests / 2587 named checks**. It has no tag and
 makes no HTTP or adoption claim. See [preparation notes](releases/v0.11.1.md).
 Previous published **v0.10.0** contains **560 requests / 2467 named checks**. See

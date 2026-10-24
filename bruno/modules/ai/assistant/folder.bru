@@ -59,8 +59,9 @@ tests {
     const coreIds = bru.getVar("coreInvocationIds") || [];
     expect(coreIds).not.to.include(body.invocationId);
     for (const tool of body.toolsUsed) {
-      expect(Object.keys(tool).sort()).to.deep.equal(["capabilityId", "invocationId"]);
-      expect(tool.capabilityId).to.match(new RegExp(bru.getFolderVar("capabilityIdPattern")));
+      const identity = Object.prototype.hasOwnProperty.call(tool, "primitiveId") ? "primitiveId" : "capabilityId";
+      expect(Object.keys(tool).sort()).to.deep.equal([identity, "invocationId"].sort());
+      expect(tool[identity]).to.match(new RegExp(bru.getFolderVar("capabilityIdPattern")));
       expect(tool.invocationId).to.be.a("string").and.not.equal("");
       expect(tool.invocationId).not.to.equal(body.invocationId);
       expect(coreIds).not.to.include(tool.invocationId);
@@ -68,6 +69,11 @@ tests {
     }
     bru.setVar("coreInvocationIds", coreIds);
     const expected = (bru.getVar("expectedCapabilities") || "").split(",").filter(Boolean);
-    expect(body.toolsUsed.map(tool => tool.capabilityId)).to.deep.equal(expected);
+    expect(body.toolsUsed.filter(tool => tool.capabilityId).map(tool => tool.capabilityId)).to.deep.equal(expected);
+    const primitives = (bru.getVar("expectedPrimitives") || "").split(",").filter(Boolean);
+    expect(body.toolsUsed.filter(tool => tool.primitiveId).map(tool => tool.primitiveId)).to.deep.equal(primitives);
+    const sequence = bru.getVar("expectedToolSequence");
+    if (sequence) expect(body.toolsUsed.map(tool => tool.capabilityId ? "capability:" + tool.capabilityId : "primitive:" + tool.primitiveId))
+      .to.deep.equal(sequence.split(","));
   });
 }
