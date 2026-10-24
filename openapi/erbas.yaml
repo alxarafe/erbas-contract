@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
   title: ERBAS shared HTTP contract
-  version: 0.11.1
+  version: 0.12.0
   description: >-
-    ERBAS Contract 0.11.1 unpublished preparation: compatible PATCH over published immutable v0.11.0 that increases only the full conformance runner timeout and changes no HTTP behavior. No v0.11.1 backend or client adoption or conformance is claimed. See docs/releases/v0.11.1.md.
+    ERBAS Contract 0.12.0 unpublished MINOR candidate over immutable v0.11.1: controlled READ primitives and typed AI tool provenance. No release, tag or consumer adoption is claimed. See docs/releases/v0.12.0.md.
 security: []
 paths:
   /api/core/capabilities/{capabilityId}/invocations:
@@ -147,6 +147,10 @@ components:
       $ref: './modules/ai/contract.yaml#/schemas/AiAssistantInvocationRequest'
     AiAssistantInvocation:
       $ref: './modules/ai/contract.yaml#/schemas/AiAssistantInvocation'
+    AiAssistantCapabilityUsage:
+      $ref: './modules/ai/contract.yaml#/schemas/AiAssistantCapabilityUsage'
+    AiAssistantPrimitiveUsage:
+      $ref: './modules/ai/contract.yaml#/schemas/AiAssistantPrimitiveUsage'
     AiAssistantToolUsage:
       $ref: './modules/ai/contract.yaml#/schemas/AiAssistantToolUsage'
     AiAssistantUnavailable:

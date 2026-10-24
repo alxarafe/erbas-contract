@@ -8,7 +8,7 @@ export const scopeTests = {
   wms: ['tests/modules/wms/contract.test.mjs'],
   'storage-attributes': ['tests/modules/wms/contract.test.mjs'],
   'item-families': ['tests/modules/wms/contract.test.mjs'],
-  ai: ['tests/ai/contract.test.mjs', 'tests/ai/assistant.test.mjs'],
+  ai: ['tests/ai/contract.test.mjs', 'tests/ai/assistant.test.mjs', 'tests/ai/provenance.test.mjs'],
 };
 
 const ownedDirectories = {
