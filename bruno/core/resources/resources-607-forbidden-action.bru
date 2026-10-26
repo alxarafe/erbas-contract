@@ -1,0 +1,34 @@
+meta {
+  name: Resource protocol forbidden-action
+  type: http
+  seq: 607
+}
+
+post {
+  url: {{baseUrl}}/api/resource-actions/{{probeActionResource}}/{{probeAction}}/execute
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{userToken}}
+  Content-Type: application/json
+}
+
+vars:pre-request {
+  expectedStatus: 403
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  req.setBody({target:{id:bru.getVar("probeRecord")},parameters:{}});
+}

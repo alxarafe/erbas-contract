@@ -1,4 +1,5 @@
 export const scopeTests = {
+  resources: ['tests/core/resources.test.mjs'],
   health: ['tests/core/health.test.mjs'],
   auth: ['tests/core/auth.test.mjs'],
   users: ['tests/core/users.test.mjs'],
@@ -12,7 +13,7 @@ export const scopeTests = {
 };
 
 const ownedDirectories = {
-  'core/health': 'health', 'core/auth': 'auth', 'core/users': 'users',
+  'core/resources': 'resources', 'core/health': 'health', 'core/auth': 'auth', 'core/users': 'users',
   'core/modularity': 'modules', 'core/capabilities': 'capabilities',
   'modules/wms/uoms': 'wms', 'modules/wms/storage-attributes': 'storage-attributes',
   'modules/wms/item-families': 'item-families',

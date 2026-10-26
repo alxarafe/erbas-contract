@@ -1,11 +1,23 @@
 openapi: 3.1.0
 info:
   title: ERBAS shared HTTP contract
-  version: 0.12.0
+  version: 0.13.0
   description: >-
-    ERBAS Contract 0.12.0 unpublished MINOR candidate over immutable v0.11.1: controlled READ primitives and typed AI tool provenance. No release, tag or consumer adoption is claimed. See docs/releases/v0.12.0.md.
+    ERBAS Contract 0.13.0 unpublished additive MINOR candidate over immutable v0.12.0: Generic Resource Runtime protocol. No release, tag or consumer adoption is claimed. See docs/releases/v0.13.0.md.
 security: []
 paths:
+  /api/meta/resources:
+    $ref: './core/resources/contract.yaml#/paths/~1api~1meta~1resources'
+  /api/meta/resources/{resource}:
+    $ref: './core/resources/contract.yaml#/paths/~1api~1meta~1resources~1{resource}'
+  /api/resources/{resource}:
+    $ref: './core/resources/contract.yaml#/paths/~1api~1resources~1{resource}'
+  /api/resources/{resource}/{id}:
+    $ref: './core/resources/contract.yaml#/paths/~1api~1resources~1{resource}~1{id}'
+  /api/resource-actions/{resource}/{action}/execute:
+    $ref: './core/resources/contract.yaml#/paths/~1api~1resource-actions~1{resource}~1{action}~1execute'
+  /api/resource-actions/{resource}/availability:
+    $ref: './core/resources/contract.yaml#/paths/~1api~1resource-actions~1{resource}~1availability'
   /api/core/capabilities/{capabilityId}/invocations:
     $ref: './core/capabilities/contract.yaml#/paths/~1api~1core~1capabilities~1{capabilityId}~1invocations'
   /api/core/capabilities:
@@ -125,6 +137,58 @@ components:
     WmsAssociationConflict:
       $ref: './modules/wms/item-families/contract.yaml#/responses/WmsAssociationConflict'
   schemas:
+    ResourceScalar:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceScalar'
+    ResourceIdentifier:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceIdentifier'
+    ResourceRecord:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceRecord'
+    ResourcePage:
+      $ref: './core/resources/contract.yaml#/schemas/ResourcePage'
+    ResourceFilter:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceFilter'
+    ResourceOperation:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceOperation'
+    ResourceOperations:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceOperations'
+    ResourceFieldCapabilities:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceFieldCapabilities'
+    ResourceConstraints:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceConstraints'
+    ResourceAnnotation:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceAnnotation'
+    ResourceField:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceField'
+    ResourceRelation:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceRelation'
+    ResourceActionParameter:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceActionParameter'
+    ResourceAction:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceAction'
+    ResourceFormGroup:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceFormGroup'
+    ResourceFormSection:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceFormSection'
+    ResourceFormTab:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceFormTab'
+    ResourcePresentation:
+      $ref: './core/resources/contract.yaml#/schemas/ResourcePresentation'
+    ResourceMetadata:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceMetadata'
+    ResourceSummary:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceSummary'
+    ResourceDiscovery:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceDiscovery'
+    ResourceActionTarget:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceActionTarget'
+    ResourceActionExecution:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceActionExecution'
+    ResourceActionAvailabilityRequest:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceActionAvailabilityRequest'
+    ResourceActionState:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceActionState'
+    ResourceActionAvailability:
+      $ref: './core/resources/contract.yaml#/schemas/ResourceActionAvailability'
     CapabilityInvocationRequest:
       $ref: './core/capabilities/contract.yaml#/schemas/CapabilityInvocationRequest'
     CapabilityInvocation:

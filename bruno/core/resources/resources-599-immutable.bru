@@ -1,0 +1,36 @@
+meta {
+  name: Resource protocol immutable
+  type: http
+  seq: 599
+}
+
+patch {
+  url: {{baseUrl}}/api/resources/{{probeResource}}/{{probeRecord}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+vars:pre-request {
+  expectedStatus: 409
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+body:json {
+  {"code": "CRUD-OTHER"}
+}
+
+tests {
+  test("immutable semantics", function () {
+    expect(res.getBody().code).to.equal("resource_conflict");
+  });
+}

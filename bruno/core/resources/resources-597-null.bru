@@ -1,0 +1,40 @@
+meta {
+  name: Resource protocol null
+  type: http
+  seq: 597
+}
+
+patch {
+  url: {{baseUrl}}/api/resources/{{probeResource}}/{{probeRecord}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+vars:pre-request {
+  expectedStatus: 200
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  req.setBody({[bru.getVar("nullableField")]:null});
+}
+
+tests {
+  test("null semantics", function () {
+    expect(res.getBody()[bru.getVar("nullableField")]).to.equal(null); expect(res.getBody().name).to.equal("Edited");
+  });
+}

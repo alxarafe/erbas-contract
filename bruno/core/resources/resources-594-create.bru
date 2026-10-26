@@ -1,0 +1,41 @@
+meta {
+  name: Resource protocol create
+  type: http
+  seq: 594
+}
+
+post {
+  url: {{baseUrl}}/api/resources/{{probeResource}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+vars:pre-request {
+  expectedStatus: 201
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+body:json {
+  {}
+}
+
+script:pre-request {
+  req.setBody({code:"CRUD-PROBE",name:"First",[bru.getVar("nullableField")]:"Initially present"});
+}
+
+tests {
+  test("create semantics", function () {
+    const body=res.getBody(); expect(body.code).to.equal("CRUD-PROBE"); expect(body.active).to.equal(true); expect(body[bru.getVar("nullableField")]).to.equal("Initially present");
+    expect(body.id).to.be.a("string"); bru.setVar("probeRecord",body.id); expect(res.getHeader("location")).to.equal("/api/resources/"+encodeURIComponent(bru.getVar("probeResource"))+"/"+encodeURIComponent(body.id));
+  });
+}

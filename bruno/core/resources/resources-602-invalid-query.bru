@@ -1,0 +1,25 @@
+meta {
+  name: Resource protocol invalid-query
+  type: http
+  seq: 602
+}
+
+get {
+  url: {{baseUrl}}/api/resources/{{probeResource}}?sort=__unknown
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+vars:pre-request {
+  expectedStatus: 400
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

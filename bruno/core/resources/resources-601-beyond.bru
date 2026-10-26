@@ -1,0 +1,31 @@
+meta {
+  name: Resource protocol beyond
+  type: http
+  seq: 601
+}
+
+get {
+  url: {{baseUrl}}/api/resources/{{probeResource}}?filter=%7B%22field%22%3A%22code%22%2C%22operator%22%3A%22eq%22%2C%22value%22%3A%22CRUD-PROBE%22%7D&offset=1&limit=1
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+vars:pre-request {
+  expectedStatus: 200
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+tests {
+  test("beyond semantics", function () {
+    const b=res.getBody(); expect(b.items).to.deep.equal([]); expect(b.offset).to.equal(1); expect(b.limit).to.equal(1); if(b.total!==undefined) expect(b.total).to.equal(1);
+  });
+}

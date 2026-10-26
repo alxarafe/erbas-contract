@@ -1,0 +1,25 @@
+meta {
+  name: Resource protocol deleted
+  type: http
+  seq: 610
+}
+
+get {
+  url: {{baseUrl}}/api/resources/{{probeResource}}/{{probeRecord}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+vars:pre-request {
+  expectedStatus: 404
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

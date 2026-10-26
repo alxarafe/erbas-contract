@@ -1,0 +1,35 @@
+meta {
+  name: Resource protocol discovery
+  type: http
+  seq: 592
+}
+
+get {
+  url: {{baseUrl}}/api/meta/resources
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+vars:pre-request {
+  expectedStatus: 200
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+tests {
+  test("discovery semantics", function () {
+    const rows = res.getBody(); expect(rows).to.be.an("array").that.is.not.empty;
+    rows.forEach(row => { expect(Object.keys(row).sort()).to.deep.equal(["definitionHash","id","metadataPath","moduleId","operations","version"]); expect(row.metadataPath).to.equal("/api/meta/resources/" + encodeURIComponent(row.id)); });
+    const candidates = rows.filter(row => row.operations.get.declared && row.operations.get.authorized);
+    expect(candidates).not.to.be.empty; bru.setVar("resourceCandidates", candidates); bru.setVar("resourceMetadataIndex", 0);
+    bru.setVar("inspectResource", candidates[0].id); bru.setVar("probeResource", ""); bru.setVar("probeActionResource", "");
+  });
+}

@@ -1,0 +1,32 @@
+meta {
+  name: Resource protocol page
+  type: http
+  seq: 600
+}
+
+get {
+  url: {{baseUrl}}/api/resources/{{probeResource}}?filter=%7B%22field%22%3A%22code%22%2C%22operator%22%3A%22eq%22%2C%22value%22%3A%22CRUD-PROBE%22%7D&filter=%7B%22field%22%3A%22active%22%2C%22operator%22%3A%22eq%22%2C%22value%22%3Afalse%7D&sort=-name&sort=code&offset=0&limit=1
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+vars:pre-request {
+  expectedStatus: 200
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+tests {
+  test("page semantics", function () {
+    const b=res.getBody(); expect(Object.keys(b).every(k=>["items","offset","limit","total"].includes(k))).to.equal(true);
+    expect(b.offset).to.equal(0); expect(b.limit).to.equal(1); expect(b.items).to.have.length(1); expect(b.items[0].id).to.equal(bru.getVar("probeRecord")); if (b.total !== undefined) expect(b.total).to.equal(1);
+  });
+}

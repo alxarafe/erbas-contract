@@ -1,4 +1,5 @@
 // The composition layer chooses installed functional fixtures; transport and CORE do not.
+import { resourceFixture } from './resources.mjs';
 import { readFile } from 'node:fs/promises';
 import { startServer } from './server.mjs';
 import { createContext } from './common.mjs';
@@ -20,9 +21,10 @@ export async function startFixture(options = {}) {
     return wms.invoke(descriptor, input);
   }, ...options, availableModules: options.availableModules === undefined ? fixtureModules() : options.availableModules }, context);
   const wms = wmsFixture(options, context, core);
+  const resources = resourceFixture(options, context, core);
   const assistant = assistantFixture(options, context, core);
   return startServer(async (request, response, url) => {
-    if (!await wms(request, response, url) && !await assistant(request, response, url)) {
+    if (!await resources(request, response, url) && !await wms(request, response, url) && !await assistant(request, response, url)) {
       await core.handle(request, response, url);
     }
   }, context);

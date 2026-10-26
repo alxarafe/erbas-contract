@@ -2,7 +2,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 export const coreScopes = Object.freeze({
-  health: 'health', auth: 'auth', users: 'users', collections: 'collections', modules: 'modules', capabilities: 'capabilities'
+  health: 'health', auth: 'auth', users: 'users', collections: 'collections', modules: 'modules', capabilities: 'capabilities', resources: 'resources'
 });
 export const coreFullPaths = ['core/health', 'core/auth', 'core/users', 'core/collections', 'core/modularity'];
 export const coreCapabilityPaths = ['core/capabilities'];
@@ -14,6 +14,7 @@ const passwordBoundaryRequests = ['core/users/users-66-password-boundary-12.bru'
 export const administratorBootstrap = [administratorLogin, createNormalUser, normalUserLogin];
 
 export async function coreScopePaths(scope, collectionDirectory) {
+  if (scope === coreScopes.resources) return [...administratorBootstrap, 'core/resources'];
   if (scope === coreScopes.health) return ['core/health/health.bru'];
   if (scope === coreScopes.capabilities) return [...administratorBootstrap, ...coreCapabilityPaths];
   if (scope === coreScopes.modules) return [...administratorBootstrap, 'core/modularity'];

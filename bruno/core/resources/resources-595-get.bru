@@ -1,0 +1,31 @@
+meta {
+  name: Resource protocol get
+  type: http
+  seq: 595
+}
+
+get {
+  url: {{baseUrl}}/api/resources/{{probeResource}}/{{probeRecord}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+vars:pre-request {
+  expectedStatus: 200
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+tests {
+  test("get semantics", function () {
+    expect(res.getBody().name).to.equal("First");
+  });
+}

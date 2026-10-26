@@ -108,7 +108,7 @@ or recreated. Publication does not imply backend/client adoption or conformance;
 no live provider integration or live backend conformance is claimed. Historical
 verification evidence remains unchanged.
 
-## Published immutable release: v0.11.1
+## Previous published immutable release: v0.11.1
 
 Published v0.11.1 is immutable: annotated tag object
 `5ea047b3375cf0362397ee1e21c95d4991f09c10`, target commit
@@ -230,10 +230,18 @@ as defined in [the working agreement](../../AGENTS.md). Pushes, tags, releases,
 publication and deployment require separate express authorization; passing
 checks alone do not authorize them.
 
-## Unpublished candidate: v0.12.0
+## Published immutable release: v0.12.0
 
-v0.12.0 is a MINOR candidate, not a published release and has no tag. It adds
-controlled READ primitive tool semantics and a closed primitive provenance variant
-to the AI response while preserving existing capability responses. See
-[candidate notes](../releases/v0.12.0.md). Consumers must not pin an imaginary tag;
-publication/adoption require separate authorization and validation.
+The existing annotated v0.12.0 tag object is
+`070990bef7bc0aa8ca8876c6b112d4edc6cf99d7`, targeting
+`0d3d1c1cd81cc39b9d9eb8840381c415cb909363`. It adds controlled READ primitive
+semantics and typed AI provenance. The historical [preparation notes](../releases/v0.12.0.md)
+retain their then-unpublished status wording; they are not the current release
+identity. The .NET backend pin is v0.12.0. No new Java/client adoption is claimed.
+
+## Unpublished candidate: v0.13.0
+
+CRUD-CONTRACT-001 prepares an additive MINOR Generic Resource Runtime protocol.
+There is no v0.13.0 tag or publication. See [candidate notes](../releases/v0.13.0.md).
+Published pins remain unchanged; explicit candidate validation is development
+evidence and must not masquerade as adoption of a published release.

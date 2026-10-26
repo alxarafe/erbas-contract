@@ -1,0 +1,21 @@
+meta {
+  name: Generic Resource Runtime protocol
+}
+
+tests {
+  test("Expected generic protocol status", function () {
+    expect(res.getStatus()).to.equal(Number(bru.getRequestVar("expectedStatus")));
+  });
+  test("Generic protocol error and success representation", function () {
+    const status = res.getStatus();
+    if (status === 204) { expect(res.getBody()).to.satisfy(v => v === "" || v === undefined || v === null); return; }
+    expect(res.getHeader("content-type")).to.match(/^application\/json(?:;|$)/i);
+    if (status >= 400) {
+      const body = res.getBody(); expect(Object.keys(body).sort()).to.deep.equal(["code", "errors"]);
+      expect(body.code).to.be.a("string"); expect(body.errors).to.be.an("array").that.is.not.empty;
+      body.errors.forEach(error => { expect(error.code).to.be.a("string"); expect(Object.keys(error).every(k => ["code","resource","resourceId","path"].includes(k))).to.equal(true); });
+      expect(res.getHeader("cache-control")).to.equal("no-store");
+      if (status === 401) expect(res.getHeader("www-authenticate")).to.equal("Bearer");
+    }
+  });
+}

@@ -1,0 +1,36 @@
+meta {
+  name: Resource protocol availability
+  type: http
+  seq: 605
+}
+
+post {
+  url: {{baseUrl}}/api/resource-actions/{{probeActionResource}}/availability
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+vars:pre-request {
+  expectedStatus: 200
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+body:json {
+  {"scope": "COLLECTION"}
+}
+
+tests {
+  test("availability semantics", function () {
+    expect(res.getBody()).to.be.an("array"); res.getBody().forEach(s=>{expect(s.authorized).to.be.a("boolean"); expect(s.available).to.be.a("boolean"); expect(s.name).to.be.a("string"); if(!s.authorized){expect(s.available).to.equal(false);expect(s).not.to.have.property("unavailableReason");}});
+  });
+}

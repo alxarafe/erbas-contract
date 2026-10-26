@@ -1,0 +1,25 @@
+meta {
+  name: Resource protocol delete
+  type: http
+  seq: 609
+}
+
+delete {
+  url: {{baseUrl}}/api/resources/{{probeResource}}/{{probeRecord}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+vars:pre-request {
+  expectedStatus: 204
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

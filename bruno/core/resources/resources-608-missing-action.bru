@@ -1,0 +1,30 @@
+meta {
+  name: Resource protocol missing-action
+  type: http
+  seq: 608
+}
+
+post {
+  url: {{baseUrl}}/api/resource-actions/{{probeActionResource}}/crud-contract-missing/execute
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+vars:pre-request {
+  expectedStatus: 404
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+body:json {
+  {}
+}

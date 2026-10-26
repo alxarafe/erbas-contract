@@ -1,0 +1,25 @@
+meta {
+  name: Resource protocol forbidden
+  type: http
+  seq: 603
+}
+
+get {
+  url: {{baseUrl}}/api/resources/{{probeResource}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{userToken}}
+}
+
+vars:pre-request {
+  expectedStatus: 403
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

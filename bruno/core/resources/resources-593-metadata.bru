@@ -1,0 +1,47 @@
+meta {
+  name: Resource protocol metadata
+  type: http
+  seq: 593
+}
+
+get {
+  url: {{baseUrl}}/api/meta/resources/{{inspectResource}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+vars:pre-request {
+  expectedStatus: 200
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+tests {
+  test("metadata semantics", function () {
+    const body = res.getBody(); expect(body.moduleEnabled).to.equal(true); expect(body.idDefinition.field).to.be.a("string");
+    const ordinary = ["eq","ne"], ordered = ordinary.concat(["lt","lte","gt","gte"]);
+    body.fields.forEach(field => {
+      const expected = !field.capabilities.filterable ? [] : ["STRING","TEXT"].includes(field.type) ? ordered.concat(["contains","startsWith"]) : ["INT8","UINT8","INT16","UINT16","INT32","UINT32","INT64","DECIMAL","DATE","TIME","DATETIME"].includes(field.type) ? ordered : ordinary;
+      expect(field.capabilities.filterOperators).to.deep.equal(expected); expect(field.nullable).to.be.a("boolean"); expect(field.required).to.be.a("boolean"); expect(field.immutable).to.be.a("boolean"); expect(field.readOnly).to.be.a("boolean");
+    });
+    const code = body.fields.find(f => f.name === "code"), name = body.fields.find(f => f.name === "name"), active = body.fields.find(f => f.name === "active");
+    const nullable = body.fields.find(f => f.type === "STRING" || f.type === "TEXT" ? f.nullable && !f.readOnly && !f.immutable : false);
+    const writable = ["list","get","create","update","delete"].every(k => body.operations[k].declared && body.operations[k].authorized);
+    if (!bru.getVar("probeResource") && writable && code && code.type === "STRING" && code.immutable && code.required && name && name.required && active && active.default === true && nullable && body.fields.filter(f => f.required && !f.readOnly).every(f => ["code","name"].includes(f.name))) {
+      bru.setVar("probeResource", body.id); bru.setVar("nullableField", nullable.name);
+    }
+    const action = body.actions.find(a => a.authorized && a.scope === "ENTITY");
+    if (!bru.getVar("probeActionResource") && action) { bru.setVar("probeActionResource",body.id); bru.setVar("probeAction",action.name); }
+    const candidates=bru.getVar("resourceCandidates"), next=Number(bru.getVar("resourceMetadataIndex"))+1;
+    if (next < candidates.length) { bru.setVar("resourceMetadataIndex",next); bru.setVar("inspectResource",candidates[next].id); bru.setNextRequest("Resource protocol metadata"); }
+    else { expect(bru.getVar("probeResource")).to.be.a("string").that.is.not.empty; expect(bru.getVar("probeActionResource")).to.be.a("string").that.is.not.empty; }
+  });
+}

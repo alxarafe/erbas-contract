@@ -1,0 +1,36 @@
+meta {
+  name: Resource protocol patch
+  type: http
+  seq: 596
+}
+
+patch {
+  url: {{baseUrl}}/api/resources/{{probeResource}}/{{probeRecord}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+vars:pre-request {
+  expectedStatus: 200
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+body:json {
+  {"name": "Edited", "active": false}
+}
+
+tests {
+  test("patch semantics", function () {
+    const b=res.getBody(); expect(b.name).to.equal("Edited"); expect(b.code).to.equal("CRUD-PROBE"); expect(b.active).to.equal(false); expect(b[bru.getVar("nullableField")]).to.equal("Initially present");
+  });
+}

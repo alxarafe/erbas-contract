@@ -1,0 +1,25 @@
+meta {
+  name: Resource protocol missing-resource
+  type: http
+  seq: 604
+}
+
+get {
+  url: {{baseUrl}}/api/resources/crud-contract.missing
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+vars:pre-request {
+  expectedStatus: 404
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

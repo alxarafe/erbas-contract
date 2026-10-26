@@ -1,0 +1,30 @@
+meta {
+  name: Resource protocol invalid
+  type: http
+  seq: 598
+}
+
+patch {
+  url: {{baseUrl}}/api/resources/{{probeResource}}/{{probeRecord}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  Content-Type: application/json
+}
+
+vars:pre-request {
+  expectedStatus: 400
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+body:json {
+  {"__unknown": true}
+}

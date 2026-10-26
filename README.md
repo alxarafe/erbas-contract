@@ -8,7 +8,7 @@
 [![.NET backend CI / shared conformance](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml)
 [![Angular client CI](https://github.com/alxarafe/erbas-client/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alxarafe/erbas-client/actions/workflows/ci.yml)
 
-[![Published v0.11.0](https://img.shields.io/badge/contract-v0.11.0-blue)](https://github.com/alxarafe/erbas-contract/tree/v0.11.0)
+[![Published v0.12.0](https://img.shields.io/badge/contract-v0.12.0-blue)](https://github.com/alxarafe/erbas-contract/tree/v0.12.0)
 [![OpenAPI 3.1](https://img.shields.io/badge/OpenAPI-3.1-6BA539)](openapi/erbas.yaml)
 [![Bruno CLI 4.2.0](https://img.shields.io/badge/Bruno_CLI-4.2.0-F4AA41)](bruno/)
 [![Docker-based validation](https://img.shields.io/badge/validation-Docker--based-2496ED)](docs/usage.md)
@@ -32,9 +32,9 @@ flowchart LR
 
 | Repository | Responsibility | Current status |
 | --- | --- | --- |
-| [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Published immutable v0.11.0 |
+| [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Published immutable v0.12.0 |
 | [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 | Adopted v0.6.0; authoritative `./bin/check` requires shared conformance locally and in CI |
-| [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 plus platform modules | Adopted v0.6.0; authoritative `./bin/check` requires shared conformance locally and in CI |
+| [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 plus platform modules | Pins v0.12.0; candidate validation is explicit and does not change adoption |
 | [erbas-client](https://github.com/alxarafe/erbas-client) | Angular 22 client consuming Health, AUTH-001, USERS-001 basic user administration and COLLECTIONS-001 pagination from either backend | Shared client for both backends; real Java/.NET interoperability verified |
 
 Backends own their builds and isolated test infrastructure; this repository
@@ -71,12 +71,14 @@ No backend or client v0.10.0 adoption or conformance is claimed.
 
 ## Current contractual coverage
 
-**v0.11.0 is the current published immutable release**, adding AI-001 to CORE
+**v0.12.0 is the current published immutable release**, adding typed READ primitive
+provenance to the AI assistant, alongside CORE
 module administration, capability discovery and synchronous READ invocation, plus
 WMS UoMs, Storage Attributes, Item Families and associations. See
 [versioning](docs/common/versioning.md) and [WMS-003](docs/modules/wms/wms-003.md).
 Backend adoption, shared conformance and client consumption are separate facts;
-the recorded Java/.NET adoption remains v0.6.0.
+the .NET backend pins v0.12.0; older adoption reports remain historical and no new
+Java/client adoption is claimed.
 
 ```text
 GET /health
@@ -102,8 +104,9 @@ pagination from either backend. See the
 [client development guide](https://github.com/alxarafe/erbas-client/blob/main/docs/full-stack-development.md)
 for behavior and verification scope.
 
-Java and .NET both pin published `v0.6.0` and require the shared suite through
-their authoritative `./bin/check`, locally and in GitHub Actions.
+The .NET backend pins published `v0.12.0` and requires shared conformance through
+its authoritative `./bin/check`, locally and in GitHub Actions. Earlier dual-stack
+v0.6.0 adoption reports remain historical; no new Java adoption is claimed here.
 .NET's `POST /api/auth/register` remains an
 [implementation-specific extension](docs/common/implementation-extensions.md).
 Angular CI checks the client and isolated runtime proxies; the
@@ -126,6 +129,10 @@ CONTRACT-002 is complete. See the [release notes](docs/releases/v0.4.0.md) and
 consumption policy. Consumers must pin the published version and verify conformance.
 Backend workflows and their coverage are described in the
 [documentation index](docs/README.md#verification-badges).
+
+
+The local [v0.13.0 candidate](docs/releases/v0.13.0.md) adds the generic resource
+protocol for static client generation; it is not published or adopted as a pin.
 
 ## License
 

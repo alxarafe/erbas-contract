@@ -35,6 +35,12 @@ stage to referenced-resource existence (404), then relation-state conflicts
 (409), then mutation. Within a stage, return all safely and deterministically
 detectable errors; never add errors from a later HTTP evaluation category.
 
+The new [Generic Resource Runtime protocol](../core/resources-001.md#explicitly-scoped-evaluation-precedence-exception)
+has an explicitly approved exception for its listed generic routes only. Its
+transport, resource resolution, module/context guards, authorization and validation
+stages are documented separately. This does not change the precedence above for
+Users, Modules, WMS or any other existing API.
+
 Preserve `Cache-Control: no-store` wherever already contractual; WMS-003 requires
 it on every response. Preserve existing bearer, Accept and JSON media-type
 conventions. Only 401 carries `WWW-Authenticate: Bearer` on protected operations.

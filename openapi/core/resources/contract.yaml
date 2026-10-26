@@ -1,0 +1,1383 @@
+paths:
+  "/api/meta/resources":
+    get:
+      operationId: "discoverResources"
+      summary: "Discover enabled resources"
+      description: "Generic Resource Runtime protocol; see docs/core/resources-001.md. Its explicitly scoped evaluation precedence differs from the legacy API convention."
+      security:
+        -
+          bearerAuth: []
+      responses:
+        "200":
+          description: "Discover enabled resources"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/schemas/ResourceDiscovery"
+        "400":
+          description: "Malformed or invalid input/query."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "401":
+          description: "Authentication required."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+          headers:
+            WWW-Authenticate:
+              schema:
+                type: "string"
+                const: "Bearer"
+        "403":
+          description: "Permission or required execution-context denial."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "404":
+          description: "Unknown resource/action or missing record."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "405":
+          description: "Operation is not declared for the resource."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "409":
+          description: "Explicit domain/state/integrity conflict or action unavailable."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "500":
+          description: "Execution failed without internal details."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "503":
+          description: "Module or execution adapter unavailable."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+  "/api/meta/resources/{resource}":
+    parameters:
+      -
+        $ref: "#/parameters/ResourceName"
+    get:
+      operationId: "getResourceMetadata"
+      summary: "Read resource metadata"
+      description: "Generic Resource Runtime protocol; see docs/core/resources-001.md. Its explicitly scoped evaluation precedence differs from the legacy API convention."
+      security:
+        -
+          bearerAuth: []
+      responses:
+        "200":
+          description: "Read resource metadata"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/schemas/ResourceMetadata"
+          headers:
+            ETag:
+              schema:
+                type: "string"
+            Cache-Control:
+              schema:
+                type: "string"
+                const: "private, no-cache"
+            Vary:
+              schema:
+                type: "string"
+                const: "Authorization"
+        "400":
+          description: "Malformed or invalid input/query."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "401":
+          description: "Authentication required."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+          headers:
+            WWW-Authenticate:
+              schema:
+                type: "string"
+                const: "Bearer"
+        "403":
+          description: "Permission or required execution-context denial."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "404":
+          description: "Unknown resource/action or missing record."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "405":
+          description: "Operation is not declared for the resource."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "409":
+          description: "Explicit domain/state/integrity conflict or action unavailable."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "500":
+          description: "Execution failed without internal details."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "503":
+          description: "Module or execution adapter unavailable."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "304":
+          description: "Unchanged metadata after rechecking effective authorization and module state; no body."
+      parameters:
+        -
+          name: "If-None-Match"
+          in: "header"
+          schema:
+            type: "string"
+  "/api/resources/{resource}":
+    parameters:
+      -
+        $ref: "#/parameters/ResourceName"
+    get:
+      operationId: "listResourceRecords"
+      summary: "List a resource window"
+      description: "Generic Resource Runtime protocol; see docs/core/resources-001.md. Its explicitly scoped evaluation precedence differs from the legacy API convention."
+      security:
+        -
+          bearerAuth: []
+      responses:
+        "200":
+          description: "List a resource window"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/schemas/ResourcePage"
+        "400":
+          description: "Malformed or invalid input/query."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "401":
+          description: "Authentication required."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+          headers:
+            WWW-Authenticate:
+              schema:
+                type: "string"
+                const: "Bearer"
+        "403":
+          description: "Permission or required execution-context denial."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "404":
+          description: "Unknown resource/action or missing record."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "405":
+          description: "Operation is not declared for the resource."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "409":
+          description: "Explicit domain/state/integrity conflict or action unavailable."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "500":
+          description: "Execution failed without internal details."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "503":
+          description: "Module or execution adapter unavailable."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+      parameters:
+        -
+          name: "offset"
+          in: "query"
+          schema:
+            type: "integer"
+            minimum: 0
+            default: 0
+        -
+          name: "limit"
+          in: "query"
+          schema:
+            type: "integer"
+            minimum: 1
+            maximum: 100
+            default: 50
+        -
+          name: "search"
+          in: "query"
+          schema:
+            type: "string"
+            minLength: 1
+            maxLength: 512
+          description: "Literal case-sensitive substring over searchable fields, combined with filters. No tokenization; whitespace-only invalid."
+        -
+          name: "sort"
+          in: "query"
+          style: "form"
+          explode: true
+          schema:
+            type: "array"
+            items:
+              type: "string"
+              minLength: 1
+          description: "Repeated field names in priority order; leading - means descending. Duplicate fields are invalid."
+        -
+          name: "filter"
+          in: "query"
+          style: "form"
+          explode: true
+          schema:
+            type: "array"
+            items:
+              type: "string"
+          description: "Repeated URL-encoded ResourceFilter JSON objects. AND semantics; operators must be listed in field capabilities.filterOperators."
+    post:
+      operationId: "createResourceRecord"
+      summary: "Create a resource record"
+      description: "Generic Resource Runtime protocol; see docs/core/resources-001.md. Its explicitly scoped evaluation precedence differs from the legacy API convention."
+      security:
+        -
+          bearerAuth: []
+      responses:
+        "201":
+          description: "Create a resource record"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/schemas/ResourceRecord"
+          headers:
+            Location:
+              required: true
+              schema:
+                type: "string"
+              description: "URI of the created record."
+        "400":
+          description: "Malformed or invalid input/query."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "401":
+          description: "Authentication required."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+          headers:
+            WWW-Authenticate:
+              schema:
+                type: "string"
+                const: "Bearer"
+        "403":
+          description: "Permission or required execution-context denial."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "404":
+          description: "Unknown resource/action or missing record."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "405":
+          description: "Operation is not declared for the resource."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "409":
+          description: "Explicit domain/state/integrity conflict or action unavailable."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "500":
+          description: "Execution failed without internal details."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "503":
+          description: "Module or execution adapter unavailable."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/schemas/ResourceRecord"
+  "/api/resources/{resource}/{id}":
+    parameters:
+      -
+        $ref: "#/parameters/ResourceName"
+      -
+        $ref: "#/parameters/ResourceId"
+    get:
+      operationId: "getResourceRecord"
+      summary: "Get a resource record"
+      description: "Generic Resource Runtime protocol; see docs/core/resources-001.md. Its explicitly scoped evaluation precedence differs from the legacy API convention."
+      security:
+        -
+          bearerAuth: []
+      responses:
+        "200":
+          description: "Get a resource record"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/schemas/ResourceRecord"
+        "400":
+          description: "Malformed or invalid input/query."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "401":
+          description: "Authentication required."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+          headers:
+            WWW-Authenticate:
+              schema:
+                type: "string"
+                const: "Bearer"
+        "403":
+          description: "Permission or required execution-context denial."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "404":
+          description: "Unknown resource/action or missing record."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "405":
+          description: "Operation is not declared for the resource."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "409":
+          description: "Explicit domain/state/integrity conflict or action unavailable."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "500":
+          description: "Execution failed without internal details."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "503":
+          description: "Module or execution adapter unavailable."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+    patch:
+      operationId: "patchResourceRecord"
+      summary: "Partially update a resource record"
+      description: "Generic Resource Runtime protocol; see docs/core/resources-001.md. Its explicitly scoped evaluation precedence differs from the legacy API convention."
+      security:
+        -
+          bearerAuth: []
+      responses:
+        "200":
+          description: "Partially update a resource record"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/schemas/ResourceRecord"
+        "400":
+          description: "Malformed or invalid input/query."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "401":
+          description: "Authentication required."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+          headers:
+            WWW-Authenticate:
+              schema:
+                type: "string"
+                const: "Bearer"
+        "403":
+          description: "Permission or required execution-context denial."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "404":
+          description: "Unknown resource/action or missing record."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "405":
+          description: "Operation is not declared for the resource."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "409":
+          description: "Explicit domain/state/integrity conflict or action unavailable."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "500":
+          description: "Execution failed without internal details."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "503":
+          description: "Module or execution adapter unavailable."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/schemas/ResourceRecord"
+    delete:
+      operationId: "deleteResourceRecord"
+      summary: "Delete a resource record"
+      description: "Generic Resource Runtime protocol; see docs/core/resources-001.md. Its explicitly scoped evaluation precedence differs from the legacy API convention."
+      security:
+        -
+          bearerAuth: []
+      responses:
+        "204":
+          description: "Delete a resource record"
+        "400":
+          description: "Malformed or invalid input/query."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "401":
+          description: "Authentication required."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+          headers:
+            WWW-Authenticate:
+              schema:
+                type: "string"
+                const: "Bearer"
+        "403":
+          description: "Permission or required execution-context denial."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "404":
+          description: "Unknown resource/action or missing record."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "405":
+          description: "Operation is not declared for the resource."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "409":
+          description: "Explicit domain/state/integrity conflict or action unavailable."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "500":
+          description: "Execution failed without internal details."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "503":
+          description: "Module or execution adapter unavailable."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+  "/api/resource-actions/{resource}/{action}/execute":
+    parameters:
+      -
+        $ref: "#/parameters/ResourceName"
+      -
+        $ref: "#/parameters/ResourceActionName"
+    post:
+      operationId: "executeResourceAction"
+      summary: "Execute an action"
+      description: "Generic Resource Runtime protocol; see docs/core/resources-001.md. Its explicitly scoped evaluation precedence differs from the legacy API convention."
+      security:
+        -
+          bearerAuth: []
+      responses:
+        "204":
+          description: "Execute an action"
+        "400":
+          description: "Malformed or invalid input/query."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "401":
+          description: "Authentication required."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+          headers:
+            WWW-Authenticate:
+              schema:
+                type: "string"
+                const: "Bearer"
+        "403":
+          description: "Permission or required execution-context denial."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "404":
+          description: "Unknown resource/action or missing record."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "405":
+          description: "Operation is not declared for the resource."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "409":
+          description: "Explicit domain/state/integrity conflict or action unavailable."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "500":
+          description: "Execution failed without internal details."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "503":
+          description: "Module or execution adapter unavailable."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/schemas/ResourceActionExecution"
+  "/api/resource-actions/{resource}/availability":
+    parameters:
+      -
+        $ref: "#/parameters/ResourceName"
+    post:
+      operationId: "getResourceActionAvailability"
+      summary: "Evaluate contextual action availability"
+      description: "Generic Resource Runtime protocol; see docs/core/resources-001.md. Its explicitly scoped evaluation precedence differs from the legacy API convention."
+      security:
+        -
+          bearerAuth: []
+      responses:
+        "200":
+          description: "Evaluate contextual action availability"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/schemas/ResourceActionAvailability"
+        "400":
+          description: "Malformed or invalid input/query."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "401":
+          description: "Authentication required."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+          headers:
+            WWW-Authenticate:
+              schema:
+                type: "string"
+                const: "Bearer"
+        "403":
+          description: "Permission or required execution-context denial."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "404":
+          description: "Unknown resource/action or missing record."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "405":
+          description: "Operation is not declared for the resource."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "409":
+          description: "Explicit domain/state/integrity conflict or action unavailable."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "500":
+          description: "Execution failed without internal details."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "503":
+          description: "Module or execution adapter unavailable."
+          content:
+            "application/json":
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/schemas/ResourceActionAvailabilityRequest"
+parameters:
+  ResourceName:
+    name: "resource"
+    in: "path"
+    required: true
+    schema:
+      type: "string"
+      minLength: 1
+  ResourceId:
+    name: "id"
+    in: "path"
+    required: true
+    schema:
+      type: "string"
+      minLength: 1
+    description: "URI text encoding of the metadata-declared ID scalar; preserve opaque identity."
+  ResourceActionName:
+    name: "action"
+    in: "path"
+    required: true
+    schema:
+      type: "string"
+      minLength: 1
+schemas:
+  ResourceScalar:
+    type:
+      - "string"
+      - "number"
+      - "boolean"
+      - "null"
+  ResourceIdentifier:
+    type:
+      - "string"
+      - "integer"
+  ResourceRecord:
+    type: "object"
+    additionalProperties:
+      $ref: "#/schemas/ResourceScalar"
+    description: "Flat scalar properties defined by the resource metadata; unknown input properties are invalid."
+  ResourcePage:
+    type: "object"
+    additionalProperties: false
+    required:
+      - "items"
+      - "offset"
+      - "limit"
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/schemas/ResourceRecord"
+      offset:
+        type: "integer"
+        minimum: 0
+      limit:
+        type: "integer"
+        minimum: 1
+        maximum: 100
+      total:
+        type: "integer"
+        minimum: 0
+    description: "Separate from existing shared collections: total is optional and omitted when unavailable; no order member. Count, when present, precedes paging."
+  ResourceFilter:
+    type: "object"
+    additionalProperties: false
+    required:
+      - "field"
+      - "operator"
+      - "value"
+    properties:
+      field:
+        type: "string"
+        minLength: 1
+      operator:
+        type: "string"
+        enum:
+          - "eq"
+          - "ne"
+          - "lt"
+          - "lte"
+          - "gt"
+          - "gte"
+          - "contains"
+          - "startsWith"
+      value:
+        $ref: "#/schemas/ResourceScalar"
+  ResourceOperation:
+    type: "object"
+    additionalProperties: false
+    required:
+      - "declared"
+      - "authorized"
+    properties:
+      declared:
+        type: "boolean"
+      authorized:
+        type: "boolean"
+  ResourceOperations:
+    type: "object"
+    additionalProperties: false
+    required:
+      - "list"
+      - "get"
+      - "create"
+      - "update"
+      - "delete"
+    properties:
+      list:
+        $ref: "#/schemas/ResourceOperation"
+      get:
+        $ref: "#/schemas/ResourceOperation"
+      create:
+        $ref: "#/schemas/ResourceOperation"
+      update:
+        $ref: "#/schemas/ResourceOperation"
+      delete:
+        $ref: "#/schemas/ResourceOperation"
+  ResourceFieldCapabilities:
+    type: "object"
+    additionalProperties: false
+    required:
+      - "filterable"
+      - "sortable"
+      - "searchable"
+      - "filterOperators"
+    properties:
+      filterable:
+        type: "boolean"
+      sortable:
+        type: "boolean"
+      searchable:
+        type: "boolean"
+      filterOperators:
+        type: "array"
+        uniqueItems: true
+        items:
+          type: "string"
+          enum:
+            - "eq"
+            - "ne"
+            - "lt"
+            - "lte"
+            - "gt"
+            - "gte"
+            - "contains"
+            - "startsWith"
+  ResourceConstraints:
+    type: "object"
+    additionalProperties: false
+    required: []
+    properties:
+      minimum:
+        type: "number"
+      maximum:
+        type: "number"
+      multipleOf:
+        type: "number"
+      exclusiveMinimum:
+        type: "boolean"
+      exclusiveMaximum:
+        type: "boolean"
+      precision:
+        type: "integer"
+        minimum: 0
+      scale:
+        type: "integer"
+        minimum: 0
+      minimumLength:
+        type: "integer"
+        minimum: 0
+      maximumLength:
+        type: "integer"
+        minimum: 0
+      pattern:
+        type: "string"
+  ResourceAnnotation:
+    type: "object"
+    additionalProperties: false
+    required:
+      - "vocabulary"
+      - "term"
+      - "value"
+    properties:
+      vocabulary:
+        type: "string"
+        minLength: 1
+      term:
+        type: "string"
+        minLength: 1
+      value:
+        oneOf:
+          -
+            type:
+              - "string"
+              - "number"
+              - "boolean"
+          -
+            type: "array"
+            items:
+              type: "string"
+              minLength: 1
+  ResourceField:
+    type: "object"
+    additionalProperties: false
+    required:
+      - "name"
+      - "type"
+      - "nullable"
+      - "required"
+      - "readOnly"
+      - "immutable"
+      - "constraints"
+      - "capabilities"
+      - "enumValues"
+      - "annotations"
+    properties:
+      name:
+        type: "string"
+        minLength: 1
+      type:
+        type: "string"
+        enum:
+          - "BOOLEAN"
+          - "STRING"
+          - "TEXT"
+          - "INT8"
+          - "UINT8"
+          - "INT16"
+          - "UINT16"
+          - "INT32"
+          - "UINT32"
+          - "INT64"
+          - "DECIMAL"
+          - "UUID"
+          - "DATE"
+          - "TIME"
+          - "DATETIME"
+          - "ENUM"
+          - "BINARY"
+      nullable:
+        type: "boolean"
+      required:
+        type: "boolean"
+      readOnly:
+        type: "boolean"
+      immutable:
+        type: "boolean"
+      default:
+        $ref: "#/schemas/ResourceScalar"
+      constraints:
+        $ref: "#/schemas/ResourceConstraints"
+      capabilities:
+        $ref: "#/schemas/ResourceFieldCapabilities"
+      enumValues:
+        type: "array"
+        items:
+          type: "string"
+          minLength: 1
+      annotations:
+        type: "array"
+        items:
+          $ref: "#/schemas/ResourceAnnotation"
+  ResourceRelation:
+    type: "object"
+    additionalProperties: false
+    required:
+      - "name"
+      - "kind"
+      - "targetResource"
+      - "localField"
+      - "targetField"
+      - "displayField"
+      - "required"
+    properties:
+      name:
+        type: "string"
+        minLength: 1
+      kind:
+        type: "string"
+        enum:
+          - "MANY_TO_ONE"
+      targetResource:
+        type: "string"
+        minLength: 1
+      localField:
+        type: "string"
+        minLength: 1
+      targetField:
+        type: "string"
+        minLength: 1
+      displayField:
+        type:
+          - "string"
+          - "null"
+      required:
+        type: "boolean"
+  ResourceActionParameter:
+    type: "object"
+    additionalProperties: false
+    required:
+      - "name"
+      - "type"
+      - "nullable"
+      - "required"
+      - "constraints"
+      - "enumValues"
+      - "annotations"
+    properties:
+      name:
+        type: "string"
+        minLength: 1
+      type:
+        type: "string"
+        enum:
+          - "BOOLEAN"
+          - "STRING"
+          - "TEXT"
+          - "INT8"
+          - "UINT8"
+          - "INT16"
+          - "UINT16"
+          - "INT32"
+          - "UINT32"
+          - "INT64"
+          - "DECIMAL"
+          - "UUID"
+          - "DATE"
+          - "TIME"
+          - "DATETIME"
+          - "ENUM"
+          - "BINARY"
+      nullable:
+        type: "boolean"
+      required:
+        type: "boolean"
+      default:
+        $ref: "#/schemas/ResourceScalar"
+      constraints:
+        $ref: "#/schemas/ResourceConstraints"
+      enumValues:
+        type: "array"
+        items:
+          type: "string"
+          minLength: 1
+      annotations:
+        type: "array"
+        items:
+          $ref: "#/schemas/ResourceAnnotation"
+  ResourceAction:
+    type: "object"
+    additionalProperties: false
+    required:
+      - "name"
+      - "scope"
+      - "requiresSelection"
+      - "authorized"
+      - "annotations"
+      - "parameters"
+    properties:
+      name:
+        type: "string"
+        minLength: 1
+      scope:
+        type: "string"
+        enum:
+          - "ENTITY"
+          - "COLLECTION"
+          - "SELECTION"
+      requiresSelection:
+        type: "boolean"
+      authorized:
+        type: "boolean"
+      annotations:
+        type: "array"
+        items:
+          $ref: "#/schemas/ResourceAnnotation"
+      parameters:
+        type: "array"
+        items:
+          $ref: "#/schemas/ResourceActionParameter"
+  ResourceFormGroup:
+    type: "object"
+    additionalProperties: false
+    required:
+      - "id"
+      - "fields"
+    properties:
+      id:
+        type: "string"
+        minLength: 1
+      label:
+        type: "string"
+        minLength: 1
+      fields:
+        type: "array"
+        items:
+          type: "string"
+          minLength: 1
+  ResourceFormSection:
+    type: "object"
+    additionalProperties: false
+    required:
+      - "id"
+      - "collapsible"
+      - "initiallyCollapsed"
+      - "actions"
+      - "groups"
+    properties:
+      id:
+        type: "string"
+        minLength: 1
+      label:
+        type: "string"
+        minLength: 1
+      collapsible:
+        type: "boolean"
+      initiallyCollapsed:
+        type: "boolean"
+      actions:
+        type: "array"
+        items:
+          type: "string"
+          minLength: 1
+      groups:
+        type: "array"
+        items:
+          $ref: "#/schemas/ResourceFormGroup"
+  ResourceFormTab:
+    type: "object"
+    additionalProperties: false
+    required:
+      - "id"
+      - "actions"
+      - "sections"
+    properties:
+      id:
+        type: "string"
+        minLength: 1
+      label:
+        type: "string"
+        minLength: 1
+      actions:
+        type: "array"
+        items:
+          type: "string"
+          minLength: 1
+      sections:
+        type: "array"
+        items:
+          $ref: "#/schemas/ResourceFormSection"
+  ResourcePresentation:
+    type: "object"
+    additionalProperties: false
+    required:
+      - "form"
+    properties:
+      form:
+        type: "object"
+        additionalProperties: false
+        required:
+          - "behavior"
+          - "actions"
+          - "tabs"
+        properties:
+          behavior:
+            type: "object"
+            additionalProperties: false
+            required:
+              - "unsavedChanges"
+            properties:
+              unsavedChanges:
+                type: "string"
+                enum:
+                  - "CONFIRM_DISCARD"
+                  - "ALLOW_DISCARD"
+          actions:
+            type: "array"
+            items:
+              type: "string"
+              minLength: 1
+          tabs:
+            type: "array"
+            items:
+              $ref: "#/schemas/ResourceFormTab"
+  ResourceMetadata:
+    type: "object"
+    additionalProperties: false
+    required:
+      - "id"
+      - "version"
+      - "moduleId"
+      - "definitionHash"
+      - "idDefinition"
+      - "moduleEnabled"
+      - "fields"
+      - "relations"
+      - "operations"
+      - "actions"
+      - "annotations"
+    properties:
+      id:
+        type: "string"
+        minLength: 1
+      version:
+        type: "string"
+        minLength: 1
+      moduleId:
+        type: "string"
+        minLength: 1
+      definitionHash:
+        type: "string"
+        minLength: 1
+      idDefinition:
+        type: "object"
+        additionalProperties: false
+        required:
+          - "field"
+        properties:
+          field:
+            type: "string"
+            minLength: 1
+      moduleEnabled:
+        type: "boolean"
+      fields:
+        type: "array"
+        items:
+          $ref: "#/schemas/ResourceField"
+      relations:
+        type: "array"
+        items:
+          $ref: "#/schemas/ResourceRelation"
+      operations:
+        $ref: "#/schemas/ResourceOperations"
+      actions:
+        type: "array"
+        items:
+          $ref: "#/schemas/ResourceAction"
+      annotations:
+        type: "array"
+        items:
+          $ref: "#/schemas/ResourceAnnotation"
+      presentation:
+        $ref: "#/schemas/ResourcePresentation"
+  ResourceSummary:
+    type: "object"
+    additionalProperties: false
+    required:
+      - "id"
+      - "version"
+      - "moduleId"
+      - "definitionHash"
+      - "operations"
+      - "metadataPath"
+    properties:
+      id:
+        type: "string"
+        minLength: 1
+      version:
+        type: "string"
+        minLength: 1
+      moduleId:
+        type: "string"
+        minLength: 1
+      definitionHash:
+        type: "string"
+        minLength: 1
+      operations:
+        $ref: "#/schemas/ResourceOperations"
+      metadataPath:
+        type: "string"
+        minLength: 1
+  ResourceDiscovery:
+    type: "array"
+    items:
+      $ref: "#/schemas/ResourceSummary"
+  ResourceActionTarget:
+    oneOf:
+      -
+        type: "object"
+        additionalProperties: false
+        required:
+          - "id"
+        properties:
+          id:
+            $ref: "#/schemas/ResourceIdentifier"
+      -
+        type: "object"
+        additionalProperties: false
+        required:
+          - "ids"
+        properties:
+          ids:
+            type: "array"
+            minItems: 1
+            maxItems: 100
+            uniqueItems: true
+            items:
+              $ref: "#/schemas/ResourceIdentifier"
+  ResourceActionExecution:
+    type: "object"
+    additionalProperties: false
+    required: []
+    properties:
+      target:
+        $ref: "#/schemas/ResourceActionTarget"
+      parameters:
+        $ref: "#/schemas/ResourceRecord"
+    description: "Scope determines required target: ENTITY id, SELECTION ids, COLLECTION target absent. Required parameters/defaults follow discovered metadata."
+  ResourceActionAvailabilityRequest:
+    oneOf:
+      -
+        type: "object"
+        additionalProperties: false
+        required:
+          - "scope"
+          - "id"
+        properties:
+          scope:
+            const: "ENTITY"
+          id:
+            $ref: "#/schemas/ResourceIdentifier"
+      -
+        type: "object"
+        additionalProperties: false
+        required:
+          - "scope"
+          - "ids"
+        properties:
+          scope:
+            const: "SELECTION"
+          ids:
+            type: "array"
+            minItems: 1
+            maxItems: 100
+            uniqueItems: true
+            items:
+              $ref: "#/schemas/ResourceIdentifier"
+      -
+        type: "object"
+        additionalProperties: false
+        required:
+          - "scope"
+        properties:
+          scope:
+            const: "COLLECTION"
+  ResourceActionState:
+    type: "object"
+    additionalProperties: false
+    required:
+      - "name"
+      - "authorized"
+      - "available"
+    properties:
+      name:
+        type: "string"
+        minLength: 1
+      authorized:
+        type: "boolean"
+      available:
+        type: "boolean"
+      unavailableReason:
+        type: "string"
+        maxLength: 100
+  ResourceActionAvailability:
+    type: "array"
+    items:
+      $ref: "#/schemas/ResourceActionState"

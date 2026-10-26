@@ -1,0 +1,24 @@
+meta {
+  name: Resource protocol anonymous
+  type: http
+  seq: 591
+}
+
+get {
+  url: {{baseUrl}}/api/meta/resources
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+vars:pre-request {
+  expectedStatus: 401
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
