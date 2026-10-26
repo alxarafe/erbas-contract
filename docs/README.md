@@ -3,6 +3,7 @@
 | Document | What to find |
 | --- | --- |
 | [Usage](usage.md) | Local commands, Docker networking, limits, cleanup, and pinned tooling. |
+| [ASSET-001 design](modules/assets/asset-001.md) | Implementation-specific Asset Management experiment: lifecycle, dynamic fields, integrity, permissions, test matrix and proposed implementation tasks; no published Asset API. |
 | [CONTRACT-007 verification](verification/contract-007.md) | FAST, scoped and full checks, impact classification and CI policy. |
 | [COLLECTIONS-001](common/collections.md) | Standard paged envelope, user and module pagination, order, totals and compatibility. |
 | [CORE-CAP-001](core/capabilities-001.md) | Capability ownership, descriptors, permissions, effective discovery, schemas and deferred execution. |
