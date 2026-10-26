@@ -1,0 +1,25 @@
+meta {
+  name: Navigation logout
+  type: http
+  seq: 616
+}
+
+get {
+  url: {{baseUrl}}/api/meta/navigation
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  If-None-Match: {{navigationEtag}}
+}
+
+vars:pre-request {
+  expectedStatus: 401
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

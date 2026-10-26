@@ -1,0 +1,31 @@
+meta {
+  name: Navigation stable
+  type: http
+  seq: 617
+}
+
+get {
+  url: {{baseUrl}}/api/meta/navigation
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+vars:pre-request {
+  expectedStatus: 200
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+tests {
+  test("stable navigation semantics",function(){
+    expect(res.getBody().version).to.equal(bru.getVar("navigationVersion"));expect(res.getBody().items).to.deep.equal(bru.getVar("navigationItems"));
+  });
+}

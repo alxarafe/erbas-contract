@@ -1,0 +1,32 @@
+meta {
+  name: Navigation effective
+  type: http
+  seq: 613
+}
+
+get {
+  url: {{baseUrl}}/api/meta/navigation
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+vars:pre-request {
+  expectedStatus: 200
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+tests {
+  test("effective navigation semantics",function(){
+    bru.setVar("navigationEtag",res.getHeader("etag"));bru.setVar("navigationVersion",res.getBody().version);
+    bru.setVar("navigationItems",res.getBody().items);
+  });
+}

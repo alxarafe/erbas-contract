@@ -28,6 +28,7 @@ tests {
   test("discovery semantics", function () {
     const rows = res.getBody(); expect(rows).to.be.an("array").that.is.not.empty;
     rows.forEach(row => { expect(Object.keys(row).sort()).to.deep.equal(["definitionHash","id","metadataPath","moduleId","operations","version"]); expect(row.metadataPath).to.equal("/api/meta/resources/" + encodeURIComponent(row.id)); });
+    bru.setVar("resourceDiscoverable", rows.map(row=>row.id));
     const candidates = rows.filter(row => row.operations.get.declared && row.operations.get.authorized);
     expect(candidates).not.to.be.empty; bru.setVar("resourceCandidates", candidates); bru.setVar("resourceMetadataIndex", 0);
     bru.setVar("inspectResource", candidates[0].id); bru.setVar("probeResource", ""); bru.setVar("probeActionResource", "");

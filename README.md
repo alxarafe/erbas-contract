@@ -132,7 +132,8 @@ Backend workflows and their coverage are described in the
 
 
 The local [v0.13.0 candidate](docs/releases/v0.13.0.md) adds the generic resource
-protocol for static client generation; it is not published or adopted as a pin.
+protocol and separate [effective navigation](docs/core/navigation-001.md) for generic
+client bootstrap; it is not published or adopted as a pin.
 
 ## License
 

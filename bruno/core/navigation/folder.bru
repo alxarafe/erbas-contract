@@ -1,0 +1,42 @@
+meta {
+  name: Effective application navigation
+}
+
+tests {
+  test("Expected navigation status and cache headers", function () {
+    const status = res.getStatus(); expect(status).to.equal(Number(bru.getRequestVar("expectedStatus")));
+    if(status===200 || status===304) {
+      expect(res.getHeader("cache-control")).to.equal("private, no-cache");
+      const vary = res.getHeader("vary").toLowerCase().split(",").map(v=>v.trim());
+      expect(vary).to.include("authorization"); expect(vary).to.include("accept-language");
+      expect(res.getHeader("etag")).to.be.a("string").and.match(/^"[^"\r\n]+"$/);
+    }
+  });
+  test("Navigation has only effective presentation and target descriptors", function () {
+    const status=res.getStatus();
+    if(status===304){expect(res.getBody()).to.satisfy(v=>v==="" || v===undefined || v===null);return;}
+    expect(res.getHeader("content-type")).to.match(/^application\/json(?:;|$)/i);
+    const body=res.getBody();
+    if(status>=400){expect(Object.keys(body).sort()).to.deep.equal(["code","errors"]);expect(body.errors).to.be.an("array").that.is.not.empty;expect(res.getHeader("cache-control")).to.equal("no-store");return;}
+    expect(Object.keys(body).sort()).to.deep.equal(["items","version"]);expect(body.version).to.be.a("string").that.is.not.empty;
+    expect(res.getHeader("etag")).to.equal('"'+body.version+'"');const ids=[];
+    function walk(items){
+      expect(items).to.be.an("array");
+      items.forEach((item,index)=>{
+        expect(Object.keys(item).every(k=>["id","label","order","icon","target","children"].includes(k))).to.equal(true);
+        expect(item.id).to.be.a("string").that.is.not.empty;expect(item.label).to.be.a("string").that.is.not.empty;expect(Number.isInteger(item.order)).to.equal(true);
+        expect(ids).not.to.include(item.id);ids.push(item.id);
+        if(index){const previous=items[index-1];expect(previous.order<item.order || (previous.order===item.order && previous.id<item.id)).to.equal(true);}
+        expect(item.children).to.be.an("array");
+        if(item.target){
+          expect(item.children).to.have.length(0);
+          if(item.target.type==="RESOURCE"){
+            expect(Object.keys(item.target).sort()).to.deep.equal(["resource","type"]);
+            expect(bru.getVar("resourceDiscoverable")).to.include(item.target.resource);
+          }else{expect(item.target.type).to.equal("ROUTE");expect(Object.keys(item.target).sort()).to.deep.equal(["route","type"]);expect(item.target.route).to.match(/^\/(?:[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_-]+)*\/?)?$/);}
+        }else{expect(item.children).not.to.be.empty;}
+        walk(item.children);
+      });
+    }walk(body.items);
+  });
+}

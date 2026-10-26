@@ -1,0 +1,24 @@
+meta {
+  name: Navigation anonymous
+  type: http
+  seq: 612
+}
+
+get {
+  url: {{baseUrl}}/api/meta/navigation
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+vars:pre-request {
+  expectedStatus: 401
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

@@ -1,0 +1,135 @@
+paths:
+  /api/meta/navigation:
+    get:
+      operationId: getEffectiveNavigation
+      summary: Get effective application navigation
+      description: Authenticated, context-aware ordered navigation; independent of resource metadata. Recompute visibility before cache validation. Empty navigation is a successful response. No query parameters.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: If-None-Match
+          in: header
+          schema:
+            type: string
+        - name: Accept-Language
+          in: header
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Effective navigation tree for the authenticated context.
+          headers:
+            ETag:
+              required: true
+              description: Quoted opaque version; scoped to the authenticated context and effective representation.
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+                const: private, no-cache
+            Vary:
+              description: Includes Authorization and Accept-Language; future context selectors must also participate.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/schemas/NavigationResponse'
+        '304':
+          description: Effective authenticated navigation is unchanged; no body. Recomputed ETag and private cache headers are retained.
+        '400':
+          $ref: '../../common/errors.yaml#/responses/InvalidRequest'
+        '401':
+          $ref: '../../common/errors.yaml#/responses/Unauthorized'
+        '403':
+          description: Authoritative execution-context denial when not representable by omitting scoped entries.
+          content:
+            application/json:
+              schema:
+                $ref: '../../common/errors.yaml#/schemas/ErrorResponse'
+        '503':
+          description: Required context configuration is unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '../../common/errors.yaml#/schemas/ErrorResponse'
+        '500':
+          description: Navigation resolution failed; no internal details.
+          content:
+            application/json:
+              schema:
+                $ref: '../../common/errors.yaml#/schemas/ErrorResponse'
+schemas:
+  NavigationResponse:
+    type: object
+    additionalProperties: false
+    required: [version, items]
+    properties:
+      version:
+        type: string
+        minLength: 1
+        description: Opaque effective-navigation version, corresponding to the ETag without its quotes. Not a contract release or record version.
+      items:
+        type: array
+        items:
+          $ref: '#/schemas/NavigationItem'
+  NavigationItem:
+    type: object
+    additionalProperties: false
+    required: [id, label, order, children]
+    description: Stable entry. Containers omit target and have nonempty effective children; actionable entries have target and empty children. No permission rules or resource schemas.
+    properties:
+      id:
+        type: string
+        minLength: 1
+      label:
+        type: string
+        minLength: 1
+        description: Final localized display text; clients render it as text, not HTML or a translation key.
+      order:
+        type: integer
+        format: int32
+      icon:
+        type: string
+        minLength: 1
+        description: Optional opaque client-understood icon identifier, not an asset URL or a library-specific contract.
+      target:
+        $ref: '#/schemas/NavigationTarget'
+      children:
+        type: array
+        items:
+          $ref: '#/schemas/NavigationItem'
+  NavigationTarget:
+    oneOf:
+      - $ref: '#/schemas/NavigationResourceTarget'
+      - $ref: '#/schemas/NavigationRouteTarget'
+    discriminator:
+      propertyName: type
+      mapping:
+        RESOURCE: '#/schemas/NavigationResourceTarget'
+        ROUTE: '#/schemas/NavigationRouteTarget'
+  NavigationResourceTarget:
+    type: object
+    additionalProperties: false
+    required: [type, resource]
+    properties:
+      type:
+        type: string
+        const: RESOURCE
+      resource:
+        type: string
+        minLength: 1
+        description: Existing discoverable list-capable resource identifier; resolve its metadata separately.
+  NavigationRouteTarget:
+    type: object
+    additionalProperties: false
+    required: [type, route]
+    properties:
+      type:
+        type: string
+        const: ROUTE
+      route:
+        type: string
+        pattern: '^/(?:[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*/?)?$'
+        description: Application-local path. No external URL, protocol-relative URL, traversal, query or fragment. The application router owns its interpretation.

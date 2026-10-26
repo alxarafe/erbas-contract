@@ -10,7 +10,7 @@ const scopedConformanceTimeoutMs = 30000;
 const fullConformanceTimeoutMs = 180000;
 
 async function scopePaths(scope) {
-  if (scope === conformanceScopes.full) return [...coreFullPaths, ...wmsFullPaths, ...coreCapabilityPaths, ...wmsCapabilityPaths, ...aiFullPaths, 'core/resources'];
+  if (scope === conformanceScopes.full) return [...coreFullPaths, ...wmsFullPaths, ...coreCapabilityPaths, ...wmsCapabilityPaths, ...aiFullPaths, 'core/resources', 'core/navigation'];
   const core = await coreScopePaths(scope, collectionDirectory);
   if (core) return core;
   const module = wmsScopePaths(scope);

@@ -11,9 +11,10 @@
 | [AI-001](modules/ai/ai-001.md) | Published v0.11.0: provider-agnostic assistant over effective READ capabilities, security, errors and audit. |
 | [AI-001 verification](verification/ai-001.md) | AI focused/full Docker validation, preservation and conformance limitations. |
 | [v0.11.0 release notes](releases/v0.11.0.md) | Published compatible additive MINOR over immutable v0.10.0. |
+| [Effective navigation](core/navigation-001.md) | NAVIGATION-CONTRACT-001: separate effective tree, targets, localization and ETag. |
 | [Generic resources](core/resources-001.md) | CRUD-CONTRACT-001: routes, metadata, queries, actions and scoped precedence. |
 | [Portability review](core/resources-portability.md) | Observable cross-stack design; no new Java/client adoption claim. |
-| [v0.13.0 candidate](releases/v0.13.0.md) | Local unpublished additive generic-resource contract. |
+| [v0.13.0 candidate](releases/v0.13.0.md) | Local unpublished generic-resource and effective-navigation contracts. |
 | [v0.12.0 preparation](releases/v0.12.0.md) | Historical candidate notes; current immutable release identity is recorded in versioning. |
 | [v0.11.1 preparation](releases/v0.11.1.md) | Unreleased compatible PATCH over immutable v0.11.0; full conformance timeout only, no HTTP change. |
 | [CORE-CAP-002 verification](verification/core-cap-002.md) | Focused and full Docker repository validation, contract preservation, and no live conformance claim. |
