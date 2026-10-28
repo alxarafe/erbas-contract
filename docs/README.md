@@ -12,8 +12,8 @@
 | [AI-001 verification](verification/ai-001.md) | AI focused/full Docker validation, preservation and conformance limitations. |
 | [v0.11.0 release notes](releases/v0.11.0.md) | Published compatible additive MINOR over immutable v0.10.0. |
 | [Effective navigation](core/navigation-001.md) | NAVIGATION-CONTRACT-001: separate effective tree, targets, localization and ETag. |
-| [Contextual presentation](core/resource-presentation-001.md) | RESOURCE-PRESENTATION-001: unpublished v0.14.0 contexts, compatible separate endpoint, fallback and portability. |
-| [v0.14.0 candidate](releases/v0.14.0.md) | Unpublished compatible additive MINOR over immutable v0.13.0; no consumer adoption. |
+| [Contextual presentation](core/resource-presentation-001.md) | RESOURCE-PRESENTATION-001: published v0.14.0 contexts, compatible separate endpoint, fallback and portability. |
+| [v0.14.0 release](releases/v0.14.0.md) | Published immutable compatible additive MINOR over v0.13.0; exact tag identity and unchanged consumer pins. |
 | [Generic resources](core/resources-001.md) | CRUD-CONTRACT-001: routes, metadata, queries, actions and scoped precedence. |
 | [Portability review](core/resources-portability.md) | Observable cross-stack design; no new Java/client adoption claim. |
 | [v0.13.0 release notes](releases/v0.13.0.md) | Published immutable generic-resource and effective-navigation contracts, exact tag identity and historical preparation evidence. |
@@ -93,14 +93,15 @@ or conformance. Demo defaults are outside the HTTP release scope.
 
 ## Published contract and consumer adoption
 
-**v0.13.0 is the latest published immutable release**. See
+**v0.14.0 is the latest published immutable release**. See
 [release identity and policy](common/versioning.md) and
-[release notes](releases/v0.13.0.md). It adds generic resources and effective
-application navigation; its sole collection contains 617 physical requests /
-2,655 named checks.
-.NET and `erbas-client` formally adopt published v0.13.0; Java adoption of its
-new runtime operations is not claimed. Their published pins remain unchanged by
-this v0.14.0 presentation candidate; no candidate conformance/adoption is claimed.
+[release notes](releases/v0.14.0.md). It adds RESOURCE-PRESENTATION-001 contextual
+presentation while preserving v0.13.0 generic resources and effective navigation;
+its sole collection contains **622 physical requests / 2,668 named checks**.
+No GitHub Release or package was published.
+.NET and `erbas-client` implemented/validated it against the exact contractual
+commit before publication, with green CI, but their formal pins remain v0.13.0.
+Neither formally adopts v0.14.0 yet; Java compatibility/adoption is not claimed.
 Older adoption and candidate-validation reports remain historical. Angular WMS
 or module administration adoption is not claimed.
 

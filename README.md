@@ -32,9 +32,9 @@ flowchart LR
 
 | Repository | Responsibility | Current status |
 | --- | --- | --- |
-| [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Published immutable v0.13.0 |
+| [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Published immutable v0.14.0 |
 | [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 | Adopted v0.6.0; authoritative `./bin/check` requires shared conformance locally and in CI |
-| [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 plus platform modules | Pins published v0.13.0; future candidate preparation does not change adoption |
+| [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 plus platform modules | Pins published v0.13.0; v0.14.0 publication does not change adoption |
 | [erbas-client](https://github.com/alxarafe/erbas-client) | Angular 22 client consuming Health, AUTH-001, USERS-001 basic user administration and COLLECTIONS-001 pagination from either backend | Shared client for both backends; real Java/.NET interoperability verified |
 
 Backends own their builds and isolated test infrastructure; this repository
@@ -71,15 +71,17 @@ No backend or client v0.10.0 adoption or conformance is claimed.
 
 ## Current contractual coverage
 
-**v0.13.0 is the current published immutable release**, adding the
-[Generic Resource Runtime protocol](docs/core/resources-001.md) and separate
-[effective navigation](docs/core/navigation-001.md) for generic client bootstrap.
-It retains typed READ provenance for AI, CORE module administration, capability
-discovery and invocation, and WMS catalogues. See the
-[release notes](docs/releases/v0.13.0.md) and [versioning](docs/common/versioning.md).
-.NET and `erbas-client` formally adopt published v0.13.0. Java adoption of its
-new runtime operations is not claimed. Consumer pins remain unchanged by the
-unpublished [v0.14.0 contextual-presentation candidate](docs/releases/v0.14.0.md).
+**v0.14.0 is the current published immutable release**, adding
+[contextual resource presentation](docs/core/resource-presentation-001.md) for
+LIST/CREATE/EDIT/VIEW while preserving closed v0.13.0 metadata. It retains the
+[Generic Resource Runtime protocol](docs/core/resources-001.md),
+[effective navigation](docs/core/navigation-001.md), typed READ provenance for AI,
+CORE module administration, capability discovery/invocation and WMS catalogues.
+See the [release notes](docs/releases/v0.14.0.md) and
+[versioning](docs/common/versioning.md).
+.NET and `erbas-client` implemented/validated contextual presentation before
+publication; both still formally pin published v0.13.0. Java compatibility with
+v0.14.0 is not claimed. Publication does not update consumer pins.
 Backend adoption, shared conformance and client consumption remain separate facts.
 
 ```text

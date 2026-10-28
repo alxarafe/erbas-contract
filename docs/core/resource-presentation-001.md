@@ -1,8 +1,11 @@
 # RESOURCE-PRESENTATION-001: contextual resource presentation
 
-This is the **unpublished v0.14.0 candidate**, an additive extension over immutable
-[v0.13.0](../releases/v0.13.0.md). No backend/client implementation or adoption,
-tag, release or publication is claimed. See [candidate notes](../releases/v0.14.0.md).
+RESOURCE-PRESENTATION-001 is part of **published immutable v0.14.0**, an additive
+extension over immutable [v0.13.0](../releases/v0.13.0.md). See the
+[release notes and annotated tag identity](../releases/v0.14.0.md).
+.NET and erbas-client implemented/validated this capability before publication
+against the exact contractual commit; their formal pins remain v0.13.0.
+Publication does not imply formal v0.14.0 consumer adoption or Java compatibility.
 
 Generic CRUD is the primary presentation path for standard resources. Modules
 declare semantics and conceptual structure; clients choose components, renderers,
@@ -32,7 +35,7 @@ would conceal a second untyped layout language. Neither approach is used.
 Instead, one new GET endpoint supplies the contextual recommendations. Every
 published path and component remains unchanged. New clients can consume legacy
 resources and old clients continue reading exactly the same metadata/form shape.
-The candidate is a **compatible additive MINOR**; no permissive-schema relaxation,
+The release is a **compatible additive MINOR**; no permissive-schema relaxation,
 consumer validator change or request negotiation is required.
 
 ## Discovery, identity and HTTP behavior
@@ -179,7 +182,9 @@ declarations and a Spring metadata handler. Neither requires Angular or shared
 framework internals. A common client resolves one recommendation document and
 reuses its hierarchical renderer. Separate projection preserves strict v0.13.0
 consumers at the cost of one cacheable GET; the definitionHash check prevents
-combining versions. No stack is claimed to implement this candidate.
+combining versions. This portability review preceded implementation. Subsequent
+pre-publication .NET/client verification and their unchanged formal pins are
+recorded in the [release notes](../releases/v0.14.0.md).
 
 The [conceptual fixture](../../tests/fixtures/resource-presentation.mjs) models an
 Asset using generic field/relation/action DTOs only:

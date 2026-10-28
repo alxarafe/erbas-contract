@@ -239,9 +239,9 @@ semantics and typed AI provenance. The historical [preparation notes](../release
 retain their then-unpublished status wording; they are not the current release
 identity. The .NET backend pin is v0.12.0. No new Java/client adoption is claimed.
 
-## Published immutable release: v0.13.0
+## Previous published immutable release: v0.13.0
 
-**v0.13.0 is the latest published immutable release**, a compatible additive MINOR
+**v0.13.0 remains a previous published immutable release**, a compatible additive MINOR
 over v0.12.0. It adds CRUD-CONTRACT-001 Generic Resource Runtime and
 NAVIGATION-CONTRACT-001 effective application navigation. See the
 [release notes and historical preparation evidence](../releases/v0.13.0.md).
@@ -256,16 +256,30 @@ full `./bin/check`: 218 tests, zero failures, cancellations or skips. Remote
 
 Publication and adoption remain distinct. .NET and `erbas-client` subsequently
 formally adopted published v0.13.0; Java adoption of its runtime operations is not
-claimed. These consumer pins are not changed by future candidate preparation.
+claimed. These consumer pins are not changed by v0.14.0 publication.
 Pre-publication candidate validation remains historical development evidence,
 separate from conformance against a formally adopted published version.
 
-## Unpublished candidate: v0.14.0
+## Published immutable release: v0.14.0
 
-RESOURCE-PRESENTATION-001 prepares a compatible additive MINOR over immutable
-v0.13.0. A separate contextual-presentation endpoint preserves all closed
-v0.13.0 response schemas; adding properties directly would be incompatible.
-See the [candidate notes](../releases/v0.14.0.md) and
+**v0.14.0 is the latest published immutable release**, a compatible additive MINOR
+over immutable v0.13.0. RESOURCE-PRESENTATION-001 adds a separate contextual
+presentation endpoint, preserving all closed v0.13.0 response schemas; adding
+properties directly would be incompatible. See the
+[release notes and historical preparation evidence](../releases/v0.14.0.md) and
 [compatibility/fallback design](../core/resource-presentation-001.md).
-There is no v0.14.0 tag, publication or backend/client adoption. Published consumer
-pins remain v0.13.0; the v0.13.0 annotated tag object/target above are unchanged.
+
+- Annotated tag object: `22191afb8ab477fef319093b8c212264f4019816`.
+- Target commit: `9919ad3725e50d63e7a19befbe0d81b4d91df0cc`.
+
+The exact target passed full `./bin/check`: 242 tests, zero failures,
+cancellations or skips. Remote `git ls-remote` confirmed the annotated tag
+object and its peeled target. Never move or recreate the tag. No GitHub Release
+or package was published. Publication records on `main` do not alter the tagged
+preparation snapshot or the immutable v0.13.0 identity above.
+
+.NET and `erbas-client` implemented and validated the capability against the exact
+commit before publication, with green consumer CI; see the release notes for
+source identities and proof scope. Their formal `contract.revision` pins remain
+v0.13.0, not v0.14.0. Java compatibility/adoption for v0.14.0 is not claimed.
+Development verification, publication and formal adoption remain distinct.
