@@ -12,6 +12,8 @@
 | [AI-001 verification](verification/ai-001.md) | AI focused/full Docker validation, preservation and conformance limitations. |
 | [v0.11.0 release notes](releases/v0.11.0.md) | Published compatible additive MINOR over immutable v0.10.0. |
 | [Effective navigation](core/navigation-001.md) | NAVIGATION-CONTRACT-001: separate effective tree, targets, localization and ETag. |
+| [Contextual presentation](core/resource-presentation-001.md) | RESOURCE-PRESENTATION-001: unpublished v0.14.0 contexts, compatible separate endpoint, fallback and portability. |
+| [v0.14.0 candidate](releases/v0.14.0.md) | Unpublished compatible additive MINOR over immutable v0.13.0; no consumer adoption. |
 | [Generic resources](core/resources-001.md) | CRUD-CONTRACT-001: routes, metadata, queries, actions and scoped precedence. |
 | [Portability review](core/resources-portability.md) | Observable cross-stack design; no new Java/client adoption claim. |
 | [v0.13.0 release notes](releases/v0.13.0.md) | Published immutable generic-resource and effective-navigation contracts, exact tag identity and historical preparation evidence. |
@@ -55,7 +57,7 @@ it is not a test result.
 | --- | --- |
 | [Contract CI](../.github/workflows/ci.yml) | Impact-aware PR checks and authoritative Docker-based `./bin/check` on main. No live backend conformance or publication. |
 | [Java backend CI](https://github.com/alxarafe/erbas/actions/workflows/ci.yml) | Authoritative `./bin/check`: Docker build, native/integration tests, clean PostgreSQL, application readiness, Flyway, mandatory shared Bruno against published `v0.6.0`, and cleanup. Its workflow display name is `Java CI`. |
-| [.NET backend CI / shared conformance](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml) | Authoritative `./bin/check`: native/module tests, validation Host, mandatory shared Bruno against published `v0.12.0`, persistence and cleanup. Its display name is `.NET CI / shared conformance`. This is a combined workflow result, not a separate Bruno-only result. |
+| [.NET backend CI / shared conformance](https://github.com/alxarafe/alxarafe-dotnet/actions/workflows/ci.yml) | Authoritative `./bin/check`: native/module tests, validation Host, mandatory shared Bruno against published `v0.13.0`, persistence and cleanup. Its display name is `.NET CI / shared conformance`. This is a combined workflow result, not a separate Bruno-only result. |
 | [Angular client CI](https://github.com/alxarafe/erbas-client/actions/workflows/ci.yml) | Client `bin/check`: Angular tests, production build, Docker runtime and isolated shared API proxies. No backend shared-conformance claim. Real dual-backend demo verification is separate. |
 
 External badges report the checks of their named repositories, not tests of this
@@ -96,8 +98,9 @@ or conformance. Demo defaults are outside the HTTP release scope.
 [release notes](releases/v0.13.0.md). It adds generic resources and effective
 application navigation; its sole collection contains 617 physical requests /
 2,655 named checks.
-Publication does not establish formal v0.13.0 adoption by .NET, Java or
-`erbas-client`. Consumer pins remain unchanged; .NET still pins v0.12.0.
+.NET and `erbas-client` formally adopt published v0.13.0; Java adoption of its
+new runtime operations is not claimed. Their published pins remain unchanged by
+this v0.14.0 presentation candidate; no candidate conformance/adoption is claimed.
 Older adoption and candidate-validation reports remain historical. Angular WMS
 or module administration adoption is not claimed.
 

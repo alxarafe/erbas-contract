@@ -1,0 +1,24 @@
+meta {
+  name: Resource context presentation anonymous
+  type: http
+  seq: 620
+}
+
+get {
+  url: {{baseUrl}}/api/meta/resources/{{presentationResource}}/presentation
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+vars:pre-request {
+  expectedStatus: 401
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

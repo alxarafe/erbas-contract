@@ -1,11 +1,13 @@
 openapi: 3.1.0
 info:
   title: ERBAS shared HTTP contract
-  version: 0.13.0
+  version: 0.14.0
   description: >-
-    ERBAS Contract 0.13.0 unpublished additive MINOR candidate over immutable v0.12.0: Generic Resource Runtime and effective application navigation protocols. No release, tag or consumer adoption is claimed. See docs/releases/v0.13.0.md.
+    ERBAS Contract 0.14.0 unpublished compatible additive MINOR candidate over immutable v0.13.0: RESOURCE-PRESENTATION-001 contextual presentation. No release, tag or consumer adoption is claimed. See docs/releases/v0.14.0.md.
 security: []
 paths:
+  /api/meta/resources/{resource}/presentation:
+    $ref: './core/resources/presentation.yaml#/paths/~1api~1meta~1resources~1{resource}~1presentation'
   /api/meta/navigation:
     $ref: './core/navigation/contract.yaml#/paths/~1api~1meta~1navigation'
   /api/meta/resources:
@@ -183,6 +185,14 @@ components:
       $ref: './core/resources/contract.yaml#/schemas/ResourceFormSection'
     ResourceFormTab:
       $ref: './core/resources/contract.yaml#/schemas/ResourceFormTab'
+    ResourceContextPresentationResponse:
+      $ref: './core/resources/presentation.yaml#/schemas/ResourceContextPresentationResponse'
+    ResourceContextPresentation:
+      $ref: './core/resources/presentation.yaml#/schemas/ResourceContextPresentation'
+    ResourceListPresentation:
+      $ref: './core/resources/presentation.yaml#/schemas/ResourceListPresentation'
+    ResourceListColumn:
+      $ref: './core/resources/presentation.yaml#/schemas/ResourceListColumn'
     ResourcePresentation:
       $ref: './core/resources/contract.yaml#/schemas/ResourcePresentation'
     ResourceMetadata:

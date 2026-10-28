@@ -1,8 +1,10 @@
 # CRUD-CONTRACT-001: Generic Resource Runtime protocol
 
 This protocol is part of published immutable [v0.13.0](../releases/v0.13.0.md).
-Existing APIs and their contracts remain unchanged. Publication does not establish
-formal adoption by .NET, Java or `erbas-client`; consumer pins remain unchanged.
+Existing APIs and their contracts remain unchanged. .NET and `erbas-client`
+formally adopt v0.13.0; Java adoption of these operations is not claimed.
+The [v0.14.0 presentation candidate](resource-presentation-001.md) adds a separate
+endpoint without changing these published shapes or consumer pins.
 The protocol describes observable HTTP behavior, not a framework,
 database, permission-policy naming scheme or business module.
 

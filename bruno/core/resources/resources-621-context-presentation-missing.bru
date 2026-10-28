@@ -1,0 +1,25 @@
+meta {
+  name: Resource context presentation missing
+  type: http
+  seq: 621
+}
+
+get {
+  url: {{baseUrl}}/api/meta/resources/__missing-presentation-resource/presentation
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+vars:pre-request {
+  expectedStatus: 404
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

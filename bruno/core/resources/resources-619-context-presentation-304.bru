@@ -1,0 +1,35 @@
+meta {
+  name: Resource context presentation conditional
+  type: http
+  seq: 619
+}
+
+get {
+  url: {{baseUrl}}/api/meta/resources/{{presentationResource}}/presentation
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+  If-None-Match: {{presentationEtag}}
+}
+
+vars:pre-request {
+  expectedStatus: 304
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+tests {
+  test("Context presentation 304 preserves private cache identity and has no body", function () {
+    expect(res.getBody()).to.satisfy(value => value === "" || value === undefined || value === null);
+    expect(res.getHeader("etag")).to.equal(bru.getVar("presentationEtag"));
+    expect(res.getHeader("cache-control")).to.equal("private, no-cache");
+    expect(res.getHeader("vary").toLowerCase()).to.equal("authorization");
+  });
+}

@@ -1,0 +1,147 @@
+paths:
+  "/api/meta/resources/{resource}/presentation":
+    parameters:
+      - $ref: "./contract.yaml#/parameters/ResourceName"
+    get:
+      operationId: getResourceContextPresentation
+      summary: Read contextual resource presentation
+      description: >-
+        RESOURCE-PRESENTATION-001. Static recommendations for LIST/CREATE/EDIT/VIEW,
+        separate from field semantics and effective authorization. Derive this URL
+        by appending /presentation to the discovery metadataPath. Existing metadata
+        and closed v0.13.0 presentation responses remain unchanged. An adopting
+        server returns an empty presentation object for an unchanged legacy resource.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: If-None-Match
+          in: header
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Contextual presentation bound to the resource definition."
+          headers:
+            ETag:
+              schema:
+                type: string
+                pattern: '^"[^"\r\n]+"$'
+            Cache-Control:
+              schema:
+                type: string
+                const: private, no-cache
+            Vary:
+              schema:
+                type: string
+                const: Authorization
+          content:
+            application/json:
+              schema:
+                $ref: "#/schemas/ResourceContextPresentationResponse"
+        "304":
+          description: "Unchanged presentation; empty body."
+          headers:
+            ETag:
+              schema:
+                type: string
+                pattern: '^"[^"\r\n]+"$'
+            Cache-Control:
+              schema:
+                type: string
+                const: private, no-cache
+            Vary:
+              schema:
+                type: string
+                const: Authorization
+        "400":
+          description: "Query parameters are not accepted."
+          content:
+            application/json:
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "401":
+          description: "Authentication required."
+          headers:
+            WWW-Authenticate:
+              schema:
+                type: string
+                const: Bearer
+          content:
+            application/json:
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "404":
+          description: "Unknown resource."
+          content:
+            application/json:
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+        "500":
+          description: "Safe execution failure."
+          content:
+            application/json:
+              schema:
+                $ref: "../../common/errors.yaml#/schemas/ErrorResponse"
+schemas:
+  ResourceContextPresentationResponse:
+    type: object
+    additionalProperties: false
+    required: [id, definitionHash, presentation]
+    properties:
+      id:
+        type: string
+        minLength: 1
+      definitionHash:
+        type: string
+        minLength: 1
+      presentation:
+        $ref: "#/schemas/ResourceContextPresentation"
+    description: Both identity members must match the detailed resource metadata before applying recommendations.
+  ResourceContextPresentation:
+    type: object
+    additionalProperties: false
+    properties:
+      list:
+        $ref: "#/schemas/ResourceListPresentation"
+      create:
+        $ref: "./contract.yaml#/schemas/ResourcePresentation/properties/form"
+      edit:
+        $ref: "./contract.yaml#/schemas/ResourcePresentation/properties/form"
+      view:
+        $ref: "./contract.yaml#/schemas/ResourcePresentation/properties/form"
+    description: >-
+      Missing contexts fall back deterministically. A present context selects its
+      exact ordered field subset; empty arrays are intentional, not absence.
+      Form primitives are exactly those already published in v0.13.0.
+  ResourceListPresentation:
+    type: object
+    additionalProperties: false
+    required: [columns, actions]
+    properties:
+      columns:
+        type: array
+        uniqueItems: true
+        items:
+          $ref: "#/schemas/ResourceListColumn"
+      actions:
+        type: array
+        uniqueItems: true
+        items:
+          type: string
+          minLength: 1
+    description: Column membership and array order specify list visibility/order; actions reference existing COLLECTION/SELECTION actions only.
+  ResourceListColumn:
+    type: object
+    additionalProperties: false
+    required: [field]
+    properties:
+      field:
+        type: string
+        minLength: 1
+      label:
+        type: string
+        minLength: 1
+    description: >-
+      Field reference, unique by field across the list. Optional semantic list label
+      overrides Common.Label then field name. No CSS, widget, width, authority,
+      query capability, primary-field role or relation semantics is introduced.

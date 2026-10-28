@@ -29,7 +29,7 @@ test('generic resource runner exercises metadata, CRUD, conflicts, pages and act
     const result = await runBruno(fixture.baseUrl, { scope: conformanceScopes.resources, env: fixtureEnv });
     assert.equal(result.code, 0, result.output);
     const requests = fixture.requests.filter(r => r.path.startsWith('/api/resources/') || r.path.startsWith('/api/meta/resources') || r.path.startsWith('/api/resource-actions/'));
-    assert.equal(requests.length, 21);
+    assert.equal(requests.length, 26);
     assert.ok(requests.some(r => r.method === 'PATCH' && r.expected === 409));
     assert.ok(requests.some(r => r.method === 'DELETE' && r.expected === 204));
   } finally { await fixture.close(); }

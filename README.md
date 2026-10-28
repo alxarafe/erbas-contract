@@ -34,7 +34,7 @@ flowchart LR
 | --- | --- | --- |
 | [erbas-contract](https://github.com/alxarafe/erbas-contract) | Shared OpenAPI and sole Bruno conformance collection | Published immutable v0.13.0 |
 | [erbas](https://github.com/alxarafe/erbas) | Java/Spring Boot backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 | Adopted v0.6.0; authoritative `./bin/check` requires shared conformance locally and in CI |
-| [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 plus platform modules | Pins v0.12.0; candidate validation is explicit and does not change adoption |
+| [alxarafe-dotnet](https://github.com/alxarafe/alxarafe-dotnet) | .NET backend implementing Health, AUTH-001, USERS-001 and COLLECTIONS-001 plus platform modules | Pins published v0.13.0; future candidate preparation does not change adoption |
 | [erbas-client](https://github.com/alxarafe/erbas-client) | Angular 22 client consuming Health, AUTH-001, USERS-001 basic user administration and COLLECTIONS-001 pagination from either backend | Shared client for both backends; real Java/.NET interoperability verified |
 
 Backends own their builds and isolated test infrastructure; this repository
@@ -77,8 +77,9 @@ No backend or client v0.10.0 adoption or conformance is claimed.
 It retains typed READ provenance for AI, CORE module administration, capability
 discovery and invocation, and WMS catalogues. See the
 [release notes](docs/releases/v0.13.0.md) and [versioning](docs/common/versioning.md).
-Publication does not establish formal v0.13.0 adoption by .NET, Java or
-`erbas-client`. Consumer pins remain unchanged; .NET still pins v0.12.0.
+.NET and `erbas-client` formally adopt published v0.13.0. Java adoption of its
+new runtime operations is not claimed. Consumer pins remain unchanged by the
+unpublished [v0.14.0 contextual-presentation candidate](docs/releases/v0.14.0.md).
 Backend adoption, shared conformance and client consumption remain separate facts.
 
 ```text
@@ -105,7 +106,7 @@ pagination from either backend. See the
 [client development guide](https://github.com/alxarafe/erbas-client/blob/main/docs/full-stack-development.md)
 for behavior and verification scope.
 
-The .NET backend pins published `v0.12.0` and requires shared conformance through
+The .NET backend pins published `v0.13.0` and requires shared conformance through
 its authoritative `./bin/check`, locally and in GitHub Actions. Earlier dual-stack
 v0.6.0 adoption reports remain historical; no new Java adoption is claimed here.
 .NET's `POST /api/auth/register` remains an

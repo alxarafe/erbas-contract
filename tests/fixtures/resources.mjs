@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { contextPresentation } from './resource-presentation.mjs';
 
 // Synthetic protocol fixture tests the sole runner, never backend persistence.
 export const resourceProbe = 'fixture.resource-probe';
@@ -26,7 +27,7 @@ function metadata(authorized) {
     actions: [{ name: 'submit', scope: 'ENTITY', requiresSelection: false, authorized, annotations: [], parameters: [] }] };
 }
 
-export function resourceFixture({ resourceFault } = {}, context, { actorFor }) {
+export function resourceFixture({ resourceFault, presentationFault, legacyPresentation = false } = {}, context, { actorFor }) {
   const rows = new Map();
   return async (request, response, url) => {
     if (!url.pathname.startsWith(root) && !url.pathname.startsWith(metadataRoot) && !url.pathname.startsWith(actionsRoot)) return false;
@@ -46,6 +47,25 @@ export function resourceFixture({ resourceFault } = {}, context, { actorFor }) {
     } else if (url.pathname === `${metadataRoot}/${resourceProbe}`) {
       result = meta;
       if (context.hasFault(resourceFault, 'operators')) result.fields[0].capabilities.filterOperators = ['contains'];
+    } else if (url.pathname.endsWith('/presentation') && url.pathname.startsWith(metadataRoot + '/')) {
+      if (url.search) failure(400, 'invalid_request');
+      else if (url.pathname !== `${metadataRoot}/${resourceProbe}/presentation`) failure(404, 'resource_not_found');
+      else {
+        result = legacyPresentation ? { id: meta.id, definitionHash: meta.definitionHash, presentation: {} } : contextPresentation(meta);
+        const etag = '"fixture-presentation"';
+        response.setHeader('ETag', etag);
+        response.setHeader('Cache-Control', 'private, no-cache');
+        response.setHeader('Vary', 'Authorization');
+        if (request.headers['if-none-match'] === etag) { status = 304; result = undefined; }
+        if (status === 200) {
+          if (context.hasFault(presentationFault, 'field')) result.presentation.create.tabs[0].sections[0].groups[0].fields.push('__unknown');
+          if (context.hasFault(presentationFault, 'duplicate')) result.presentation.list.columns.push({ field: 'name', label: 'Other' });
+          if (context.hasFault(presentationFault, 'scope')) result.presentation.create.actions.push('submit');
+          if (context.hasFault(presentationFault, 'hash')) result.definitionHash = 'mismatched-definition';
+          if (context.hasFault(presentationFault, 'closed')) result.presentation.create.editable = true;
+        }
+        if (context.hasFault(presentationFault, 'cache')) response.setHeader('Cache-Control', 'public');
+      }
     } else if (url.pathname.startsWith(actionsRoot)) {
       if (url.pathname.endsWith('/availability')) result = [];
       else if (!url.pathname.endsWith('/submit/execute')) failure(404, 'resource_action_not_found');
@@ -76,8 +96,8 @@ export function resourceFixture({ resourceFault } = {}, context, { actorFor }) {
       }
     }
     context.requests.push({ method: request.method, path: request.url, expected: status });
-    response.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...(status === 401 ? { 'WWW-Authenticate': 'Bearer' } : {}) });
-    response.end(status === 204 ? undefined : context.serialize(result));
+    response.writeHead(status, { 'Content-Type': 'application/json', ...(!response.hasHeader('Cache-Control') ? { 'Cache-Control': 'no-store' } : {}), ...(status === 401 ? { 'WWW-Authenticate': 'Bearer' } : {}) });
+    response.end(status === 204 || status === 304 ? undefined : context.serialize(result));
     return true;
   };
 }

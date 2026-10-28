@@ -9,7 +9,10 @@ const baseResolvedContractSha256 = '0ad19e56e34d44eb90464436c8dfbb09a2e99fa52e82
 test('AI-001 preserves every published v0.10.0, v0.9.0 and prior v0.8.0 contract definition', async () => {
   const api = await bundleOpenApi({ dereferenced: true });
   assert.equal(api.info.version, contractVersion);
-  assert.equal(api.info.description, `ERBAS Contract ${contractVersion} unpublished additive MINOR candidate over immutable v0.12.0: Generic Resource Runtime and effective application navigation protocols. No release, tag or consumer adoption is claimed. See docs/releases/v${contractVersion}.md.`);
+  assert.equal(api.info.description, `ERBAS Contract ${contractVersion} unpublished compatible additive MINOR candidate over immutable v0.13.0: RESOURCE-PRESENTATION-001 contextual presentation. No release, tag or consumer adoption is claimed. See docs/releases/v${contractVersion}.md.`);
+  // Redocly promotes the existing inline form when the new route references it.
+  assert.deepEqual(api.components.schemas.form, api.components.schemas.ResourcePresentation.properties.form);
+  delete api.components.schemas.form;
   delete api.paths['/api/meta/navigation'];
   for (const name of Object.keys(api.components.schemas)) if (name.startsWith('Navigation')) delete api.components.schemas[name];
   for (const path of Object.keys(api.paths)) if (path.startsWith('/api/resources/') || path.startsWith('/api/meta/resources') || path.startsWith('/api/resource-actions/')) delete api.paths[path];

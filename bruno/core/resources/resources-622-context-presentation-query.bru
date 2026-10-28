@@ -1,0 +1,25 @@
+meta {
+  name: Resource context presentation query
+  type: http
+  seq: 622
+}
+
+get {
+  url: {{baseUrl}}/api/meta/resources/{{presentationResource}}/presentation?__unsupported=1
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+vars:pre-request {
+  expectedStatus: 400
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}

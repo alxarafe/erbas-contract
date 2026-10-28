@@ -254,7 +254,18 @@ recreated. No GitHub Release or package was published. The exact target passed
 full `./bin/check`: 218 tests, zero failures, cancellations or skips. Remote
 `git ls-remote` verification confirmed both the tag object and target commit.
 
-Publication does not establish formal v0.13.0 adoption by .NET, Java or
-`erbas-client`. Consumer pins remain unchanged; .NET still pins v0.12.0.
+Publication and adoption remain distinct. .NET and `erbas-client` subsequently
+formally adopted published v0.13.0; Java adoption of its runtime operations is not
+claimed. These consumer pins are not changed by future candidate preparation.
 Pre-publication candidate validation remains historical development evidence,
 separate from conformance against a formally adopted published version.
+
+## Unpublished candidate: v0.14.0
+
+RESOURCE-PRESENTATION-001 prepares a compatible additive MINOR over immutable
+v0.13.0. A separate contextual-presentation endpoint preserves all closed
+v0.13.0 response schemas; adding properties directly would be incompatible.
+See the [candidate notes](../releases/v0.14.0.md) and
+[compatibility/fallback design](../core/resource-presentation-001.md).
+There is no v0.14.0 tag, publication or backend/client adoption. Published consumer
+pins remain v0.13.0; the v0.13.0 annotated tag object/target above are unchanged.

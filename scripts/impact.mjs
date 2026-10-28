@@ -1,6 +1,6 @@
 export const scopeTests = {
   navigation: ['tests/core/navigation.test.mjs'],
-  resources: ['tests/core/resources.test.mjs'],
+  resources: ['tests/core/resources.test.mjs', 'tests/core/resource-presentation.test.mjs'],
   health: ['tests/core/health.test.mjs'],
   auth: ['tests/core/auth.test.mjs'],
   users: ['tests/core/users.test.mjs'],

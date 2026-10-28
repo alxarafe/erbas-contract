@@ -1,0 +1,48 @@
+meta {
+  name: Resource context presentation
+  type: http
+  seq: 618
+}
+
+get {
+  url: {{baseUrl}}/api/meta/resources/{{presentationResource}}/presentation
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+vars:pre-request {
+  expectedStatus: 200
+}
+
+settings {
+  followRedirects: false
+  timeout: 2000
+}
+
+script:pre-request {
+  const index = Number(bru.getVar("presentationIndex") || 0);
+  bru.setVar("presentationResource", bru.getVar("resourceCandidates")[index].id);
+}
+
+tests {
+  test("Context presentation shape and reference semantics", function () {
+    const oracle = require(bru.cwd() + "/core/resources/presentation.cjs");
+    const metadata = bru.getVar("resourceMetadata").find(item => item.id === bru.getVar("presentationResource"));
+    oracle.validatePresentation(metadata, res.getBody());
+    bru.setVar("presentationEtag", res.getHeader("etag"));
+    const next = Number(bru.getVar("presentationIndex") || 0) + 1;
+    if (next < bru.getVar("resourceCandidates").length) {
+      bru.setVar("presentationIndex", next); bru.setNextRequest("Resource context presentation");
+    }
+  });
+  test("Context presentation private conditional caching", function () {
+    expect(res.getHeader("cache-control")).to.equal("private, no-cache");
+    expect(res.getHeader("vary").toLowerCase()).to.equal("authorization");
+    expect(res.getHeader("etag")).to.match(/^"[^"\r\n]+"$/);
+  });
+}

@@ -27,6 +27,8 @@ settings {
 tests {
   test("metadata semantics", function () {
     const body = res.getBody(); expect(body.moduleEnabled).to.equal(true); expect(body.idDefinition.field).to.be.a("string");
+    const resourceMetadata = bru.getVar("resourceMetadata") || [];
+    resourceMetadata.push(body); bru.setVar("resourceMetadata", resourceMetadata);
     const ordinary = ["eq","ne"], ordered = ordinary.concat(["lt","lte","gt","gte"]);
     body.fields.forEach(field => {
       const expected = !field.capabilities.filterable ? [] : ["STRING","TEXT"].includes(field.type) ? ordered.concat(["contains","startsWith"]) : ["INT8","UINT8","INT16","UINT16","INT32","UINT32","INT64","DECIMAL","DATE","TIME","DATETIME"].includes(field.type) ? ordered : ordinary;

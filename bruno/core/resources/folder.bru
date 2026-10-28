@@ -8,7 +8,7 @@ tests {
   });
   test("Generic protocol error and success representation", function () {
     const status = res.getStatus();
-    if (status === 204) { expect(res.getBody()).to.satisfy(v => v === "" || v === undefined || v === null); return; }
+    if (status === 204 || status === 304) { expect(res.getBody()).to.satisfy(v => v === "" || v === undefined || v === null); return; }
     expect(res.getHeader("content-type")).to.match(/^application\/json(?:;|$)/i);
     if (status >= 400) {
       const body = res.getBody(); expect(Object.keys(body).sort()).to.deep.equal(["code", "errors"]);
