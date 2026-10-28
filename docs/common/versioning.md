@@ -230,7 +230,7 @@ as defined in [the working agreement](../../AGENTS.md). Pushes, tags, releases,
 publication and deployment require separate express authorization; passing
 checks alone do not authorize them.
 
-## Published immutable release: v0.12.0
+## Previous published immutable release: v0.12.0
 
 The existing annotated v0.12.0 tag object is
 `070990bef7bc0aa8ca8876c6b112d4edc6cf99d7`, targeting
@@ -239,9 +239,22 @@ semantics and typed AI provenance. The historical [preparation notes](../release
 retain their then-unpublished status wording; they are not the current release
 identity. The .NET backend pin is v0.12.0. No new Java/client adoption is claimed.
 
-## Unpublished candidate: v0.13.0
+## Published immutable release: v0.13.0
 
-CRUD-CONTRACT-001 prepares an additive MINOR Generic Resource Runtime protocol.
-There is no v0.13.0 tag or publication. See [candidate notes](../releases/v0.13.0.md).
-Published pins remain unchanged; explicit candidate validation is development
-evidence and must not masquerade as adoption of a published release.
+**v0.13.0 is the latest published immutable release**, a compatible additive MINOR
+over v0.12.0. It adds CRUD-CONTRACT-001 Generic Resource Runtime and
+NAVIGATION-CONTRACT-001 effective application navigation. See the
+[release notes and historical preparation evidence](../releases/v0.13.0.md).
+
+- Annotated tag object: `919684db4f607a575397576b87577cd9582e1f86`.
+- Target commit: `29bd8de3e5c5772fea5096ab2c60abc6a10e55f7`.
+
+The annotated Git tag is the publication identity and must never be moved or
+recreated. No GitHub Release or package was published. The exact target passed
+full `./bin/check`: 218 tests, zero failures, cancellations or skips. Remote
+`git ls-remote` verification confirmed both the tag object and target commit.
+
+Publication does not establish formal v0.13.0 adoption by .NET, Java or
+`erbas-client`. Consumer pins remain unchanged; .NET still pins v0.12.0.
+Pre-publication candidate validation remains historical development evidence,
+separate from conformance against a formally adopted published version.

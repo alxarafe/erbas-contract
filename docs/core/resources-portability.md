@@ -1,9 +1,11 @@
 # Generic resource protocol portability review
 
 CRUD-CONTRACT-001 promotes an observable protocol, not the .NET object model.
-The demonstrated implementation is .NET; Java support for the new candidate is
-not claimed. Existing Java consumers retain their published version until an
-explicit adoption task implements and validates the new routes.
+The demonstrated implementation is .NET; Java support for the new protocol is
+not claimed. Published [v0.13.0](../releases/v0.13.0.md) does not establish formal
+adoption by .NET, Java or `erbas-client`; consumer pins remain unchanged.
+Existing Java consumers retain their published version until an explicit adoption
+task implements and validates the new routes.
 
 | Concern | .NET evidence | Java implementation assessment | Chosen public behavior |
 | --- | --- | --- | --- |

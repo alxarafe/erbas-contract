@@ -1,8 +1,10 @@
 # NAVIGATION-CONTRACT-001: effective application navigation
 
-This extends the local unpublished v0.13.0 candidate alongside, but logically
-separate from, the [Generic Resource Runtime protocol](resources-001.md).
-Existing published definitions and backend pins remain unchanged. Navigation is
+This protocol is part of published immutable [v0.13.0](../releases/v0.13.0.md),
+alongside, but logically separate from, the
+[Generic Resource Runtime protocol](resources-001.md). Publication does not
+establish formal adoption by .NET, Java or `erbas-client`; consumer pins remain
+unchanged. Existing public definitions remain unchanged. Navigation is
 curated presentation/discovery, never authorization or a resource schema.
 
 ## Request and effective representation
@@ -62,7 +64,7 @@ The discriminator is explicit. Future meaningful target variants can extend the
 union through deliberate contract evolution, without replacing the envelope or
 hierarchy. Clients must not execute an unsupported target descriptor; ignore that
 entry and prune newly empty client containers when handling a newer protocol.
-ACTION/REPORT/DASHBOARD/PROCESS are not contracted target kinds in this candidate.
+ACTION/REPORT/DASHBOARD/PROCESS are not contracted target kinds in v0.13.0.
 
 ## Effective authorization and context
 
@@ -128,7 +130,8 @@ shape/order, valid resource references, stable ETags, identity separation, 304 a
 logout. Synthetic failures prove rejection of empty groups, leaked schemas and
 cross-user cache reuse. Backend tests cover startup validation, permissions,
 module filtering, context changes, localization and endpoint authority. Existing
-published conformance and the expanded candidate are validated separately.
+v0.12.0 conformance and the expanded v0.13.0 candidate were validated separately
+during preparation; that evidence does not establish formal v0.13.0 adoption.
 
 Generic client readiness now includes authentication/context bootstrap, one menu
 fetch, hierarchical rendering, RESOURCE → metadata → static CRUD pages, ROUTE

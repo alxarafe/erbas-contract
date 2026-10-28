@@ -14,7 +14,7 @@
 | [Effective navigation](core/navigation-001.md) | NAVIGATION-CONTRACT-001: separate effective tree, targets, localization and ETag. |
 | [Generic resources](core/resources-001.md) | CRUD-CONTRACT-001: routes, metadata, queries, actions and scoped precedence. |
 | [Portability review](core/resources-portability.md) | Observable cross-stack design; no new Java/client adoption claim. |
-| [v0.13.0 candidate](releases/v0.13.0.md) | Local unpublished generic-resource and effective-navigation contracts. |
+| [v0.13.0 release notes](releases/v0.13.0.md) | Published immutable generic-resource and effective-navigation contracts, exact tag identity and historical preparation evidence. |
 | [v0.12.0 preparation](releases/v0.12.0.md) | Historical candidate notes; current immutable release identity is recorded in versioning. |
 | [v0.11.1 preparation](releases/v0.11.1.md) | Unreleased compatible PATCH over immutable v0.11.0; full conformance timeout only, no HTTP change. |
 | [CORE-CAP-002 verification](verification/core-cap-002.md) | Focused and full Docker repository validation, contract preservation, and no live conformance claim. |
@@ -91,9 +91,15 @@ or conformance. Demo defaults are outside the HTTP release scope.
 
 ## Published contract and consumer adoption
 
-**v0.12.0 is the latest published immutable release**. See [release identity and policy](common/versioning.md).
-The .NET backend pins v0.12.0. Older Java/.NET adoption reports remain historical;
-publication and adoption are distinct, and no new Java adoption is claimed. Angular WMS or module administration adoption is not claimed.
+**v0.13.0 is the latest published immutable release**. See
+[release identity and policy](common/versioning.md) and
+[release notes](releases/v0.13.0.md). It adds generic resources and effective
+application navigation; its sole collection contains 617 physical requests /
+2,655 named checks.
+Publication does not establish formal v0.13.0 adoption by .NET, Java or
+`erbas-client`. Consumer pins remain unchanged; .NET still pins v0.12.0.
+Older adoption and candidate-validation reports remain historical. Angular WMS
+or module administration adoption is not claimed.
 
 Published **v0.11.0** contains **590 requests / 2587 named checks**. See
 [AI-001](modules/ai/ai-001.md) and [release notes](releases/v0.11.0.md).
