@@ -9,6 +9,7 @@
 | [CORE-CAP-001](core/capabilities-001.md) | Capability ownership, descriptors, permissions, effective discovery, schemas and deferred execution. |
 | [CORE-CAP-002](core/capabilities-002.md) | v0.10.0 synchronous READ invocation, trusted context, audit and safe failures. |
 | [AI-001](modules/ai/ai-001.md) | Published v0.11.0: provider-agnostic assistant over effective READ capabilities, security, errors and audit. |
+| [Accepted AI provider profiles](modules/ai/provider-profiles.md) | ERBAS-CONTRACT-AIP-001: minimal Chat Completions and native Ollama consumption profiles, acceptance criteria and synthetic exchanges; no public HTTP revision. |
 | [AI-001 verification](verification/ai-001.md) | AI focused/full Docker validation, preservation and conformance limitations. |
 | [v0.11.0 release notes](releases/v0.11.0.md) | Published compatible additive MINOR over immutable v0.10.0. |
 | [Effective navigation](core/navigation-001.md) | NAVIGATION-CONTRACT-001: separate effective tree, targets, localization and ETag. |
